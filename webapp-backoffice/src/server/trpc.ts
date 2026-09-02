@@ -8,6 +8,9 @@ import path from 'path';
 import SuperJSON from 'superjson';
 import { OpenApiMeta } from 'trpc-openapi';
 import { ZodError } from 'zod';
+// Sous-module importé directement : passer par l'index de `open-api-log`
+// remonterait au routeur tRPC et créerait un cycle d'imports.
+import { enrichApiLog } from './open-api-log/context';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
 import prisma from '../utils/db';
@@ -278,6 +281,14 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 				message: 'Please provide a valid API key'
 			});
 		} else {
+			// Seul endroit où la clé est résolue : on en profite pour nommer
+			// l'appelant dans le journal d'audit, plutôt que de refaire la
+			// requête depuis le handler HTTP. Sans effet hors open API.
+			enrichApiLog(ctx.req, {
+				apikey_id: checkApiKey.id,
+				user_id: checkApiKey.user_id
+			});
+
 			return next({
 				ctx: {
 					...ctx,

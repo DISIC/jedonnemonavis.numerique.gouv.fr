@@ -187,12 +187,8 @@ export const statsUsagersQuery = async ({
 
 	const result = await fetchAndFormatData(fetchParams);
 
-	await ctx.prisma.apiKeyLog.create({
-		data: {
-			apikey_id: ctx.api_key?.id || 0,
-			url: ctx.req.url || ''
-		}
-	});
+	// La journalisation est assurée par le wrapper HTTP des open API
+	// (`pages/api/open-api/[...trpc].ts`), pas ici.
 
 	return { data: result };
 };

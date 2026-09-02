@@ -358,12 +358,53 @@ model ApiKey {
   UserEvent    UserEvent[]
 }
 
+/// Journal d'audit des appels aux open API (`/api/open-api/*`).
+///
+/// Alimenté par un point de capture unique dans `pages/api/open-api/[...trpc].ts`,
+/// donc *tous* les endpoints y passent, y compris ceux qui échouent (clé invalide,
+/// 400, 404, 500) — ce sont justement ceux qu'on veut voir pour détecter un abus.
+/// Aucun endpoint n'a besoin d'écrire ici lui-même.
+///
+/// Ce que chaque appel stocke est décidé par route dans
+/// `src/server/open-api-log/policy.ts` (bodies complets pour les mutations,
+/// résumé pour les lectures volumineuses), et la rétention y est également
+/// définie puis appliquée par `scripts/purge-api-logs.ts`.
 model ApiKeyLog {
-  id         Int      @id @default(autoincrement())
-  apikey     ApiKey   @relation(fields: [apikey_id], references: [id], onDelete: Cascade)
-  apikey_id  Int
-  url        String
+  id        Int     @id @default(autoincrement())
+  /// Nullable : on journalise aussi les appels sans clé valide (401), et un
+  /// journal d'audit ne doit pas disparaître avec la clé qu'il incrimine
+  /// (d'où `SetNull` plutôt que `Cascade`).
+  apikey    ApiKey? @relation(fields: [apikey_id], references: [id], onDelete: SetNull)
+  apikey_id Int?
+  /// sha256 du Bearer présenté : conserve la corrélation entre appels même
+  /// après suppression de la clé, sans jamais stocker le secret en clair.
+  key_hash  String?
+  /// Porteur de la clé au moment de l'appel. Volontairement dénormalisé (pas de
+  /// relation) pour que la piste survive à la suppression du compte.
+  user_id   Int?
+
+  ip         String?
+  user_agent String?
+
+  method String?
+  /// Chemin *templaté* (`/demarches-numeriques/services/{external_id}/admins`).
+  /// C'est lui qui permet d'agréger par API — pour le suivi comme pour le
+  /// futur plafonnement par endpoint. `url` garde le chemin réel + query.
+  route  String?
+  url    String
+
+  request_body  Json?
+  status_code   Int?
+  response_body Json?
+  error_message String?
+  duration_ms   Int?
+
   created_at DateTime @default(now())
+
+  @@index([apikey_id, created_at])
+  @@index([ip, created_at])
+  @@index([route, created_at])
+  @@index([created_at])
 }
 
 model Product {
