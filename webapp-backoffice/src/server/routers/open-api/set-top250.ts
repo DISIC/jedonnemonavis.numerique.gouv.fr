@@ -20,7 +20,7 @@ export const setTop250Mutation = async ({
 
 	const requestedForms = await ctx.prisma.form.findMany({
 		where: { id: { in: form_ids } },
-		select: { id: true, product_id: true, form_template: { select: { slug: true } } }
+		select: { id: true, form_template: { select: { slug: true } } }
 	});
 
 	const missingFormIds = form_ids.filter(
@@ -64,22 +64,10 @@ export const setTop250Mutation = async ({
 		id => !form_ids.includes(id)
 	);
 
-	const newProductIds = [
-		...new Set(
-			requestedForms
-				.filter(f => new_top250_forms.includes(f.id))
-				.map(f => f.product_id)
-		)
-	];
-
 	await ctx.prisma.$transaction([
 		ctx.prisma.form.updateMany({
-			where: { id: { in: new_top250_forms } },
-			data: { isTop250: true }
-		}),
-		ctx.prisma.product.updateMany({
-			where: { id: { in: newProductIds } },
-			data: { isPublic: true, hasBeenTop250: true }
+			where: { id: { in: form_ids } },
+			data: { isTop250: true, isPublic: true }
 		}),
 		ctx.prisma.form.updateMany({
 			where: { id: { in: down_top250_forms } },
