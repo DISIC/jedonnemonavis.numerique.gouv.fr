@@ -218,23 +218,6 @@ const ProductInformationPage = (props: Props) => {
 						))}
 					</div>
 				</div>
-				<div>
-					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
-						Données statistiques publiques
-					</h3>
-					{product.isPublic ? 'Oui' : 'Non'}
-					{product.isPublic && (
-						<div className={fr.cx('fr-mt-1v')}>
-							<Link
-								className={fr.cx('fr-link', 'fr-text--sm')}
-								href={`/public/product/${product.id}/stats`}
-								target="_blank"
-							>
-								Voir la page publique
-							</Link>
-						</div>
-					)}
-				</div>
 				{ownRight === 'carrier_admin' && !hasLockedForm && (
 					<div>
 						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
