@@ -24,6 +24,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
 					},
 		include: {
 			forms: {
+				where: {
+					isPublic: true,
+					OR: [{ isDeleted: false }, { isDeleted: null }]
+				},
 				include: {
 					form_template: true,
 					form_configs: {
@@ -45,7 +49,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	prisma.$disconnect();
 
-	if (!product || !product.isPublic) {
+	if (!product || product.forms.length === 0) {
 		return {
 			props: {
 				product: null
