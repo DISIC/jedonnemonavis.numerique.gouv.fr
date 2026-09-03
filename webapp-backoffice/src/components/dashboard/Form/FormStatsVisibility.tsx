@@ -21,7 +21,7 @@ const FormStatsVisibility = ({ form }: Props) => {
 
 	const publicPageLink = (
 		<Link
-			className={cx(classes.publicLink, fr.cx('fr-link', 'fr-text--sm'))}
+			className={cx(classes.publicLink)}
 			href={`/public/form/${form.id}/stats`}
 			target="_blank"
 		>
@@ -63,18 +63,23 @@ const FormStatsVisibility = ({ form }: Props) => {
 	};
 
 	return (
-		<div className={cx(classes.radiosWrapper, fr.cx('fr-col-12', 'fr-mb-12v'))}>
+		<div className={cx(fr.cx('fr-col-12', 'fr-mb-12v'))}>
 			<RadioButtons
 				legend={
-					<h3 className={fr.cx('fr-mb-0', 'fr-h4')}>
+					<h3 className={fr.cx('fr-h4')}>
 						Définir la visibilité des statistiques
 					</h3>
 				}
-				hintText="En activant le partage public, toutes les personnes disposant du lien peuvent consulter la page de statistiques. Elles n’auront pas accès aux commentaires."
 				name={`form-visibility-${form.id}`}
 				options={[
 					{
 						label: 'Privé',
+						hintText: (
+							<>
+								Seuls les administrateurs de ce service peuvent voir les
+								statistiques. Ils doivent être connectés.
+							</>
+						),
 						nativeInputProps: {
 							checked: !isPublic,
 							disabled: setVisibility.isLoading,
@@ -82,10 +87,11 @@ const FormStatsVisibility = ({ form }: Props) => {
 						}
 					},
 					{
-						label: (
+						label: 'Public',
+						hintText: (
 							<>
-								<span>Publique</span>
-								{isPublic && publicPageLink}
+								Tout le monde peut voir les statistiques. La page est accessible
+								sans connexion. {isPublic && publicPageLink}
 							</>
 						),
 						nativeInputProps: {
@@ -102,12 +108,7 @@ const FormStatsVisibility = ({ form }: Props) => {
 
 const useStyles = tss.withName({ FormStatsVisibility }).create({
 	publicLink: {
-		marginLeft: fr.spacing('3v')
-	},
-	radiosWrapper: {
-		'.fr-radio-group .fr-label': {
-			flexDirection: 'row'
-		}
+		marginLeft: fr.spacing('1v')
 	}
 });
 
