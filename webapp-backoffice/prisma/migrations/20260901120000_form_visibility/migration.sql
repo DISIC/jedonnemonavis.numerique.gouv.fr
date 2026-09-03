@@ -9,15 +9,15 @@ UPDATE "FormTemplate" SET "hasStats" = true WHERE "slug" = 'root';
 -- AlterTable: move statistics visibility from Product to Form
 ALTER TABLE "Form" ADD COLUMN "isPublic" BOOLEAN NOT NULL DEFAULT false;
 
--- Backfill: every stats-capable form of a currently public service becomes public,
--- closed forms included so already-shared links keep working
+-- Backfill: every open, stats-capable form of a currently public service becomes public
 UPDATE "Form" f
 SET "isPublic" = true
 FROM "Product" p, "FormTemplate" ft
 WHERE f.product_id = p.id
   AND f.form_template_id = ft.id
   AND ft."hasStats" = true
-  AND p."isPublic" = true;
+  AND p."isPublic" = true
+  AND COALESCE(f."isDeleted", false) = false;
 
 -- Warn about public services that have no stats-capable form to carry the flag
 DO $$
@@ -34,6 +34,7 @@ BEGIN
         JOIN "FormTemplate" ft ON ft.id = f.form_template_id
         WHERE f.product_id = p.id
           AND ft."hasStats" = true
+          AND COALESCE(f."isDeleted", false) = false
       )
   LOOP
     RAISE WARNING 'Product % (%) is public but has no stats-capable form to flag', unmigrated_product.id, unmigrated_product.title;

@@ -225,18 +225,12 @@ const SettingsTab = ({
 							/>
 						</div>
 					</div>
-				</>
-			)}
-
-			{form.form_template.hasStats && (
-				<>
-					<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
-					<FormStatsVisibility form={form} />
-				</>
-			)}
-
-			{!form.isDeleted && (
-				<>
+					{form.form_template.hasStats && (
+						<>
+							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
+							<FormStatsVisibility form={form} />
+						</>
+					)}
 					{!isLocked && (
 						<>
 							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />

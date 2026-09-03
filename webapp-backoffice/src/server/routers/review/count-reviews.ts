@@ -58,7 +58,8 @@ export const countReviewsQuery = async ({
 		? await ctx.prisma.form.findUnique({
 				where: {
 					id: form_id
-				}
+				},
+				include: { product: { select: { status: true } } }
 		  })
 		: null;
 

@@ -41,7 +41,8 @@ export const getObservatoireStatsQuery = async ({
 	if (!form_id && !product.forms[0].id) throw new Error('No form specified');
 
 	const form = await ctx.prisma.form.findUnique({
-		where: { id: form_id ? form_id : product?.forms[0].id }
+		where: { id: form_id ? form_id : product?.forms[0].id },
+		include: { product: { select: { status: true } } }
 	});
 
 	if (!form) throw new Error('Form not found');

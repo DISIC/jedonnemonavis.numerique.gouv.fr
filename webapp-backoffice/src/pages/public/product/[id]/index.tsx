@@ -49,7 +49,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	prisma.$disconnect();
 
-	if (!product || product.forms.length === 0) {
+	if (
+		!product ||
+		product.status === 'archived' ||
+		product.forms.length === 0
+	) {
 		return {
 			props: {
 				product: null

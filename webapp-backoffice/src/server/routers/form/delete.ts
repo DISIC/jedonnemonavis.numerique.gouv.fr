@@ -35,7 +35,8 @@ export const deleteFormMutation = async ({
 	const deletedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...form
+			...form,
+			...(form.isDeleted === true && { isPublic: false })
 		},
 		include: { form_template: true }
 	});

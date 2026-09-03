@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProductStatus } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { Session } from 'next-auth';
 import { Buckets, ElkAnswer, ElkAnswerDefaults } from '../../../types/custom';
@@ -11,9 +11,13 @@ export const checkFormVisibility = async ({
 	form
 }: {
 	ctx: { prisma: PrismaClient; session: Session | null };
-	form: { isPublic: boolean; product_id: number };
+	form: {
+		isPublic: boolean;
+		product_id: number;
+		product: { status: ProductStatus };
+	};
 }) => {
-	if (form.isPublic) return;
+	if (form.isPublic && form.product.status !== 'archived') return;
 
 	if (!ctx.session?.user)
 		throw new TRPCError({
@@ -34,14 +38,16 @@ export const checkProductVisibility = async ({
 	product
 }: {
 	ctx: { prisma: PrismaClient; session: Session | null };
-	product: { id: number };
+	product: { id: number; status: ProductStatus };
 }) => {
-	const publicForm = await ctx.prisma.form.findFirst({
-		where: { product_id: product.id, isPublic: true },
-		select: { id: true }
-	});
+	if (product.status !== 'archived') {
+		const publicForm = await ctx.prisma.form.findFirst({
+			where: { product_id: product.id, isPublic: true },
+			select: { id: true }
+		});
 
-	if (publicForm) return;
+		if (publicForm) return;
+	}
 
 	if (!ctx.session?.user)
 		throw new TRPCError({
@@ -87,7 +93,8 @@ export const checkAndGetForm = async ({
 	const form = await ctx.prisma.form.findUnique({
 		where: {
 			id: form_id
-		}
+		},
+		include: { product: { select: { status: true } } }
 	});
 
 	if (!form) throw new Error('Form not found');

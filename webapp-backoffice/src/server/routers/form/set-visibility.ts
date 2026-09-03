@@ -36,6 +36,7 @@ export const setFormVisibilityMutation = async ({
 		select: {
 			product_id: true,
 			isTop250: true,
+			isDeleted: true,
 			form_template: { select: { hasStats: true } }
 		}
 	});
@@ -44,6 +45,13 @@ export const setFormVisibilityMutation = async ({
 		throw new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'Form not found'
+		});
+	}
+
+	if (form.isDeleted) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Un formulaire fermé ne peut pas être rendu public.'
 		});
 	}
 
