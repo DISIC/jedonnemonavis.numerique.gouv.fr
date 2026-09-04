@@ -9,12 +9,12 @@ Il ne concerne **que** les open API. L'API tRPC interne du backoffice
 
 ## État
 
-| Volet                           | État          | Branche                    |
-| ------------------------------- | ------------- | -------------------------- |
-| Journal d'audit + purge         | **Livré**     | `feat/open-api-audit-log`  |
-| Quota par clé et par route      | À implémenter | `feat/open-api-rate-limit` |
-| Garde anti-force brute (ban IP) | À implémenter | `feat/open-api-rate-limit` |
-| Coupure manuelle d'une clé      | À implémenter | `feat/open-api-rate-limit` |
+| Volet                           | État      | Branche                    |
+| ------------------------------- | --------- | -------------------------- |
+| Journal d'audit + purge         | **Livré** | `feat/open-api-audit-log`  |
+| Quota par clé et par route      | **Livré** | `feat/open-api-rate-limit` |
+| Garde anti-force brute (ban IP) | **Livré** | `feat/open-api-rate-limit` |
+| Coupure manuelle d'une clé      | **Livré** | `feat/open-api-rate-limit` |
 
 ---
 
@@ -62,7 +62,7 @@ lui-même**. Un endpoint ajouté au routeur est couvert d'office.
 
 ---
 
-## 2. Journal d'audit — livré
+## 2. Journal d'audit
 
 ### Ce qui est enregistré
 
@@ -137,7 +137,7 @@ DRY_RUN=1 npm run logs:purge   # compte sans supprimer
 
 ---
 
-## 3. Quota par clé — à implémenter
+## 3. Quota par clé
 
 ### Principe
 
@@ -170,7 +170,7 @@ qu'est un trafic normal sur ces API — voir le mode observation plus bas.
 
 ---
 
-## 4. Garde anti-force brute — à implémenter
+## 4. Garde anti-force brute
 
 ### Principe
 
@@ -219,6 +219,23 @@ rl:<api_key_id>:<route>   compteur de quota,        TTL = fenêtre
 bf:<ip>                   compteur d'échecs d'auth, TTL = fenêtre
 ban:<ip>                  présence = banni,          TTL = durée du ban
 ```
+
+### Une connexion Redis dédiée, distincte de celle de BullMQ
+
+`src/lib/redis.ts` est configuré pour BullMQ avec `maxRetriesPerRequest: null`,
+ce qui met les commandes en file d'attente **indéfiniment** quand la connexion
+est perdue, au lieu de les faire échouer. C'est ce que BullMQ exige, et c'est
+exactement ce qu'il ne faut pas sur un chemin de requête : une commande qui ne
+rejette jamais, c'est une requête HTTP qui ne se termine jamais.
+
+Le plafonnement ouvre donc sa propre connexion
+(`src/server/open-api-log/redis.ts`) avec trois précautions :
+`enableOfflineQueue: false`, `maxRetriesPerRequest: 1`, et un délai maximal dur
+de 150 ms autour de chaque commande — parce qu'une socket morte qu'`ioredis`
+croit encore vivante ne produit ni erreur ni réponse.
+
+Deux connexions dans le processus, donc, et c'est voulu : un client de
+plafonnement en difficulté ne doit pas entraîner la file d'alertes avec lui.
 
 ### Pourquoi pas le limiteur en mémoire déjà présent
 
@@ -320,10 +337,15 @@ couper un partenaire le jour du déploiement.
    doit jamais mener à un ban.
 3. **Le rejet doit rester peu coûteux.** Une IP bannie qui martèle ne doit pas
    provoquer une écriture Postgres par requête, sinon le mécanisme anti-abus
-   devient lui-même le vecteur d'abus. On journalise le premier rejet, puis on
-   échantillonne.
-4. **Le 401 ne doit rien révéler.** Le message ne dit pas si la clé existe.
-5. **Une panne du journal ne casse jamais un appel.** `flushApiLog` n'échoue
+   devient lui-même le vecteur d'abus. On journalise le premier rejet, puis un
+   sur vingt.
+4. **Le premier motif de rejet l'emporte.** Plusieurs mécanismes peuvent vouloir
+   rejeter le même appel — une IP bannie qui dépasse aussi son quota. C'est le
+   plus en amont, celui qui aurait effectivement coupé l'appel, qui reste au
+   journal (`markWouldBlock`). Sans cette règle, la mesure d'impact attribue les
+   rejets au mauvais mécanisme.
+5. **Le 401 ne doit rien révéler.** Le message ne dit pas si la clé existe.
+6. **Une panne du journal ne casse jamais un appel.** `flushApiLog` n'échoue
    jamais vers l'appelant ; un échec est bruyant dans les logs applicatifs.
 
 ---
@@ -338,10 +360,21 @@ couper un partenaire le jour du déploiement.
 
 ---
 
-## 10. Plan d'implémentation de la phase 2
+## 10. Ce qui a été vérifié en local
 
-1. `rateLimit` dans `EndpointPolicy`, `AUTH_GUARD`, les deux drapeaux
-2. `open-api-log/limits.ts` — compteurs Redis, dégradation ouverte si Redis est absent
-3. Branchement aux trois points du wrapper, en-têtes `429` / `Retry-After` / `X-RateLimit-*`
-4. Migration : `ApiIpBan`, `ApiKey.blocked_at` / `blocked_reason`, `ApiKeyLog.would_block`
-5. Vérification locale : quota atteint, ban déclenché, escalade, exemption, Redis coupé
+| Cas                               | Résultat                                                      |
+| --------------------------------- | ------------------------------------------------------------- |
+| Clé coupée à la main              | `403 FORBIDDEN`                                               |
+| En-têtes sur appel normal         | `X-RateLimit-Limit/Remaining/Reset` posés                     |
+| Quota épuisé (60/min)             | `429` + `Retry-After`, `Remaining: 0`                         |
+| 10 clés invalides                 | bannissement au 11ᵉ appel                                     |
+| IP bannie avec une clé **valide** | `403` — c'est l'IP qui est bloquée, pas la clé                |
+| Échantillonnage des rejets        | 14 requêtes rejetées → 1 ligne au journal                     |
+| Mode observation                  | rien n'est bloqué, tout est marqué `would_block`              |
+| Escalade                          | 1ᵉʳ ban 900 s, 2ᵉ ban 3600 s                                  |
+| Redis éteint                      | `200` en ~50 ms — dégradation ouverte, aucune requête ne pend |
+| IP exemptée                       | 14 échecs, aucun bannissement                                 |
+
+Reste hors périmètre : l'écran d'exploration du journal dans le backoffice, et
+une route d'administration pour poser ou lever un bannissement à la main
+(`banIp` / `liftBan` existent, ils ne sont simplement pas exposés).
