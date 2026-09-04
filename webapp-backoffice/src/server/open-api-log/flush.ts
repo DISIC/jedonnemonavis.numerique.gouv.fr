@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import prisma from '@/src/utils/db';
 
 import type { ApiLogEntry } from './context';
+import { recordAuthFailure } from './limits';
 import { getPolicy } from './policy';
 import { parseResponse, scrubSecrets, summarise, truncate } from './scrub';
 
@@ -64,9 +65,28 @@ export const flushApiLog = async (entry: ApiLogEntry): Promise<void> => {
 				response_body: asJson(responseBody),
 				error_message:
 					entry.error_message ?? (failed ? errorMessageFrom(response) : null),
-				duration_ms: Date.now() - entry.started_at
+				duration_ms: Date.now() - entry.started_at,
+				would_block: entry.would_block,
+				block_reason: entry.block_reason
 			}
 		});
+
+		// Le compteur d'échecs est alimenté ici, au seul endroit qui constate déjà
+		// l'issue de l'appel : pas de second point d'observation à maintenir, donc
+		// aucun risque que le journal et le compteur divergent.
+		//
+		// Uniquement les 401. Un 404 est un scanner qui essaie des chemins, pas des
+		// clés — et un appel déjà rejeté pour bannissement ne repart pas un tour.
+		if (entry.status_code === 401 && entry.block_reason === null) {
+			const ban = await recordAuthFailure(entry.ip);
+
+			if (ban) {
+				console.warn(
+					`[open-api-limits] ${entry.ip} bannie ${ban.minutes} min ` +
+						`(récidive ${ban.strike}) après échecs d'authentification répétés`
+				);
+			}
+		}
 	} catch (error) {
 		console.error(
 			`[open-api-log] échec de journalisation (${entry.method} ${entry.url})`,
