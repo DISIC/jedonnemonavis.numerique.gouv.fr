@@ -345,25 +345,25 @@ model ClosedButtonLog {
 }
 
 model ApiKey {
-  id             Int         @id @default(autoincrement())
-  key            String
-  scope          UserRole
+  id           Int         @id @default(autoincrement())
+  key          String
+  scope        UserRole
   /// Coupure manuelle d'une clé, indépendante des quotas.
   ///
   /// Lue dans `isKeyAllowed`, où la clé est de toute façon chargée depuis
   /// Postgres : c'est le seul mécanisme de blocage qui ne dépend pas de Redis,
   /// donc celui qui reste disponible quand le cache est éteint. Une clé
   /// compromise doit pouvoir être coupée en toutes circonstances.
-  blocked_at     DateTime?
-  blocked_reason String?
-  user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id        Int
-  product        Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  product_id     Int?
-  entity         Entity?     @relation(fields: [entity_id], references: [id], onDelete: Cascade)
-  entity_id      Int?
-  api_key_logs   ApiKeyLog[]
-  UserEvent      UserEvent[]
+  blocked_at   DateTime?
+  block_reason String?
+  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      Int
+  product      Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id   Int?
+  entity       Entity?     @relation(fields: [entity_id], references: [id], onDelete: Cascade)
+  entity_id    Int?
+  api_key_logs ApiKeyLog[]
+  UserEvent    UserEvent[]
 }
 
 /// Journal d'audit des appels aux open API (`/api/open-api/*`).

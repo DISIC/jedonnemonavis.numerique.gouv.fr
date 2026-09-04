@@ -5,7 +5,7 @@
 -- Indépendante des quotas et de Redis : c'est le seul moyen de blocage qui
 -- reste disponible quand le cache est éteint.
 ALTER TABLE "ApiKey" ADD COLUMN IF NOT EXISTS "blocked_at"     TIMESTAMP(3);
-ALTER TABLE "ApiKey" ADD COLUMN IF NOT EXISTS "blocked_reason" TEXT;
+ALTER TABLE "ApiKey" ADD COLUMN IF NOT EXISTS "block_reason" TEXT;
 
 -- ── Mode observation ────────────────────────────────────────────────────────
 -- `would_block` marque les appels qu'un mécanisme aurait rejetés, qu'il ait été
