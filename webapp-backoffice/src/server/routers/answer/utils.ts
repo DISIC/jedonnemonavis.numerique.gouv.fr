@@ -99,8 +99,6 @@ export const checkAndGetFormForProduct = async ({
 		include: { product: { select: { status: true } } }
 	});
 
-	// The statistics queries are scoped by product_id, so a form belonging to
-	// another product must never be able to authorize them.
 	if (!form || form.product_id !== product_id)
 		throw new TRPCError({
 			code: 'NOT_FOUND',

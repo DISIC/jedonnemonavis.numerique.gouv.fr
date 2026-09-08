@@ -3,6 +3,7 @@ import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { FORM_INCLUDE } from './constants';
+import { withoutVisibilityFlags } from './utils';
 
 export const createFormInputSchema = FormUncheckedCreateInputSchema;
 
@@ -37,13 +38,9 @@ export const createFormMutation = async ({
 		}
 	}
 
-	// A new form is always private and never Top250: both flags have dedicated,
-	// audited mutations (form.setVisibility and the Top250 API).
-	const { isPublic: _isPublic, isTop250: _isTop250, ...formData } = formPayload;
-
 	const form = await ctx.prisma.form.create({
 		data: {
-			...formData
+			...withoutVisibilityFlags(formPayload)
 		},
 		include: FORM_INCLUDE
 	});

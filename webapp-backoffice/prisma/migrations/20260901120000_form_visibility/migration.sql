@@ -19,10 +19,7 @@ WHERE f.product_id = p.id
   AND p."isPublic" = true
   AND COALESCE(f."isDeleted", false) = false;
 
--- A démarche essentielle is public by definition, and form.setVisibility
--- refuses to write such a form, so the flag has to be right from the start:
--- without this an isTop250 form on a non-public service would be stuck in a
--- state the UI reports as public and no mutation can repair.
+-- Backfill: a démarche essentielle is always public
 UPDATE "Form"
 SET "isPublic" = true
 WHERE "isTop250" = true

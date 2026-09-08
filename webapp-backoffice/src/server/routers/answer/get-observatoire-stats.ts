@@ -54,8 +54,6 @@ export const getObservatoireStatsQuery = async ({
 		include: { product: { select: { status: true } } }
 	});
 
-	// The query below is scoped by product.id, so only a form of that very
-	// product may authorize it.
 	if (!form || form.product_id !== product.id)
 		throw new TRPCError({
 			code: 'NOT_FOUND',

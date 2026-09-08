@@ -173,8 +173,6 @@ async function seed_users_products() {
 						{
 							title: formTemplate?.title,
 							isTop250: isTop250Form,
-							// isTop250 implies isPublic: a démarche essentielle always
-							// exposes its statistics.
 							isPublic:
 								isTop250Form || !!(product.isPublic && formTemplate?.hasStats),
 							form_template: {

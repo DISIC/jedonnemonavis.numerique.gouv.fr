@@ -5,6 +5,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
+import { withoutVisibilityFlags } from './utils';
 
 export const deleteFormInputSchema = z.object({
 	id: z.number(),
@@ -33,14 +34,11 @@ export const deleteFormMutation = async ({
 		select: { isDeleted: true }
 	});
 
-	// See form.update: visibility flags are not writable through this payload.
-	const { isPublic: _isPublic, isTop250: _isTop250, ...formData } = form;
-
 	const deletedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...formData,
-			...(formData.isDeleted === true && { isPublic: false })
+			...withoutVisibilityFlags(form),
+			...(form.isDeleted === true && { isPublic: false })
 		},
 		include: { form_template: true }
 	});

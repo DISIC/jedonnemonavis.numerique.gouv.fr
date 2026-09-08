@@ -71,10 +71,6 @@ export const setTop250Mutation = async ({
 		}),
 		ctx.prisma.form.updateMany({
 			where: { id: { in: down_top250_forms } },
-			// A form leaving the Top250 loses the visibility it only had by virtue
-			// of being a démarche essentielle: its owner never opted in, so the
-			// statistics go back to private and the radio in the form settings
-			// becomes theirs to set again.
 			data: { isTop250: false, isPublic: false }
 		})
 	]);

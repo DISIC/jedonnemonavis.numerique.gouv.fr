@@ -70,12 +70,10 @@ export const countReviewsQuery = async ({
 
 	await checkFormVisibility({ ctx, form });
 
-	// Never scope the counts by a caller-supplied product_id: the visibility
-	// check above authorizes this form, so the form's own product is the only
-	// one whose reviews may be counted.
-	const scopedInput = { ...input, product_id: form.product_id };
-
-	const { where } = formatWhereAndOrder(scopedInput, form.legacy);
+	const { where } = formatWhereAndOrder(
+		{ ...input, product_id: form.product_id },
+		form.legacy
+	);
 
 	const [countFiltered, countAll, countForm1, countForm2] = await Promise.all([
 		ctx.prisma.review.count({ where }),

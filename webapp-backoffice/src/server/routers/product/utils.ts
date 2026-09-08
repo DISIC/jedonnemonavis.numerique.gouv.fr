@@ -16,10 +16,6 @@ export const checkRightToProceed = async ({
 	form_id?: number;
 	authorizeCarrierUser?: boolean;
 }) => {
-	// Both constraints must hold at once: when a caller supplies product_id and
-	// form_id together, the rights decision has to be made about the product
-	// that actually owns that form, never about whichever of the two matches
-	// first.
 	const filters: Prisma.ProductWhereInput[] = [];
 	if (typeof product_id === 'number') {
 		filters.push({ id: product_id });

@@ -3,6 +3,7 @@ import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 import { FORM_INCLUDE } from './constants';
+import { withoutVisibilityFlags } from './utils';
 
 export const updateFormInputSchema = z.object({
 	id: z.number(),
@@ -22,9 +23,6 @@ export const updateFormMutation = async ({
 }) => {
 	const { id, form } = input;
 
-	// Passing both makes checkRightToProceed verify that form `id` really
-	// belongs to the claimed product, so this mutation cannot reparent a form
-	// of another tenant.
 	await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
@@ -32,16 +30,10 @@ export const updateFormMutation = async ({
 		form_id: id
 	});
 
-	// Statistics visibility is only ever writable through form.setVisibility,
-	// which enforces the hasStats / isTop250 rules and records an audit event;
-	// isTop250 itself belongs to the Top250 API. Never let the generic form
-	// payload carry either flag.
-	const { isPublic: _isPublic, isTop250: _isTop250, ...formData } = form;
-
 	const updatedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...formData
+			...withoutVisibilityFlags(form)
 		},
 		include: FORM_INCLUDE
 	});
