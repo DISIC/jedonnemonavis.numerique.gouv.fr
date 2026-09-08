@@ -24,7 +24,8 @@ export const deleteFormMutation = async ({
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
-		product_id: product_id
+		product_id: product_id,
+		form_id: id
 	});
 
 	const currentForm = await ctx.prisma.form.findUnique({
@@ -32,11 +33,14 @@ export const deleteFormMutation = async ({
 		select: { isDeleted: true }
 	});
 
+	// See form.update: visibility flags are not writable through this payload.
+	const { isPublic: _isPublic, isTop250: _isTop250, ...formData } = form;
+
 	const deletedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...form,
-			...(form.isDeleted === true && { isPublic: false })
+			...formData,
+			...(formData.isDeleted === true && { isPublic: false })
 		},
 		include: { form_template: true }
 	});

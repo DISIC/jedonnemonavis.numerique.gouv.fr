@@ -37,9 +37,13 @@ export const createFormMutation = async ({
 		}
 	}
 
+	// A new form is always private and never Top250: both flags have dedicated,
+	// audited mutations (form.setVisibility and the Top250 API).
+	const { isPublic: _isPublic, isTop250: _isTop250, ...formData } = formPayload;
+
 	const form = await ctx.prisma.form.create({
 		data: {
-			...formPayload
+			...formData
 		},
 		include: FORM_INCLUDE
 	});
