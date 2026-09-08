@@ -20,7 +20,6 @@ describe('jdma-answer-check', () => {
 		cy.visit(
 			appUrl + '/administration/dashboard/product/1/forms/2?tab=settings'
 		);
-		cy.get('button[role="tab"]').contains('Paramètres').click();
 		cy.get('fieldset.fr-fieldset')
 			.contains('legend', 'Définir la visibilité des statistiques')
 			.should('exist');
@@ -42,14 +41,21 @@ describe('jdma-answer-check', () => {
 		cy.visit(
 			appUrl + '/administration/dashboard/product/1/forms/2?tab=settings'
 		);
-		cy.get('button[role="tab"]').contains('Paramètres').click();
+		cy.get('fieldset.fr-fieldset')
+			.contains('legend', 'Définir la visibilité des statistiques')
+			.should('exist');
+		cy.get('a[href="/public/form/2/stats"]').should('exist');
 		cy.get('.fr-radio-group').contains('label', 'Privé').click();
 		cy.wait('@setVisibility').its('response.statusCode').should('eq', 200);
 		cy.get('a[href="/public/form/2/stats"]').should('not.exist');
-		cy.visit(appUrl + '/public/form/2/stats');
-		cy.get('h1').contains('Statistiques');
-		cy.contains(
-			"Ce formulaire n'existe pas ou ses statistiques ne sont pas publiques"
-		);
+		cy.request({
+			url: appUrl + '/public/form/2/stats',
+			failOnStatusCode: false
+		})
+			.its('status')
+			.should('eq', 404);
+		cy.visit(appUrl + '/public/form/2/stats', { failOnStatusCode: false });
+		cy.get('h1').should('contain', 'Page non trouvée');
+		cy.contains('Erreur 404');
 	});
 });

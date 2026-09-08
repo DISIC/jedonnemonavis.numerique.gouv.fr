@@ -50,6 +50,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const endDate = firstQueryValue(context.query['date-fin']);
 
 	if (!Number.isInteger(formId)) {
+		context.res.statusCode = 404;
 		return { props: { form: null } };
 	}
 
