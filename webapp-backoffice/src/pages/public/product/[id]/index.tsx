@@ -54,6 +54,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		product.status === 'archived' ||
 		product.forms.length === 0
 	) {
+		context.res.statusCode = 404;
 		return {
 			props: {
 				product: null

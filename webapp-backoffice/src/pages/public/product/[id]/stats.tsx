@@ -1,7 +1,7 @@
 import PublicStats from '@/src/components/dashboard/Stats/PublicStats';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import PublicStatsNotFound from '@/src/components/dashboard/Stats/PublicStatsNotFound';
 import { fr } from '@codegouvfr/react-dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import Head from 'next/head';
 import { getServerSideProps } from '.';
 
@@ -17,19 +17,7 @@ const ProductStatPage = ({
 	defaultEndDate
 }: Props) => {
 	if (product === null) {
-		return (
-			<div className={fr.cx('fr-container')}>
-				<h1 className={fr.cx('fr-mt-20v')}>Statistiques</h1>
-				<div role="alert">
-					<Alert
-						severity="info"
-						title="Cette démarche n'existe pas ou n'est pas publique"
-						description="Veuillez vérifier l'identifiant de la démarche ou contacter le porteur."
-						className={fr.cx('fr-mt-20v', 'fr-mb-20v')}
-					/>
-				</div>
-			</div>
-		);
+		return <PublicStatsNotFound />;
 	}
 
 	return (

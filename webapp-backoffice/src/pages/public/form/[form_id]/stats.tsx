@@ -3,8 +3,8 @@ import PublicStats, {
 } from '@/src/components/dashboard/Stats/PublicStats';
 import prisma from '@/src/utils/db';
 import { isValidDate } from '@/src/utils/tools';
+import PublicStatsNotFound from '@/src/components/dashboard/Stats/PublicStatsNotFound';
 import { fr } from '@codegouvfr/react-dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 
@@ -16,19 +16,7 @@ interface Props {
 
 const FormStatPage = ({ form, defaultStartDate, defaultEndDate }: Props) => {
 	if (form === null) {
-		return (
-			<div className={fr.cx('fr-container')}>
-				<h1 className={fr.cx('fr-mt-20v')}>Statistiques</h1>
-				<div role="alert">
-					<Alert
-						severity="info"
-						title="Ce formulaire n'existe pas ou ses statistiques ne sont pas publiques"
-						description="Veuillez vérifier l'identifiant du formulaire ou contacter le porteur."
-						className={fr.cx('fr-mt-20v', 'fr-mb-20v')}
-					/>
-				</div>
-			</div>
-		);
+		return <PublicStatsNotFound />;
 	}
 
 	const formTitle = form.title || form.form_template.title;
@@ -84,6 +72,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 
 	if (!form || !form.isPublic || form.product.status === 'archived') {
+		context.res.statusCode = 404;
 		return { props: { form: null } };
 	}
 
