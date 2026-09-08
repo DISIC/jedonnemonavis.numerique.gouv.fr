@@ -31,6 +31,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 				include: {
 					form_template: true,
 					form_configs: {
+						where: { status: 'published' },
 						include: {
 							form_config_displays: true,
 							form_config_labels: true
@@ -47,7 +48,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	prisma.$disconnect();
 
 	if (
 		!product ||

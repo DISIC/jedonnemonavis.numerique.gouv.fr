@@ -53,19 +53,25 @@ const FormStatPage = ({ form, defaultStartDate, defaultEndDate }: Props) => {
 	);
 };
 
+const firstQueryValue = (value: string | string[] | undefined) =>
+	Array.isArray(value) ? value[0] : value;
+
 export const getServerSideProps: GetServerSideProps = async context => {
-	const {
-		form_id,
-		'date-debut': startDate,
-		'date-fin': endDate
-	} = context.query;
+	const formId = Number(firstQueryValue(context.query.form_id));
+	const startDate = firstQueryValue(context.query['date-debut']);
+	const endDate = firstQueryValue(context.query['date-fin']);
+
+	if (!Number.isInteger(formId)) {
+		return { props: { form: null } };
+	}
 
 	const form = await prisma.form.findUnique({
-		where: { id: parseInt(form_id as string) },
+		where: { id: formId },
 		include: {
 			product: { select: { id: true, title: true, status: true } },
 			form_template: true,
 			form_configs: {
+				where: { status: 'published' },
 				include: {
 					form_config_displays: true,
 					form_config_labels: true
@@ -76,7 +82,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	prisma.$disconnect();
 
 	if (!form || !form.isPublic || form.product.status === 'archived') {
 		return { props: { form: null } };
@@ -86,13 +91,13 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		props: {
 			form: JSON.parse(JSON.stringify(form)),
 			defaultStartDate:
-				startDate && isValidDate(startDate as string)
+				startDate && isValidDate(startDate)
 					? startDate
 					: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 							.toISOString()
 							.split('T')[0],
 			defaultEndDate:
-				endDate && isValidDate(endDate as string)
+				endDate && isValidDate(endDate)
 					? endDate
 					: new Date().toISOString().split('T')[0]
 		}
