@@ -16,8 +16,9 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should make the form stats public', () => {
+		cy.intercept('POST', '**/form.setVisibility**').as('setVisibility');
 		cy.visit(
-			appUrl + '/administration/dashboard/product/2/forms/2?tab=settings'
+			appUrl + '/administration/dashboard/product/1/forms/2?tab=settings'
 		);
 		cy.get('button[role="tab"]').contains('Paramètres').click();
 		cy.get('fieldset.fr-fieldset')
@@ -27,6 +28,7 @@ describe('jdma-answer-check', () => {
 			.invoke('text')
 			.then(serviceTitle => {
 				cy.get('.fr-radio-group').contains('label', 'Publique').click();
+				cy.wait('@setVisibility').its('response.statusCode').should('eq', 200);
 				cy.get('a[href="/public/form/2/stats"]')
 					.should('be.visible')
 					.and('contain', 'Voir la page publique');
@@ -36,11 +38,13 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should make the form stats private again', () => {
+		cy.intercept('POST', '**/form.setVisibility**').as('setVisibility');
 		cy.visit(
-			appUrl + '/administration/dashboard/product/2/forms/2?tab=settings'
+			appUrl + '/administration/dashboard/product/1/forms/2?tab=settings'
 		);
 		cy.get('button[role="tab"]').contains('Paramètres').click();
 		cy.get('.fr-radio-group').contains('label', 'Privé').click();
+		cy.wait('@setVisibility').its('response.statusCode').should('eq', 200);
 		cy.get('a[href="/public/form/2/stats"]').should('not.exist');
 		cy.visit(appUrl + '/public/form/2/stats');
 		cy.get('h1').contains('Statistiques');
