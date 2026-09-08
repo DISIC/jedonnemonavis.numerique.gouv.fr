@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -13,10 +14,16 @@ interface Props {
 
 const FormStatsVisibility = ({ form }: Props) => {
 	const { cx, classes } = useStyles();
+	const router = useRouter();
 	const [isPublic, setIsPublic] = useState(form.isPublic);
 
 	const setVisibility = trpc.form.setVisibility.useMutation({
-		onError: () => setIsPublic(!isPublic)
+		onSuccess: () => {
+			router.replace(router.asPath, undefined, { scroll: false });
+		},
+		onError: (_error, variables) => {
+			setIsPublic(!variables.isPublic);
+		}
 	});
 
 	const publicPageLink = (
@@ -71,15 +78,18 @@ const FormStatsVisibility = ({ form }: Props) => {
 					</h3>
 				}
 				name={`form-visibility-${form.id}`}
+				state={setVisibility.isError ? 'error' : 'default'}
+				stateRelatedMessage={
+					setVisibility.isError
+						? setVisibility.error.message ||
+						  'La visibilité des statistiques n’a pas pu être modifiée.'
+						: undefined
+				}
 				options={[
 					{
 						label: 'Privé',
-						hintText: (
-							<>
-								Seuls les administrateurs de ce service peuvent voir les
-								statistiques. Ils doivent être connectés.
-							</>
-						),
+						hintText:
+							'Seuls les administrateurs de ce service peuvent voir les statistiques. Ils doivent être connectés.',
 						nativeInputProps: {
 							checked: !isPublic,
 							disabled: setVisibility.isLoading,
@@ -88,12 +98,8 @@ const FormStatsVisibility = ({ form }: Props) => {
 					},
 					{
 						label: 'Public',
-						hintText: (
-							<>
-								Tout le monde peut voir les statistiques. La page est accessible
-								sans connexion. {isPublic && publicPageLink}
-							</>
-						),
+						hintText:
+							'Tout le monde peut voir les statistiques. La page est accessible sans connexion.',
 						nativeInputProps: {
 							checked: isPublic,
 							disabled: setVisibility.isLoading,
@@ -102,6 +108,7 @@ const FormStatsVisibility = ({ form }: Props) => {
 					}
 				]}
 			/>
+			{isPublic && <p className={fr.cx('fr-mb-0')}>{publicPageLink}</p>}
 		</div>
 	);
 };

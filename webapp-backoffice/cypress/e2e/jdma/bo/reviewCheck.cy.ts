@@ -27,7 +27,7 @@ describe('jdma-answer-check', () => {
 		cy.get('.fr-breadcrumb a[href$="/forms"]')
 			.invoke('text')
 			.then(serviceTitle => {
-				cy.get('.fr-radio-group').contains('label', 'Publique').click();
+				cy.get('.fr-radio-group').contains('label', 'Public').click();
 				cy.wait('@setVisibility').its('response.statusCode').should('eq', 200);
 				cy.get('a[href="/public/form/2/stats"]')
 					.should('be.visible')

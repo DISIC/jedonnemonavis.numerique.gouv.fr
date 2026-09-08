@@ -225,7 +225,7 @@ const SettingsTab = ({
 							/>
 						</div>
 					</div>
-					{form.form_template.hasStats && (
+					{form.form_template.hasStats && !form.isDeleted && (
 						<>
 							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
 							<FormStatsVisibility form={form} />
