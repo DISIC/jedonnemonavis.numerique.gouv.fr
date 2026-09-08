@@ -147,6 +147,9 @@ async function seed_users_products() {
 		const formTemplate = formTemplates.find(
 			ft => ft.slug === product.templateSlug
 		);
+		const isTop250Form = !!(
+			product.isDemarcheEssentielle && formTemplate?.slug === 'root'
+		);
 
 		await prisma.product.create({
 			data: {
@@ -169,9 +172,11 @@ async function seed_users_products() {
 					create: [
 						{
 							title: formTemplate?.title,
-							isTop250:
-								product.isDemarcheEssentielle && formTemplate?.slug === 'root',
-							isPublic: product.isPublic && formTemplate?.hasStats,
+							isTop250: isTop250Form,
+							// isTop250 implies isPublic: a démarche essentielle always
+							// exposes its statistics.
+							isPublic:
+								isTop250Form || !!(product.isPublic && formTemplate?.hasStats),
 							form_template: {
 								connect: {
 									slug: formTemplate?.slug || 'root'
