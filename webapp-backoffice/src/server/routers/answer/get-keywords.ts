@@ -3,7 +3,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import { excludeKeywords } from '../../../utils/keywords';
 import { assertAggregatableFieldCode } from './field-codes';
-import { checkAndGetForm, checkAndGetProduct } from './utils';
+import { checkAndGetFormForProduct } from './utils';
 
 export const getKeywordsInputSchema = z.object({
 	product_id: z.number(),
@@ -36,8 +36,7 @@ export const getKeywordsQuery = async ({
 }) => {
 	const { product_id, form_id, start_date, end_date, size, fields } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 
 	// `field.field_code` sert de nom de champ ES dans la requête ci-dessous :
 	// le restreindre aux questions à choix fermé évite de cibler un champ libre.

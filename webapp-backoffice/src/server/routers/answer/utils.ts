@@ -83,11 +83,13 @@ export const checkAndGetProduct = async ({
 	return product;
 };
 
-export const checkAndGetForm = async ({
+export const checkAndGetFormForProduct = async ({
 	ctx,
+	product_id,
 	form_id
 }: {
 	ctx: { prisma: PrismaClient; session: Session | null };
+	product_id: number;
 	form_id: number;
 }) => {
 	const form = await ctx.prisma.form.findUnique({
@@ -97,7 +99,13 @@ export const checkAndGetForm = async ({
 		include: { product: { select: { status: true } } }
 	});
 
-	if (!form) throw new Error('Form not found');
+	// The statistics queries are scoped by product_id, so a form belonging to
+	// another product must never be able to authorize them.
+	if (!form || form.product_id !== product_id)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Form not found'
+		});
 
 	await checkFormVisibility({ ctx, form });
 

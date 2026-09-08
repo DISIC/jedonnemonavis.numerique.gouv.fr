@@ -1,6 +1,7 @@
 import type { Context } from '@/src/server/trpc';
 import { calculateBucketsAverage } from '@/src/utils/tools';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { BucketsInside, ElkAnswer } from '../../../types/custom';
 import { checkFormVisibility } from './utils';
@@ -36,16 +37,30 @@ export const getObservatoireStatsQuery = async ({
 		}
 	});
 
-	if (!product) throw new Error('Product not found');
+	if (!product)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Product not found'
+		});
 
-	if (!form_id && !product.forms[0].id) throw new Error('No form specified');
+	if (!form_id && product.forms.length === 0)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'No form specified'
+		});
 
 	const form = await ctx.prisma.form.findUnique({
-		where: { id: form_id ? form_id : product?.forms[0].id },
+		where: { id: form_id ? form_id : product.forms[0].id },
 		include: { product: { select: { status: true } } }
 	});
 
-	if (!form) throw new Error('Form not found');
+	// The query below is scoped by product.id, so only a form of that very
+	// product may authorize it.
+	if (!form || form.product_id !== product.id)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Form not found'
+		});
 
 	await checkFormVisibility({ ctx, form });
 
