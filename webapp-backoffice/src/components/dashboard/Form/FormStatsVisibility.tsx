@@ -98,8 +98,12 @@ const FormStatsVisibility = ({ form }: Props) => {
 					},
 					{
 						label: 'Public',
-						hintText:
-							'Tout le monde peut voir les statistiques. La page est accessible sans connexion.',
+						hintText: (
+							<>
+								Tout le monde peut voir les statistiques. La page est accessible
+								sans connexion. {isPublic && publicPageLink}
+							</>
+						),
 						nativeInputProps: {
 							checked: isPublic,
 							disabled: setVisibility.isLoading,
@@ -108,7 +112,6 @@ const FormStatsVisibility = ({ form }: Props) => {
 					}
 				]}
 			/>
-			{isPublic && <p className={fr.cx('fr-mb-0')}>{publicPageLink}</p>}
 		</div>
 	);
 };

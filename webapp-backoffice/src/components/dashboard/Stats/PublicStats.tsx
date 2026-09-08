@@ -30,7 +30,10 @@ import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 
-export type PublicStatsForm = ProductWithForms['forms'][number];
+export type PublicStatsForm = Omit<
+	ProductWithForms['forms'][number],
+	'buttons'
+>;
 
 interface Props {
 	product: { id: number; title: string };

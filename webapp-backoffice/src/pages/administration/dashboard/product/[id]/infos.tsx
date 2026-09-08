@@ -12,7 +12,6 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
-import Link from 'next/link';
 import Head from 'next/head';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';

@@ -65,8 +65,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 					form_config_labels: true
 				},
 				orderBy: { created_at: 'desc' }
-			},
-			buttons: { include: { closedButtonLog: true } }
+			}
 		}
 	});
 
