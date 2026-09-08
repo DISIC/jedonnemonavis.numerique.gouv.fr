@@ -66,7 +66,10 @@ export const getReviewListQuery = async ({
 		newReviews
 	} = input;
 
-	await checkRightToProceed({
+	// checkRightToProceed resolves the product that owns form_id (and matches
+	// product_id when both are given), so it is the only product these reviews
+	// may be scoped to.
+	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
 		product_id,
@@ -74,11 +77,7 @@ export const getReviewListQuery = async ({
 		authorizeCarrierUser: true
 	});
 
-	const product = await ctx.prisma.product.findUnique({
-		where: {
-			id: product_id
-		}
-	});
+	const scopedProductId = product.id;
 
 	const form = await ctx.prisma.form.findUnique({
 		where: {
@@ -92,7 +91,7 @@ export const getReviewListQuery = async ({
 			where: {
 				user_id: parseInt(ctx.session!.user.id),
 				action: 'form_reviews_view',
-				product_id: product_id,
+				product_id: scopedProductId,
 				metadata: {
 					path: ['form_id'],
 					equals: form_id
@@ -107,7 +106,7 @@ export const getReviewListQuery = async ({
 				where: {
 					user_id: parseInt(ctx.session!.user.id),
 					action: 'service_reviews_view',
-					product_id: product_id
+					product_id: scopedProductId
 				},
 				orderBy: { created_at: 'desc' },
 				take: 2
@@ -129,6 +128,7 @@ export const getReviewListQuery = async ({
 	const { where, orderBy } = formatWhereAndOrder(
 		{
 			...input,
+			product_id: scopedProductId,
 			lastSeenDate
 		},
 		!!form?.legacy
@@ -162,7 +162,7 @@ export const getReviewListQuery = async ({
 		where: {
 			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_reviews_view',
-			product_id: product_id
+			product_id: scopedProductId
 		},
 		orderBy: {
 			created_at: 'desc'
@@ -198,7 +198,7 @@ export const getReviewListQuery = async ({
 			ctx.prisma.review.count({ where }),
 			ctx.prisma.review.count({
 				where: {
-					product_id: input.product_id,
+					product_id: scopedProductId,
 					...(form_id &&
 						(form?.legacy
 							? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
@@ -208,7 +208,7 @@ export const getReviewListQuery = async ({
 			lastSeenReview[0]
 				? ctx.prisma.review.count({
 						where: {
-							product_id: input.product_id,
+							product_id: scopedProductId,
 							...(lastSeenReview[0] && {
 								created_at: {
 									gte: lastSeenReview[0].created_at
@@ -240,7 +240,7 @@ export const getReviewListQuery = async ({
 					action: input.loggingFromMail
 						? 'service_reviews_report_view'
 						: 'service_reviews_view',
-					product_id: product_id,
+					product_id: scopedProductId,
 					metadata: input
 				}
 			});
