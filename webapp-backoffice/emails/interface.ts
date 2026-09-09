@@ -69,6 +69,13 @@ export interface JdmaUserInviteEmailProps {
 	baseUrl?: string;
 }
 
+export interface JdmaDnCreatorInviteEmailProps {
+	recipientEmail: string;
+	inviteToken: string;
+	demarcheName: string;
+	baseUrl?: string;
+}
+
 export interface JdmaUserRequestRefusedEmailProps {
 	message?: string;
 	baseUrl?: string;
