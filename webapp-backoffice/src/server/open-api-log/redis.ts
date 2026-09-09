@@ -77,6 +77,13 @@ const getClient = () => {
  * Toute erreur — connexion perdue, délai dépassé, réponse inattendue — renvoie
  * `fallback`. Une API partenaire ne doit pas s'arrêter parce que le cache est
  * éteint : on préfère laisser passer un appel de trop que couper un ministère.
+ *
+ * La connexion étant paresseuse, les toutes premières commandes d'un processus
+ * peuvent tomber avant que le client soit `ready` et repartir avec `fallback`.
+ * Autrement dit, les quelques requêtes qui suivent un démarrage ne sont pas
+ * plafonnées. C'est cohérent avec la dégradation ouverte, et sans conséquence
+ * sur un serveur qui vit longtemps — mais ça surprend dans un script à usage
+ * unique, où il faut raisonner en écart plutôt qu'en valeur absolue.
  */
 export const redisCommand = async <T>(
 	run: (client: IORedis) => Promise<T>,

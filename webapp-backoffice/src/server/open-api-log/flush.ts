@@ -75,9 +75,22 @@ export const flushApiLog = async (entry: ApiLogEntry): Promise<void> => {
 		// l'issue de l'appel : pas de second point d'observation à maintenir, donc
 		// aucun risque que le journal et le compteur divergent.
 		//
-		// Uniquement les 401. Un 404 est un scanner qui essaie des chemins, pas des
-		// clés — et un appel déjà rejeté pour bannissement ne repart pas un tour.
-		if (entry.status_code === 401 && entry.block_reason === null) {
+		// Trois conditions, et la troisième est la moins évidente :
+		//
+		// - un 401, parce qu'un 404 est un scanner qui essaie des chemins, pas des
+		//   clés ;
+		// - pas déjà rejeté, sinon un appel bloqué repartirait un tour ;
+		// - **aucune clé résolue**. Un 401 peut aussi venir d'une clé parfaitement
+		//   valide à qui l'endpoint est refusé — `assertPartnerKey` répond
+		//   UNAUTHORIZED à une clé non partenaire. Sans cette condition, un
+		//   partenaire légitime qui se trompe d'endpoint dix fois se ferait bannir
+		//   son IP. C'est l'authentification qui échoue qu'on compte, pas
+		//   l'autorisation.
+		if (
+			entry.status_code === 401 &&
+			entry.block_reason === null &&
+			entry.apikey_id === null
+		) {
 			const ban = await recordAuthFailure(entry.ip);
 
 			if (ban) {
