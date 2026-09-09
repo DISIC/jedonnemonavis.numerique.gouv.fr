@@ -1,6 +1,6 @@
 import type { Context } from '@/src/server/trpc';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { assertApiKeyScopeAccess } from './utils';
 
 export const getApiKeyListInputSchema = z.object({
 	product_id: z.number().optional(),
@@ -14,52 +14,7 @@ export const getApiKeyListQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getApiKeyListInputSchema>;
 }) => {
-	const ctx_user = ctx.session!.user;
-	const ctx_user_email = ctx_user.email?.toLowerCase();
-
-	if (!input.product_id && !input.entity_id) {
-		throw new TRPCError({
-			code: 'BAD_REQUEST',
-			message: 'A product_id or entity_id is required'
-		});
-	}
-
-	if (!ctx_user.role.includes('admin') && !ctx_user_email) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: 'Your are not authorized'
-		});
-	}
-
-	if (input.product_id && !ctx_user.role.includes('admin')) {
-		const accessRight = await ctx.prisma.accessRight.findFirst({
-			where: {
-				user_email: ctx_user_email,
-				product_id: input.product_id
-			}
-		});
-		if (!accessRight) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: 'Your are not authorized'
-			});
-		}
-	}
-
-	if (input.entity_id && !ctx_user.role.includes('admin')) {
-		const adminEntityRights = await ctx.prisma.adminEntityRight.findFirst({
-			where: {
-				user_email: ctx_user_email,
-				entity_id: input.entity_id
-			}
-		});
-		if (!adminEntityRights) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: 'Your are not authorized'
-			});
-		}
-	}
+	await assertApiKeyScopeAccess(ctx, input);
 
 	const keys = await ctx.prisma.apiKey.findMany({
 		where: {

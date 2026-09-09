@@ -30,10 +30,11 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 		<div>
 			<h2>Points d'accès API</h2>
 			<p>
-				L'API JDMA propose des endpoints pour accéder aux données de satisfaction
-				(<strong>/services</strong>, <strong>/statistiques</strong>) et, pour les
-				partenaires, pour provisionner automatiquement un service depuis Démarches
-				Numériques.
+				L'API JDMA propose des endpoints pour décrire vos services numériques
+				(<strong>/services</strong>), leurs statistiques de satisfaction agrégées
+				(<strong>/statistiques</strong>) et leurs avis bruts (
+				<strong>/avis</strong>). Pour les partenaires, deux endpoints permettent de
+				provisionner automatiquement un service depuis Démarches Numériques.
 			</p>
 
 			<div className={fr.cx('fr-mt-6w')}>
@@ -229,6 +230,143 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 				</Accordion>
 
 				<SwaggerUI spec={filterDoc('/statistiques')} />
+			</div>
+
+			<div className={fr.cx('fr-mt-8w')}>
+				<div className={fr.cx('fr-mb-2w')}>
+					<strong>/avis</strong>
+					<span className={fr.cx('fr-ml-2v', 'fr-text--sm')}>
+						Avis bruts d'un formulaire
+					</span>
+				</div>
+
+				<p>
+					Récupérez un à un les avis déposés sur un formulaire, réponse par
+					réponse, plutôt que sous forme agrégée. Les avis sont retournés du
+					plus récent au plus ancien, par pages.
+				</p>
+
+				<p>
+					Récupérez d'abord les identifiants de formulaires avec{' '}
+					<code>/services</code>, puis paginez avec le <code>cursor</code>{' '}
+					renvoyé dans <code>metadata.next_cursor</code> jusqu'à ce que{' '}
+					<code>metadata.has_more</code> passe à <code>false</code>. Pour une
+					synchronisation régulière, préférez le curseur aux dates : les bornes
+					de <code>start_date</code> et <code>end_date</code> sont interprétées
+					sur la journée entière, ce qui peut faire réapparaître un avis d'une
+					fenêtre à la suivante.
+				</p>
+
+				<h4 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-6v')}>
+					Paramètres de filtrage
+				</h4>
+				<div className={fr.cx('fr-table')}>
+					<div className={fr.cx('fr-table__content')}>
+						<table>
+							<thead>
+								<tr>
+									<th>Paramètre</th>
+									<th>Description</th>
+									<th>Type</th>
+									<th>Requis</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<code>form_id</code>
+									</td>
+									<td>
+										ID du formulaire dont on veut les avis
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Obtenu via <code>/services</code>
+										</span>
+									</td>
+									<td>number</td>
+									<td>Oui</td>
+								</tr>
+								<tr>
+									<td>
+										<code>product_id</code>
+									</td>
+									<td>
+										ID du service numérique porteur du formulaire
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Facultatif, sert uniquement de garde-fou : une valeur
+											incohérente avec <code>form_id</code> renvoie une erreur
+										</span>
+									</td>
+									<td>number</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>start_date</code>
+									</td>
+									<td>Date de début au format YYYY-MM-DD</td>
+									<td>string</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>end_date</code>
+									</td>
+									<td>Date de fin au format YYYY-MM-DD</td>
+									<td>string</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>cursor</code>
+									</td>
+									<td>
+										Curseur de pagination
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											À reprendre tel quel depuis{' '}
+											<code>metadata.next_cursor</code> de la réponse précédente
+										</span>
+									</td>
+									<td>string</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>limit</code>
+									</td>
+									<td>
+										Nombre d'avis par page
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Entre 1 et 100 | Défaut: 50
+										</span>
+									</td>
+									<td>number</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>include_answers</code>
+									</td>
+									<td>
+										Inclure les réponses de chaque avis
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Défaut: true | Passez <code>false</code> pour ne récupérer
+											que les métadonnées des avis
+										</span>
+									</td>
+									<td>boolean</td>
+									<td>Non</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<SwaggerUI spec={filterDoc('/avis')} />
 			</div>
 
 			<div className={fr.cx('fr-mt-8w')}>

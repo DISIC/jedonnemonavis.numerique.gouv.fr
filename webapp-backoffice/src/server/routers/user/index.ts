@@ -1,4 +1,9 @@
-import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import {
+	protectedProcedure,
+	publicProcedure,
+	rateLimitedProcedure,
+	router
+} from '@/src/server/trpc';
 import { getUserListInputSchema, getUserListQuery } from './get-list';
 import { getUserByIdInputSchema, getUserByIdQuery } from './get-by-id';
 import {
@@ -77,35 +82,35 @@ export const userRouter = router({
 		.input(deleteManyUsersInputSchema)
 		.mutation(deleteManyUsersMutation),
 
-	register: publicProcedure
+	register: rateLimitedProcedure
 		.input(registerUserInputSchema)
 		.mutation(registerUserMutation),
 
-	validate: publicProcedure
+	validate: rateLimitedProcedure
 		.input(validateUserInputSchema)
 		.query(validateUserQuery),
 
-	checkEmail: publicProcedure
+	checkEmail: rateLimitedProcedure
 		.input(checkEmailInputSchema)
 		.mutation(checkEmailMutation),
 
 	me: publicProcedure.input(getMeInputSchema).query(getMeQuery),
 
-	getOtp: publicProcedure.input(getOtpInputSchema).mutation(getOtpMutation),
+	getOtp: rateLimitedProcedure.input(getOtpInputSchema).mutation(getOtpMutation),
 
-	initResetPwd: publicProcedure
+	initResetPwd: rateLimitedProcedure
 		.input(initResetPwdInputSchema)
 		.mutation(initResetPwdMutation),
 
-	checkToken: publicProcedure
+	checkToken: rateLimitedProcedure
 		.input(checkTokenInputSchema)
 		.query(checkTokenQuery),
 
-	changePAssword: publicProcedure
+	changePAssword: rateLimitedProcedure
 		.input(changePasswordInputSchema)
 		.mutation(changePasswordMutation),
 
-	resendValidationEmail: publicProcedure
+	resendValidationEmail: rateLimitedProcedure
 		.input(resendValidationEmailInputSchema)
 		.mutation(resendValidationEmailMutation)
 });

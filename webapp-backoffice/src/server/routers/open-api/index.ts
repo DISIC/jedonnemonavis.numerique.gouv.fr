@@ -42,6 +42,12 @@ import {
 	addAdminOutputSchema
 } from './demarches-numeriques/add-admin';
 
+import {
+	reviewsListQuery,
+	reviewsListInputSchema,
+	reviewsListOutputSchema
+} from './reviews-list';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -172,7 +178,28 @@ const openAPIRouter = router({
 		})
 		.input(addAdminInputSchema)
 		.output(addAdminOutputSchema)
-		.mutation(addAdminMutation)
+		.mutation(addAdminMutation),
+
+	reviewsList: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'GET',
+				path: '/avis',
+				protect: true,
+				enabled: true,
+				summary:
+					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information).",
+				example: {
+					request: {
+						form_id: 1,
+						limit: 50
+					}
+				}
+			}
+		})
+		.input(reviewsListInputSchema)
+		.output(reviewsListOutputSchema)
+		.query(reviewsListQuery)
 });
 
 export default openAPIRouter;

@@ -1,4 +1,7 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
+
+/** Utilisateur tel qu'exposé par l'API : le hash de mot de passe n'en fait jamais partie. */
+export type UserWithoutPassword = Omit<User, 'password'>;
 
 const AccessRightWithUsers = Prisma.validator<Prisma.AccessRightDefaultArgs>()({
 	include: {
