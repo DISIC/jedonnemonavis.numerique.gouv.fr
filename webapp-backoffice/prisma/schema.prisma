@@ -353,6 +353,14 @@ model ApiKey {
   id           Int         @id @default(autoincrement())
   key          String
   scope        UserRole
+  /// Coupure manuelle d'une clé, indépendante des quotas.
+  ///
+  /// Lue dans `isKeyAllowed`, où la clé est de toute façon chargée depuis
+  /// Postgres : c'est le seul mécanisme de blocage qui ne dépend pas de Redis,
+  /// donc celui qui reste disponible quand le cache est éteint. Une clé
+  /// compromise doit pouvoir être coupée en toutes circonstances.
+  blocked_at   DateTime?
+  block_reason String?
   user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
   product      Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
@@ -409,12 +417,48 @@ model ApiKeyLog {
   error_message String?
   duration_ms   Int?
 
+  /// Un mécanisme de protection a décidé de rejeter cet appel — que le rejet
+  /// ait été appliqué ou non. En mode observation (drapeaux à `0`), l'appel
+  /// passe quand même : c'est en interrogeant cette colonne qu'on mesure
+  /// l'impact qu'auraient les seuils avant de les activer.
+  would_block  Boolean @default(false)
+  /// `quota` | `brute_force_ban` | `key_blocked`
+  block_reason String?
+
   created_at DateTime @default(now())
 
   @@index([apikey_id, created_at])
   @@index([ip, created_at])
   @@index([route, created_at])
   @@index([created_at])
+}
+
+/// Bannissements d'IP sur les open API.
+///
+/// Redis porte la décision temps réel (rapide, TTL natif, partagé entre
+/// instances) ; cette table en est la trace durable : elle survit à un
+/// redémarrage de Redis, elle est auditable, et elle accueille les
+/// bannissements posés à la main.
+///
+/// Les bans actifs sont rechargés depuis ici dans un cache de processus
+/// rafraîchi périodiquement — ce qui les rend applicables même Redis éteint.
+model ApiIpBan {
+  id         Int       @id @default(autoincrement())
+  ip         String
+  reason     String
+  /// `auto` pour la garde anti-force brute, sinon l'e-mail de l'agent.
+  created_by String    @default("auto")
+  /// Rang de récidive au moment du bannissement, pour suivre l'escalade.
+  strike     Int       @default(1)
+  expires_at DateTime
+  created_at DateTime  @default(now())
+  /// Levée manuelle : on ne supprime pas la ligne, on la neutralise, pour que
+  /// l'historique des bannissements reste lisible.
+  lifted_at  DateTime?
+  lifted_by  String?
+
+  @@index([ip, expires_at])
+  @@index([expires_at])
 }
 
 model Product {

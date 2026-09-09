@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import prisma from '@/src/utils/db';
 
 import type { ApiLogEntry } from './context';
+import { recordAuthFailure } from './limits';
 import { getPolicy } from './policy';
 import { parseResponse, scrubSecrets, summarise, truncate } from './scrub';
 
@@ -64,9 +65,41 @@ export const flushApiLog = async (entry: ApiLogEntry): Promise<void> => {
 				response_body: asJson(responseBody),
 				error_message:
 					entry.error_message ?? (failed ? errorMessageFrom(response) : null),
-				duration_ms: Date.now() - entry.started_at
+				duration_ms: Date.now() - entry.started_at,
+				would_block: entry.would_block,
+				block_reason: entry.block_reason
 			}
 		});
+
+		// Le compteur d'échecs est alimenté ici, au seul endroit qui constate déjà
+		// l'issue de l'appel : pas de second point d'observation à maintenir, donc
+		// aucun risque que le journal et le compteur divergent.
+		//
+		// Trois conditions, et la troisième est la moins évidente :
+		//
+		// - un 401, parce qu'un 404 est un scanner qui essaie des chemins, pas des
+		//   clés ;
+		// - pas déjà rejeté, sinon un appel bloqué repartirait un tour ;
+		// - **aucune clé résolue**. Un 401 peut aussi venir d'une clé parfaitement
+		//   valide à qui l'endpoint est refusé — `assertPartnerKey` répond
+		//   UNAUTHORIZED à une clé non partenaire. Sans cette condition, un
+		//   partenaire légitime qui se trompe d'endpoint dix fois se ferait bannir
+		//   son IP. C'est l'authentification qui échoue qu'on compte, pas
+		//   l'autorisation.
+		if (
+			entry.status_code === 401 &&
+			entry.block_reason === null &&
+			entry.apikey_id === null
+		) {
+			const ban = await recordAuthFailure(entry.ip);
+
+			if (ban) {
+				console.warn(
+					`[open-api-limits] ${entry.ip} bannie ${ban.minutes} min ` +
+						`(récidive ${ban.strike}) après échecs d'authentification répétés`
+				);
+			}
+		}
 	} catch (error) {
 		console.error(
 			`[open-api-log] échec de journalisation (${entry.method} ${entry.url})`,
