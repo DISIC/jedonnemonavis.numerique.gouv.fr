@@ -288,9 +288,8 @@ export const provisionServiceMutation = async ({
 			}
 		}
 	});
-	await ctx.prisma.apiKeyLog.create({
-		data: { apikey_id: ctx.api_key?.id || 0, url: ctx.req.url || '' }
-	});
+	// La journalisation est assurée par le wrapper HTTP des open API
+	// (`pages/api/open-api/[...trpc].ts`), pas ici.
 
 	// Envoi des mails (hors transaction). Créateur = mail spécifique DN×JDMA ; autres
 	// invités = mail classique. Non bloquant : un échec d'envoi ne remet pas en cause le

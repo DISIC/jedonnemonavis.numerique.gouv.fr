@@ -57,9 +57,8 @@ export const addAdminMutation = async ({
 		});
 	}
 
-	await ctx.prisma.apiKeyLog.create({
-		data: { apikey_id: ctx.api_key?.id || 0, url: ctx.req.url || '' }
-	});
+	// La journalisation est assurée par le wrapper HTTP des open API
+	// (`pages/api/open-api/[...trpc].ts`), pas ici.
 
 	const emails = Array.from(
 		new Set(input.admin_emails.map(e => e.toLowerCase()))
