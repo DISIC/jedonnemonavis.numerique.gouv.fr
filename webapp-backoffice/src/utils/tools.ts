@@ -1,5 +1,10 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import { AnswerIntention, AnswerKind, Prisma, TypeAction } from '@prisma/client';
+import {
+	AnswerIntention,
+	AnswerKind,
+	Prisma,
+	TypeAction
+} from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -911,4 +916,13 @@ export const mapArchivedReviewToReview = (
 			created_at: createdAt
 		}))
 	};
+};
+
+type DsfrApi = (node: HTMLElement) => { modal?: { conceal: () => void } };
+
+export const closeHeaderMenuModal = (headerId: string) => {
+	const modal = document.getElementById(`header-menu-modal-${headerId}`);
+	const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr;
+
+	if (modal && dsfr) dsfr(modal).modal?.conceal();
 };
