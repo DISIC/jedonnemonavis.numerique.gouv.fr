@@ -1,19 +1,24 @@
+import { closeHeaderMenuModal } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { MainNavigation } from '@codegouvfr/react-dsfr/MainNavigation';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
 import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import UserDetailsForm from '../components/auth/UserDetailsForm';
+import HeaderMobileAccountMenu from '../components/ui/HeaderMobileAccountMenu';
 import { useUserSettings } from '../contexts/UserSettingsContext';
+
+const HEADER_ID = 'fr-header-public-header';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -49,6 +54,12 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	};
 
 	const { data: session, status } = useSession();
+
+	useEffect(() => {
+		const close = () => closeHeaderMenuModal(HEADER_ID);
+		router.events.on('routeChangeStart', close);
+		return () => router.events.off('routeChangeStart', close);
+	}, []);
 
 	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
 		{
@@ -149,97 +160,112 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					</Button>,
 					<Button
 						id="button-account"
-						iconId={'fr-icon-account-circle-line'}
-						title={`Ouvrir le menu mon compte`}
-						aria-label={`Ouvrir le menu mon compte`}
+						className={cx(
+							classes.accountButton,
+							fr.cx(
+								'fr-btn--icon-right',
+								menuOpen
+									? 'fr-icon-arrow-up-s-line'
+									: 'fr-icon-arrow-down-s-line'
+							)
+						)}
 						priority="tertiary"
 						size="large"
 						onClick={handleMenuClick}
-					>
-						Compte
-					</Button>,
-					<Menu
-						id="option-menu"
-						open={menuOpen}
-						anchorEl={anchorEl}
-						onClose={handleClose}
-						MenuListProps={{
-							'aria-labelledby': 'button-options-access-right'
-						}}
-						PaperProps={{
-							component: 'nav'
+						nativeButtonProps={{
+							'aria-haspopup': 'menu',
+							'aria-expanded': menuOpen,
+							'aria-controls': menuOpen ? 'option-menu' : undefined
 						}}
 					>
-						<MenuItem
-							style={{ pointerEvents: 'none' }}
-							className={cx(classes.firstItem)}
-						>
-							<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
-								{session?.user.name}
-							</div>
-							<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
-								{session?.user.email}
-							</div>
-						</MenuItem>
-						<MenuItem
-							className={cx(fr.cx('fr-p-4v'), classes.item)}
-							onClick={e => {
-								handleClose(e);
-								router.push(
-									`/administration/dashboard/user/${session?.user.id}/infos`
-								);
-							}}
-						>
-							<span
-								className={fr.cx(
-									'fr-icon-user-line',
-									'fr-icon--sm',
-									'fr-mr-1-5v'
-								)}
-							/>
-							Informations personnelles
-						</MenuItem>
-						<MenuItem
-							className={cx(fr.cx('fr-p-4v'), classes.item)}
-							onClick={e => {
-								handleClose(e);
-								router.push(
-									`/administration/dashboard/user/${session?.user.id}/notifications`
-								);
-							}}
-						>
-							<span
-								className={fr.cx(
-									'fr-icon-notification-3-line',
-									'fr-icon--sm',
-									'fr-mr-1-5v'
-								)}
-							/>
-							Notifications
-						</MenuItem>
-						<MenuItem
-							className={cx(
-								fr.cx('fr-pb-2v', 'fr-pt-4v'),
-								classes.item,
-								classes.lastItem
+						<i
+							className={fr.cx(
+								'fr-icon-account-circle-line',
+								'fr-icon--sm',
+								'fr-mr-1-5v'
 							)}
-						>
-							<Button
-								id="button-account"
-								iconId={'fr-icon-logout-box-r-line'}
-								title={`Déconnexion`}
-								aria-label={`Déconnexion`}
-								priority="tertiary"
-								onClick={() => {
-									signOut();
-									push(['trackEvent', 'Account', 'Disconnect']);
-								}}
-							>
-								Se déconnecter
-							</Button>
-						</MenuItem>
-					</Menu>
+							aria-hidden
+						/>
+						Compte
+					</Button>
 			  ];
+
+	const accountMenu = !session?.user ? null : (
+		<Menu
+			id="option-menu"
+			open={menuOpen}
+			anchorEl={anchorEl}
+			onClose={handleClose}
+			PaperProps={{
+				component: 'nav',
+				'aria-label': 'Menu mon compte'
+			}}
+		>
+			<MenuItem
+				style={{ pointerEvents: 'none' }}
+				className={cx(classes.firstItem)}
+			>
+				<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+					{session.user.name}
+				</div>
+				<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+					{session.user.email}
+				</div>
+			</MenuItem>
+			<MenuItem
+				className={cx(fr.cx('fr-p-4v'), classes.item)}
+				onClick={e => {
+					handleClose(e);
+					router.push(
+						`/administration/dashboard/user/${session.user.id}/infos`
+					);
+				}}
+			>
+				<span
+					className={fr.cx('fr-icon-user-line', 'fr-icon--sm', 'fr-mr-1-5v')}
+				/>
+				Informations personnelles
+			</MenuItem>
+			<MenuItem
+				className={cx(fr.cx('fr-p-4v'), classes.item)}
+				onClick={e => {
+					handleClose(e);
+					router.push(
+						`/administration/dashboard/user/${session.user.id}/notifications`
+					);
+				}}
+			>
+				<span
+					className={fr.cx(
+						'fr-icon-notification-3-line',
+						'fr-icon--sm',
+						'fr-mr-1-5v'
+					)}
+				/>
+				Notifications
+			</MenuItem>
+			<MenuItem
+				className={cx(
+					fr.cx('fr-pb-2v', 'fr-pt-4v'),
+					classes.item,
+					classes.lastItem
+				)}
+			>
+				<Button
+					iconId={'fr-icon-logout-box-r-line'}
+					title={`Déconnexion`}
+					aria-label={`Déconnexion`}
+					priority="tertiary"
+					onClick={() => {
+						signOut();
+						push(['trackEvent', 'Account', 'Disconnect']);
+					}}
+				>
+					Se déconnecter
+				</Button>
+			</MenuItem>
+		</Menu>
+	);
 
 	const navigationItems: NavigationItem[] = [];
 
@@ -328,6 +354,30 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		navigationItems.push(...adminNavigationItems);
 	}
 
+	const shouldDisplayMainNavigation =
+		!!navigationItems.length && !pathname.startsWith('/public');
+	const shouldDisplayMobileAccountMenu = !!session?.user && !light;
+
+	const navigation =
+		shouldDisplayMainNavigation || shouldDisplayMobileAccountMenu ? (
+			<>
+				{shouldDisplayMainNavigation && (
+					<MainNavigation
+						id={`${HEADER_ID}-main-navigation`}
+						items={navigationItems}
+					/>
+				)}
+				{shouldDisplayMobileAccountMenu && session && (
+					<HeaderMobileAccountMenu
+						id={`${HEADER_ID}-mobile-account`}
+						userId={session.user.id}
+						userName={session.user.name}
+						userEmail={session.user.email}
+					/>
+				)}
+			</>
+		) : undefined;
+
 	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
 		session !== null &&
@@ -365,17 +415,14 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						title: "Je donne mon avis, retour à l'accueil"
 					}}
 					className={classes.navigation}
-					id={'fr-header-public-header'}
+					id={HEADER_ID}
 					quickAccessItems={light ? undefined : quickAccessItems}
-					navigation={
-						!!navigationItems.length && !pathname.startsWith('/public')
-							? navigationItems
-							: undefined
-					}
+					navigation={navigation}
 					serviceTitle="Je donne mon avis"
 					serviceTagline="La voix de vos usagers"
 				/>
 			)}
+			{!shouldDisplayUserDetailsForm && !light && accountMenu}
 			<div id="jdma-widget-anchor" className={classes.widgetAnchor} />
 
 			<main id="main" role="main" tabIndex={-1}>
@@ -479,7 +526,30 @@ const useStyles = tss
 				color: fr.colors.decisions.text.disabled.grey.default
 			}
 		},
+		accountButton: {
+			[fr.breakpoints.down('lg')]: {
+				display: 'none'
+			},
+			'&[aria-expanded="true"]': {
+				backgroundColor: fr.colors.decisions.background.open.blueFrance.default,
+				boxShadow: 'none'
+			}
+		},
 		navigation: {
+			[fr.breakpoints.down('lg')]: {
+				'&.fr-header .fr-modal > .fr-container': {
+					display: 'flex',
+					flexDirection: 'column',
+					paddingBottom: fr.spacing('6v')
+				},
+				'&.fr-header .fr-header__menu-links::after': {
+					margin: 0,
+					width: '100%'
+				},
+				'.fr-header__menu-links .fr-btns-group > li': {
+					paddingLeft: fr.spacing('4v')
+				}
+			},
 			span: {
 				color: fr.colors.decisions.background.default.grey.default,
 				backgroundColor:
