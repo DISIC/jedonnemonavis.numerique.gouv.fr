@@ -77,6 +77,22 @@ export const DEFAULT_POLICY: EndpointPolicy = {
  */
 const MINUTE = 60_000;
 
+/**
+ * TEMPORAIRE — recette produit.
+ *
+ * Ramène **tous** les plafonds à cette valeur, pour qu'ils soient atteignables à
+ * la main pendant la recette. Les valeurs nominales restent écrites sur chaque
+ * entrée : repasser cette constante à `null` les rétablit toutes.
+ *
+ * À retirer une fois la recette terminée.
+ */
+const RECETTE_MAX: number | null = 5;
+
+const perMinute = (nominal: number): RateLimit => ({
+	max: RECETTE_MAX ?? nominal,
+	windowMs: MINUTE
+});
+
 export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 	// ── Mutations : traçabilité maximale, plafond serré ──────────────────────
 	// Opérations d'administration, rares par nature : un partenaire qui en
@@ -85,13 +101,13 @@ export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 		requestBody: true,
 		responseBody: 'full',
 		retentionDays: 365,
-		rateLimit: { max: 5, windowMs: MINUTE }
+		rateLimit: perMinute(5)
 	},
 	'POST /triggerMails': {
 		requestBody: true,
 		responseBody: 'full',
 		retentionDays: 365,
-		rateLimit: { max: 5, windowMs: MINUTE }
+		rateLimit: perMinute(5)
 	},
 	// PR #559 — provisioning Démarches Numériques. Crée services, formulaires et
 	// droits d'accès à partir d'un appel partenaire : le cas le plus sensible.
@@ -100,13 +116,13 @@ export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 		requestBody: true,
 		responseBody: 'full',
 		retentionDays: 365,
-		rateLimit: { max: 30, windowMs: MINUTE }
+		rateLimit: perMinute(30)
 	},
 	'POST /demarches-numeriques/services/{external_id}/admins': {
 		requestBody: true,
 		responseBody: 'full',
 		retentionDays: 365,
-		rateLimit: { max: 30, windowMs: MINUTE }
+		rateLimit: perMinute(30)
 	},
 
 	// ── Lectures : résumé seulement ─────────────────────────────────────────
@@ -114,7 +130,7 @@ export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 		requestBody: true,
 		responseBody: 'summary',
 		retentionDays: 180,
-		rateLimit: { max: 60, windowMs: MINUTE }
+		rateLimit: perMinute(60)
 	},
 	// Requête lourde côté Elasticsearch : le plafond protège le cluster autant
 	// que l'API.
@@ -122,7 +138,7 @@ export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 		requestBody: true,
 		responseBody: 'summary',
 		retentionDays: 180,
-		rateLimit: { max: 30, windowMs: MINUTE }
+		rateLimit: perMinute(30)
 	},
 	// PR #560 — extraction des avis et verbatims. Volumineux et directement
 	// personnel : on garde les filtres demandés, jamais le contenu renvoyé.
@@ -131,7 +147,7 @@ export const LOG_POLICIES: Record<string, EndpointPolicy> = {
 		requestBody: true,
 		responseBody: 'summary',
 		retentionDays: 180,
-		rateLimit: { max: 60, windowMs: MINUTE }
+		rateLimit: perMinute(60)
 	},
 
 	// ── Sonde de disponibilité ──────────────────────────────────────────────
