@@ -148,6 +148,7 @@ enum TypeAction {
   service_form_create
   service_form_edit
   service_form_delete
+  service_form_stats_visibility_update
   form_alert_sent
 }
 
@@ -477,8 +478,6 @@ model Product {
   forms           Form[]
   favorites       Favorite[]
   reviews         Review[]
-  isPublic        Boolean?
-  hasBeenTop250   Boolean?
   api_keys        ApiKey[]
   Export          Export[]
   UserEvent       UserEvent[]
@@ -655,6 +654,7 @@ model FormTemplate {
   description              String?
   active                   Boolean                  @default(false)
   hasStepper               Boolean                  @default(false)
+  hasStats                 Boolean                  @default(false)
   review_save_mode         ReviewSaveMode           @default(each_step)
   form_template_steps      FormTemplateStep[]
   form_template_buttons    FormTemplateButton[]
@@ -781,6 +781,7 @@ model Form {
   deleted_at               DateTime?
   isDeleted                Boolean?                @default(false)
   isTop250                 Boolean                 @default(false)
+  isPublic                 Boolean                 @default(false)
   last_review_at           DateTime?
   alert_max_window_minutes Int?
   last_alert_sent_at       DateTime?

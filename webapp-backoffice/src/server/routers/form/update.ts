@@ -3,6 +3,7 @@ import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 import { FORM_INCLUDE } from './constants';
+import { withoutVisibilityFlags } from './utils';
 
 export const updateFormInputSchema = z.object({
 	id: z.number(),
@@ -25,13 +26,14 @@ export const updateFormMutation = async ({
 	await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
-		product_id: form.product_id
+		product_id: form.product_id,
+		form_id: id
 	});
 
 	const updatedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...form
+			...withoutVisibilityFlags(form)
 		},
 		include: FORM_INCLUDE
 	});

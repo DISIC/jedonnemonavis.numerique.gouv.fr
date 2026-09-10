@@ -3,6 +3,7 @@ import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { FORM_INCLUDE } from './constants';
+import { withoutVisibilityFlags } from './utils';
 
 export const createFormInputSchema = FormUncheckedCreateInputSchema;
 
@@ -39,7 +40,7 @@ export const createFormMutation = async ({
 
 	const form = await ctx.prisma.form.create({
 		data: {
-			...formPayload
+			...withoutVisibilityFlags(formPayload)
 		},
 		include: FORM_INCLUDE
 	});

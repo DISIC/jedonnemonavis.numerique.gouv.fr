@@ -344,7 +344,10 @@
 		},
 		"not_found": {
 			"h1": "Formulaire non trouvé",
-			"text": "Le lien est invalide ou ce formulaire n'existe plus."
+			"text": "Le lien est invalide ou ce formulaire n'existe plus.",
+			"error_code": "Erreur 404",
+			"share_text": "Si vous souhaitez vous pouvez partager votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services numériques.",
+			"share_link": "Partager mon expérience publiquement"
 		},
 		"form_closed": {
 			"h1": "Ce formulaire est fermé",

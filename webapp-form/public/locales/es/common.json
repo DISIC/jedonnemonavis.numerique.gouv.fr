@@ -344,7 +344,10 @@
 		},
 		"not_found": {
 			"h1": "Formulario no encontrado",
-			"text": "El enlace no es válido o este formulario ya no existe."
+			"text": "El enlace no es válido o este formulario ya no existe.",
+			"error_code": "Error 404",
+			"share_text": "Si lo desea, puede compartir su experiencia públicamente y de forma anónima. La administración responderá y la utilizará para mejorar sus servicios digitales.",
+			"share_link": "Compartir mi experiencia públicamente"
 		},
 		"form_closed": {
 			"h1": "Este formulario está cerrado",

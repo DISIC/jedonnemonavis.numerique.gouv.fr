@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import FormDeleteModal from '../FormDeleteModal';
 import AlertEmailPreviewModal from '../AlertEmailPreviewModal';
+import FormStatsVisibility from '../FormStatsVisibility';
 
 interface Props {
 	form: FormWithElements;
@@ -224,6 +225,12 @@ const SettingsTab = ({
 							/>
 						</div>
 					</div>
+					{form.form_template.hasStats && !form.isDeleted && (
+						<>
+							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
+							<FormStatsVisibility form={form} />
+						</>
+					)}
 					{!isLocked && (
 						<>
 							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />

@@ -3,8 +3,7 @@ import { AnswerIntention } from '@prisma/client';
 import { z } from 'zod';
 import { Buckets, ElkAnswer } from '../../../types/custom';
 import {
-	checkAndGetForm,
-	checkAndGetProduct,
+	checkAndGetFormForProduct,
 	getDefaultChildValues,
 	queryCountByFieldCode
 } from './utils';
@@ -27,8 +26,7 @@ export const getByChildFieldCodeQuery = async ({
 }) => {
 	const { product_id, form_id } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 
 	const parentFieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: 'jdma-answers',
