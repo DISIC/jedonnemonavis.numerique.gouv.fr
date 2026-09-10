@@ -168,6 +168,11 @@ qu'est un trafic normal sur ces API — voir le mode observation plus bas.
 | `POST /setTop250`, `/triggerMails` | 5 / min  | Administration, rare par nature                  |
 | `GET /health`                      | aucun    | **Exempté** : la supervision l'appelle en boucle |
 
+> **Recette en cours :** la constante `RECETTE_MAX` dans `policy.ts` ramène
+> temporairement **tous** ces plafonds à 5 / min, pour qu'ils soient atteignables
+> à la main. Les valeurs nominales ci-dessus restent écrites dans le code
+> (`perMinute(60)`) : repasser `RECETTE_MAX` à `null` les rétablit toutes.
+
 ---
 
 ## 4. Garde anti-force brute
@@ -323,6 +328,65 @@ C'est le vrai apport du journal livré en phase 1 : quelques semaines de trafic
 réel, puis on ouvre le journal, on regarde qui aurait été bloqué et à quel
 volume, on ajuste les seuils, et seulement ensuite on active. Aucun risque de
 couper un partenaire le jour du déploiement.
+
+### Recetter sans rien bloquer
+
+Le plafonnement et la garde anti-force brute se vérifient **entièrement en
+base**, drapeaux à `0`. Aucun appel n'est refusé, tout est enregistré. Les
+quatre requêtes ci-dessous ont été éprouvées sur un jeu d'appels réel.
+
+**Ce qui aurait été bloqué, par endpoint et par motif :**
+
+```sql
+SELECT route, block_reason, count(*) AS rejets
+FROM "ApiKeyLog"
+WHERE would_block AND created_at > now() - interval '1 day'
+GROUP BY 1, 2 ORDER BY 3 DESC;
+```
+
+**Qui serait touché :**
+
+```sql
+SELECT apikey_id, ip, route, block_reason, count(*) AS rejets
+FROM "ApiKeyLog"
+WHERE would_block AND created_at > now() - interval '1 day'
+GROUP BY 1, 2, 3, 4 ORDER BY 5 DESC LIMIT 20;
+```
+
+**Bannissements qui auraient été prononcés :**
+
+```sql
+SELECT ip, strike, reason, created_by, expires_at
+FROM "ApiIpBan" ORDER BY created_at DESC LIMIT 20;
+```
+
+**Tentatives d'authentification échouées, par IP :**
+
+```sql
+SELECT ip, count(*) AS echecs, count(DISTINCT key_hash) AS cles_essayees,
+       min(created_at) AS debut, max(created_at) AS fin
+FROM "ApiKeyLog"
+WHERE status_code = 401 AND apikey_id IS NULL
+  AND created_at > now() - interval '1 day'
+GROUP BY 1 ORDER BY 2 DESC;
+```
+
+> **Avant de passer les drapeaux à `1`, purger les traces de recette.** Les
+> bannissements et les compteurs de récidive sont créés **même en mode
+> observation** : ils ne sont simplement pas appliqués. Si on active sans faire
+> le ménage, les bans de recette encore valides s'appliquent immédiatement, et
+> l'escalade repart au rang atteint pendant les tests — le premier vrai
+> bannissement pourrait donc durer 24 h au lieu de 15 min.
+>
+> ```sql
+> UPDATE "ApiIpBan" SET lifted_at = now(), lifted_by = 'fin de recette'
+> WHERE lifted_at IS NULL;
+> ```
+>
+> ```bash
+> redis-cli --scan --pattern 'ban:*'     | xargs -r redis-cli DEL
+> redis-cli --scan --pattern 'strikes:*' | xargs -r redis-cli DEL
+> ```
 
 ---
 
