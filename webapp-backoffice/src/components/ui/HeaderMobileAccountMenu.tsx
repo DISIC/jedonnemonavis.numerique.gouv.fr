@@ -3,6 +3,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 
 type HeaderMobileAccountMenuProps = {
@@ -19,8 +20,23 @@ export default function HeaderMobileAccountMenu({
 	userEmail
 }: HeaderMobileAccountMenuProps) {
 	const { classes, cx } = useStyles();
+	const { asPath } = useRouter();
 
 	const titleId = `${id}-title`;
+	const currentPath = asPath.split(/[?#]/)[0];
+
+	const links = [
+		{
+			href: `/administration/dashboard/user/${userId}/infos`,
+			icon: 'fr-icon-user-line' as const,
+			text: 'Informations personnelles'
+		},
+		{
+			href: `/administration/dashboard/user/${userId}/notifications`,
+			icon: 'fr-icon-notification-3-line' as const,
+			text: 'Notifications'
+		}
+	];
 
 	return (
 		<div className={cx(classes.root, fr.cx('fr-hidden-lg'))}>
@@ -32,28 +48,17 @@ export default function HeaderMobileAccountMenu({
 					Compte
 				</p>
 				<ul className={classes.list}>
-					<li>
-						<Link
-							href={`/administration/dashboard/user/${userId}/infos`}
-							className={cx(
-								fr.cx('fr-icon-user-line', 'fr-link--icon-left'),
-								classes.link
-							)}
-						>
-							Informations personnelles
-						</Link>
-					</li>
-					<li>
-						<Link
-							href={`/administration/dashboard/user/${userId}/notifications`}
-							className={cx(
-								fr.cx('fr-icon-notification-3-line', 'fr-link--icon-left'),
-								classes.link
-							)}
-						>
-							Notifications
-						</Link>
-					</li>
+					{links.map(({ href, icon, text }) => (
+						<li key={href}>
+							<Link
+								href={href}
+								aria-current={currentPath === href ? 'page' : undefined}
+								className={cx(fr.cx(icon, 'fr-link--icon-left'), classes.link)}
+							>
+								{text}
+							</Link>
+						</li>
+					))}
 				</ul>
 			</nav>
 			<div className={classes.identity}>
@@ -102,7 +107,11 @@ const useStyles = tss.withName({ HeaderMobileAccountMenu }).create(() => ({
 		padding: `${fr.spacing('3v')} ${fr.spacing('4v')}`,
 		backgroundImage: 'none',
 		textDecoration: 'none',
-		color: fr.colors.decisions.text.label.grey.default
+		color: fr.colors.decisions.text.label.grey.default,
+		'&[aria-current]': {
+			color: fr.colors.decisions.text.active.blueFrance.default,
+			boxShadow: `inset 2px 0 0 0 ${fr.colors.decisions.background.active.blueFrance.default}`
+		}
 	},
 	identity: {
 		marginTop: 'auto',

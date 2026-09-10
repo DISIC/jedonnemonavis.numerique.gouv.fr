@@ -924,5 +924,5 @@ export const closeHeaderMenuModal = (headerId: string) => {
 	const modal = document.getElementById(`header-menu-modal-${headerId}`);
 	const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr;
 
-	if (modal && dsfr) dsfr(modal).modal?.conceal();
+	if (modal && typeof dsfr === 'function') dsfr(modal).modal?.conceal();
 };
