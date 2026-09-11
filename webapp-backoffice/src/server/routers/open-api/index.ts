@@ -142,7 +142,7 @@ const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					'Provisionne un service JDMA (service + formulaire observatoire + lien) depuis une démarche Démarches Numériques. Idempotent sur external_id.',
+					'Provisionne un service JDMA (service + formulaire observatoire + lien) depuis une démarche Démarches Numériques. Un même external_id ne crée pas de doublon : un nouvel appel renvoie le service déjà créé.',
 				example: {
 					request: {
 						external_id: 'dn-abc-123',

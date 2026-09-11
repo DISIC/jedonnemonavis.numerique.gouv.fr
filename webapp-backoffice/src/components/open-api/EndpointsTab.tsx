@@ -380,8 +380,9 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 				<p>
 					Réservé aux partenaires (clé API partenaire). Crée en un appel le service,
 					le formulaire (observatoire), le lien d'intégration et les droits admin,
-					puis renvoie le code d'intégration et les liens d'inscription. Idempotent
-					sur <code>external_id</code>.
+					puis renvoie le code d'intégration et les liens d'inscription. Un même
+					<code>external_id</code> ne crée pas de doublon : un nouvel appel renvoie
+					le service déjà créé.
 				</p>
 
 				<SwaggerUI spec={filterDoc('/demarches-numeriques/services')} />
