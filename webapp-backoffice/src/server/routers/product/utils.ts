@@ -38,9 +38,18 @@ export const checkRightToProceed = async ({
 		include: { entity: { select: { name: true } } }
 	});
 
+	if (!product) {
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Product not found'
+		});
+	}
+
+	// product.id (et non product_id) : quand seul form_id est fourni, un
+	// product_id à undefined ferait matcher n'importe quel droit de l'utilisateur.
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
-			product_id: product_id,
+			product_id: product.id,
 			user_email: session.user.email,
 			status: authorizeCarrierUser
 				? { in: ['carrier_admin', 'carrier_user'] }
@@ -49,7 +58,7 @@ export const checkRightToProceed = async ({
 	});
 	const adminEntityRight = await prisma.adminEntityRight.findFirst({
 		where: {
-			entity_id: product?.entity_id,
+			entity_id: product.entity_id,
 			user_email: session.user.email
 		}
 	});

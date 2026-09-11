@@ -118,6 +118,18 @@ const ExportModal = (props: Props) => {
 			title={'Exporter les réponses'}
 			size="large"
 		>
+			<section className={fr.cx('fr-mt-6v')}>
+				<h2 className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-mb-2v')}>
+					Filtres sélectionnés
+				</h2>
+				<ul
+					className={cx(classes.filtersList, fr.cx('fr-text--xs', 'fr-my-0'))}
+				>
+					{currentFiltersLabels.map((filter, index) => (
+						<li key={index}>{filter}</li>
+					))}
+				</ul>
+			</section>
 			<RadioButtons
 				legend="Mode d'exportation"
 				name="choice"
@@ -129,15 +141,6 @@ const ExportModal = (props: Props) => {
 				options={[
 					{
 						label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
-						hintText: (
-							<span role="list" className={classes.filtersList}>
-								{currentFiltersLabels.map((filter, index) => (
-									<span role="listitem" key={index}>
-										{filter}
-									</span>
-								))}
-							</span>
-						),
 						nativeInputProps: {
 							value: 'filtered',
 							checked: choice === 'filtered',
@@ -158,7 +161,7 @@ const ExportModal = (props: Props) => {
 						}
 					}
 				]}
-				className={cx(classes.customRadio, fr.cx('fr-mt-10v'))}
+				className={fr.cx('fr-mt-10v')}
 			/>
 			<RadioButtons
 				legend="Format de fichier"
@@ -194,18 +197,7 @@ const ExportModal = (props: Props) => {
 
 const useStyles = tss.withName({ ExportModal }).create(() => ({
 	filtersList: {
-		display: 'block',
-		paddingLeft: fr.spacing('2w'),
-		marginTop: fr.spacing('1v'),
-		'& > [role="listitem"]': {
-			display: 'list-item',
-			listStyleType: 'disc'
-		}
-	},
-	customRadio: {
-		'.fr-label': {
-			paddingBottom: '0.25rem!important'
-		}
+		color: fr.colors.decisions.text.mention.grey.default
 	}
 }));
 

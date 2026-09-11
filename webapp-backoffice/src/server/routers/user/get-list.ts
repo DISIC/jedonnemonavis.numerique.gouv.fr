@@ -2,6 +2,7 @@ import type { Context } from '@/src/server/trpc';
 import { buildOrderBy } from '@/src/server/utils/order-by';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { omitPassword } from './utils';
 
 const USER_SORT_FIELDS = [
 	'email',
@@ -126,5 +127,5 @@ export const getUserListQuery = async ({
 
 	const count = await ctx.prisma.user.count({ where });
 
-	return { data: users, metadata: { count } };
+	return { data: users.map(omitPassword), metadata: { count } };
 };

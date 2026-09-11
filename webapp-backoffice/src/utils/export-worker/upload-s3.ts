@@ -105,16 +105,17 @@ export async function uploadStreamToS3(
 	await upload.done();
 }
 
-/** Generates a pre-signed GET URL valid for 7 days (SigV4 maximum). */
+/** Generates a pre-signed GET URL, valid for 7 days (SigV4 maximum) by default. */
 export async function generateDownloadLink(
-	objectName: string
+	objectName: string,
+	expiresIn: number = EXPORT_LINK_TTL_SECONDS
 ): Promise<string> {
 	const client = getS3Client();
 
 	const url = await getSignedUrl(
 		client,
 		new GetObjectCommand({ Bucket: getBucket(), Key: objectName }),
-		{ expiresIn: EXPORT_LINK_TTL_SECONDS }
+		{ expiresIn }
 	);
 
 	return url;

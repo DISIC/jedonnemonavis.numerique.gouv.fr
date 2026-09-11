@@ -101,6 +101,12 @@ const AuthenticationTab = () => {
 				{`Authorization: Bearer VOTRE_CLE_API
 Content-Type: application/json`}
 			</CodeBlock>
+			<p className={fr.cx('fr-mt-2w')}>
+				Une clé API donne accès aux données de votre service, avis bruts
+				compris. Appelez l'API depuis votre serveur uniquement : n'intégrez
+				jamais votre clé dans une page web, une application mobile ou tout autre
+				code distribué à vos usagers.
+			</p>
 		</div>
 	);
 };

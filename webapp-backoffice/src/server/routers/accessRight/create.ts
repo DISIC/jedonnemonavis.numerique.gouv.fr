@@ -103,6 +103,7 @@ export const createAccessRightMutation = async ({
 		const emailHtml = await renderInviteEmail({
 			inviterName: contextUser.name || "Quelqu'un",
 			productTitle: newAccessRight.product.title,
+			productId: newAccessRight.product.id,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});
 
