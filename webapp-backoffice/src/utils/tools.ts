@@ -539,7 +539,11 @@ export const handleActionTypeDisplay = (
 ) => {
 	if (!metadata) return '';
 
-	const metadataTyped = metadata as { json: { [key: string]: any } };
+	// Défensif : certains events (ex. anciens events DN) peuvent avoir un metadata
+	// « à plat » sans clé `json`. On évite alors que l'accès `metadata.json.x` ne fasse
+	// planter tout l'historique — on retombe sur un objet vide.
+	const rawMetadata = metadata as { json?: { [key: string]: any } };
+	const metadataTyped = { json: rawMetadata.json ?? {} };
 	const e = escapeHtmlValue;
 	const userEmail = () =>
 		e(

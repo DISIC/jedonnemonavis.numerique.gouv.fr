@@ -282,9 +282,11 @@ export const provisionServiceMutation = async ({
 			product_id: result.product.id,
 			form_id: result.form.id,
 			metadata: {
-				source: DN_SOURCE,
-				external_id,
-				organisation_name: input.organisation_name
+				json: {
+					source: DN_SOURCE,
+					external_id,
+					organisation_name: input.organisation_name
+				}
 			}
 		}
 	});
