@@ -134,6 +134,7 @@ export const addAdminMutation = async ({
 					const html = await renderInviteEmail({
 						inviterName: DN_INVITER_NAME,
 						productTitle: product.title,
+						productId: product.id,
 						baseUrl: process.env.NODEMAILER_BASEURL
 					});
 					await sendMail(

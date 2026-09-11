@@ -303,6 +303,7 @@ export const provisionServiceMutation = async ({
 				const html = await renderInviteEmail({
 					inviterName: DN_INVITER_NAME,
 					productTitle: input.demarche_name,
+					productId: result.product.id,
 					baseUrl
 				});
 				await sendMail(
