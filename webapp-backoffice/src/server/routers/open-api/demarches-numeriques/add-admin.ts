@@ -114,7 +114,15 @@ export const addAdminMutation = async ({
 					user_id: ctx.user_api?.id,
 					action: 'service_invite',
 					product_id: product.id,
-					metadata: { source: DN_SOURCE, external_id, invited_email: email }
+					metadata: {
+						json: {
+							user_email: user ? email : null,
+							user_email_invite: user ? null : email,
+							status: 'carrier_admin',
+							source: DN_SOURCE,
+							external_id
+						}
+					}
 				}
 			});
 
