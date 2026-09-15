@@ -1,4 +1,6 @@
+import { selectors } from '../../../utils/selectors';
 import { login } from '../../../utils/helpers/common';
+import { appUrl } from '../../../utils/variables';
 
 type OutsiderCtx = {
 	user_id: number;
@@ -7,7 +9,17 @@ type OutsiderCtx = {
 	foreign_product_id: number;
 };
 
+type ApiKeyRightsCtx = {
+	entity_id: number;
+	product_id: number;
+	carrier_user_email: string;
+	carrier_admin_email: string;
+	entity_admin_email: string;
+	user_ids: number[];
+};
+
 const OUTSIDER_PASSWORD = 'OutsiderPass2026@!';
+const RIGHTS_PASSWORD = 'RightsPass2026@!';
 
 // Le client tRPC de l'application passe par httpBatchLink + SuperJSON : on
 // reproduit le même format pour attaquer la procédure directement, sans passer
@@ -102,5 +114,103 @@ describe("Périmètre des clés d'API", () => {
 			'eq',
 			1
 		);
+	});
+});
+
+describe("Qui a droit aux clés d'API d'un service", () => {
+	let ctx: ApiKeyRightsCtx;
+
+	const apiKeysUrl = () =>
+		`${appUrl}/administration/dashboard/product/${ctx.product_id}/api_keys`;
+	const formsUrl = () =>
+		`${appUrl}/administration/dashboard/product/${ctx.product_id}/forms`;
+
+	before(() => {
+		cy.task<ApiKeyRightsCtx>('db:setupApiKeyRightsCtx', {
+			password: RIGHTS_PASSWORD
+		}).then(c => {
+			ctx = c;
+		});
+	});
+
+	after(() => cy.task('db:cleanupApiKeyRightsCtx', ctx));
+
+	describe('Utilisateur du service numérique', () => {
+		beforeEach(() => login(ctx.carrier_user_email, RIGHTS_PASSWORD));
+
+		it('ne peut pas lister les clés', () => {
+			trpcQuery('apiKey.getList', { product_id: ctx.product_id })
+				.its('status')
+				.should('eq', 401);
+		});
+
+		it('ne peut pas créer de clé', () => {
+			trpcMutation('apiKey.create', { product_id: ctx.product_id })
+				.its('status')
+				.should('eq', 401);
+
+			cy.task('db:countApiKeys', { product_id: ctx.product_id }).should(
+				'eq',
+				0
+			);
+		});
+
+		it("ne voit pas l'onglet « Clés API »", () => {
+			cy.visit(formsUrl());
+			cy.get(selectors.sideMenu.menu).should('be.visible');
+			cy.get(
+				`.fr-sidemenu__link[href="/administration/dashboard/product/${ctx.product_id}/api_keys"]`
+			).should('not.exist');
+		});
+
+		it("est redirigé s'il ouvre l'URL des clés directement", () => {
+			cy.visit(apiKeysUrl());
+			cy.url().should('eq', formsUrl());
+		});
+	});
+
+	describe('Administrateur du service numérique', () => {
+		beforeEach(() => login(ctx.carrier_admin_email, RIGHTS_PASSWORD));
+
+		it('peut lister et créer une clé', () => {
+			trpcQuery('apiKey.getList', { product_id: ctx.product_id })
+				.its('status')
+				.should('eq', 200);
+
+			trpcMutation('apiKey.create', { product_id: ctx.product_id })
+				.its('status')
+				.should('eq', 200);
+
+			cy.task('db:countApiKeys', { product_id: ctx.product_id }).should(
+				'eq',
+				1
+			);
+		});
+
+		it("voit l'onglet « Clés API »", () => {
+			cy.visit(formsUrl());
+			cy.get(
+				`.fr-sidemenu__link[href="/administration/dashboard/product/${ctx.product_id}/api_keys"]`
+			).should('exist');
+		});
+	});
+
+	describe("Administrateur d'organisation", () => {
+		beforeEach(() => login(ctx.entity_admin_email, RIGHTS_PASSWORD));
+
+		it('peut créer une clé puis la voir dans le listing', () => {
+			trpcMutation('apiKey.create', { product_id: ctx.product_id })
+				.its('status')
+				.should('eq', 200);
+
+			trpcQuery('apiKey.getList', { product_id: ctx.product_id }).then(
+				response => {
+					expect(response.status).to.eq(200);
+					expect(response.body[0].result.data.json.data).to.have.length.above(
+						0
+					);
+				}
+			);
+		});
 	});
 });

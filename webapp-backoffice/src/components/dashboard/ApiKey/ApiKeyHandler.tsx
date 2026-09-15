@@ -8,6 +8,7 @@ import { Toast } from '@/src/components/ui/Toast';
 import { Loader } from '@/src/components/ui/Loader';
 import { transformDateToFrenchReadable } from '@/src/utils/tools';
 import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	product?: Product;
@@ -19,8 +20,13 @@ const ApiKeyHandler = (props: Props) => {
 	const { product, entity } = props;
 	const ownRight = props.ownRight;
 	const { cx, classes } = useStyles();
+	const { data: session } = useSession();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
+
+	const canDeleteKey = (keyUserId: number) =>
+		session?.user.role.includes('admin') ||
+		parseInt(session?.user.id ?? '') === keyUserId;
 
 	const {
 		data: resultApiKey,
@@ -56,7 +62,14 @@ const ApiKeyHandler = (props: Props) => {
 	const handleDeleteKey = async (key: string) => {
 		push(['trackEvent', 'BO - ApiKey', `Delete-Key`]);
 		if (confirm(`Êtes vous sûr de vouloir supprimer la clé « ${key} » ?`)) {
-			await deleteKey.mutateAsync({ key: key, product_id: product?.id });
+			try {
+				await deleteKey.mutateAsync({ key: key, product_id: product?.id });
+			} catch (err) {
+				alert(
+					'La suppression a échoué : seule la personne qui a créé cette clé peut la supprimer.'
+				);
+				return;
+			}
 			RefectchKeys();
 		}
 	};
@@ -187,7 +200,7 @@ const ApiKeyHandler = (props: Props) => {
 									>
 										{'Copier'}
 									</Button>
-									{ownRight === 'carrier_admin' && (
+									{canDeleteKey(item.user_id) && (
 										<Button
 											priority="tertiary"
 											size="small"
