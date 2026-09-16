@@ -102,7 +102,9 @@ export const flushApiLog = async (entry: ApiLogEntry): Promise<void> => {
 		}
 	} catch (error) {
 		console.error(
-			`[open-api-log] échec de journalisation (${entry.method} ${entry.url})`,
+			'[open-api-log] échec de journalisation (%s %s)',
+			entry.method,
+			entry.url,
 			error
 		);
 	}
