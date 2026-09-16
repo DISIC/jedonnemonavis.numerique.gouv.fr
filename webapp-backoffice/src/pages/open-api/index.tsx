@@ -48,6 +48,11 @@ const DocAPIv2 = () => {
 		setDocApi(fetching as {} & { paths: Record<string, Object> });
 	};
 
+	// Un endpoint peut être désactivé côté serveur : il disparaît alors du document
+	// OpenAPI. La documentation se cale dessus plutôt que sur une liste en dur,
+	// pour ne jamais présenter un point d'accès qui n'existe pas.
+	const hasPath = (path: string) => Boolean(docApi?.paths?.[path]);
+
 	const filterDoc = (fieldToKeep: string) => {
 		let clonedObject = JSON.parse(JSON.stringify(docApi));
 		let newPathObject = { paths: {} } as DocApi;
@@ -137,7 +142,7 @@ const DocAPIv2 = () => {
 
 						{activeSection === 'endpoints' && (
 							<>
-								<EndpointsTab filterDoc={filterDoc} />
+								<EndpointsTab filterDoc={filterDoc} hasPath={hasPath} />
 								<NavigationButtons
 									previousSection={previousSection}
 									nextSection={nextSection}
@@ -148,7 +153,7 @@ const DocAPIv2 = () => {
 
 						{activeSection === 'examples' && (
 							<>
-								<ExamplesTab />
+								<ExamplesTab hasPath={hasPath} />
 								<NavigationButtons
 									previousSection={previousSection}
 									nextSection={nextSection}

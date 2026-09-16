@@ -48,6 +48,8 @@ import {
 	reviewsListOutputSchema
 } from './reviews-list';
 
+import { isAvisApiEnabled } from './utils';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -186,7 +188,10 @@ const openAPIRouter = router({
 				method: 'GET',
 				path: '/avis',
 				protect: true,
-				enabled: true,
+				// Piloté par OPEN_API_AVIS_ENABLED, fermé par défaut. À false, la route
+				// REST n'est pas montée et l'endpoint n'apparaît pas dans le document
+				// OpenAPI publié.
+				enabled: isAvisApiEnabled(),
 				summary:
 					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information). Le paramètre has_verbatim restreint aux avis avec ou sans verbatim.",
 				example: {
