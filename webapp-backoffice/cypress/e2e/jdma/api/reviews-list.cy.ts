@@ -122,6 +122,76 @@ describe('OpenAPI GET /avis', () => {
 		});
 	});
 
+	describe('has_verbatim filter', () => {
+		let ctx: Ctx;
+
+		before(() => {
+			cy.task<Ctx>('db:setupApiCtx', {
+				template_slug: 'bug',
+				api_scope: 'product'
+			}).then(c => {
+				ctx = c;
+				// Les fixtures « bug » portent une réponse verbatim, les « root » non.
+				cy.task('db:seedReviews', [
+					makeReview(ctx, 0, 'bug'),
+					makeReview(ctx, -1, 'root'),
+					makeReview(ctx, -2, 'bug'),
+					makeReview(ctx, -3, 'root')
+				]);
+			});
+		});
+
+		after(() => cy.task('db:cleanupApiCtx', ctx));
+
+		it('returns every review when the filter is omitted', () => {
+			apiRequest(ctx.api_key, { form_id: ctx.form_id }).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(4);
+			});
+		});
+
+		it('keeps only reviews with a verbatim when has_verbatim=true', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'true'
+			}).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(2);
+				res.body.data.forEach((r: any) => {
+					expect(r.has_verbatim).to.eq(true);
+					expect(
+						r.answers.some((a: any) => a.field_code === 'verbatim')
+					).to.eq(true);
+				});
+			});
+		});
+
+		it('keeps only reviews without a verbatim when has_verbatim=false', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'false'
+			}).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(2);
+				res.body.data.forEach((r: any) => {
+					expect(r.has_verbatim).to.eq(false);
+					expect(
+						r.answers.some((a: any) => a.field_code === 'verbatim')
+					).to.eq(false);
+				});
+			});
+		});
+
+		it('rejects a non-boolean has_verbatim', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'oui'
+			})
+				.its('status')
+				.should('eq', 400);
+		});
+	});
+
 	describe('pagination cursor', () => {
 		let ctx: Ctx;
 

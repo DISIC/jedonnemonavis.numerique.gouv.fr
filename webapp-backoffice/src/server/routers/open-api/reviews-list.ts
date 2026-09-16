@@ -23,6 +23,16 @@ export const reviewsListInputSchema = z
 		end_date: dateString.optional(),
 		cursor: z.string().optional(),
 		limit: z.number().int().min(1).max(100).default(50),
+		// Tri-état : absent = tous les avis, true = seulement ceux qui portent un
+		// verbatim, false = seulement ceux qui n'en portent pas. Le preprocess est
+		// indispensable : en query string, `?has_verbatim=false` arrive sous forme
+		// de chaîne, que `z.boolean()` refuserait et que JS jugerait vraie.
+		has_verbatim: z
+			.preprocess(
+				v => (v === 'false' ? false : v === 'true' ? true : v),
+				z.boolean()
+			)
+			.optional(),
 		include_answers: z
 			.preprocess(
 				v => (v === 'false' ? false : v === 'true' ? true : v),
@@ -138,6 +148,7 @@ export const reviewsListQuery = async ({
 		end_date,
 		cursor,
 		limit,
+		has_verbatim,
 		include_answers
 	} = input;
 
@@ -182,6 +193,14 @@ export const reviewsListQuery = async ({
 			? { in: Array.from(new Set([...LEGACY_FORM_IDS, form_id])) }
 			: form_id
 	};
+
+	// On filtre sur la colonne dénormalisée, pas sur une jointure vers Answer :
+	// le champ `has_verbatim` renvoyé dans chaque avis est ainsi toujours celui
+	// qui a servi de critère, et le partenaire peut refiltrer côté client sans
+	// obtenir un résultat différent du nôtre.
+	if (has_verbatim !== undefined) {
+		where.has_verbatim = has_verbatim;
+	}
 
 	if (start_date || end_date) {
 		where.created_at = getDateWhereFromUTCRange(start_date, end_date);
