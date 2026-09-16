@@ -18,7 +18,6 @@ const dateString = z
 export const reviewsListInputSchema = z
 	.object({
 		form_id: z.number().int().positive(),
-		product_id: z.number().int().positive().optional(),
 		start_date: dateString.optional(),
 		end_date: dateString.optional(),
 		cursor: z.string().optional(),
@@ -67,14 +66,16 @@ const answerSchema = z.object({
 		.nullable()
 });
 
+// `data[]` ne porte que ce qui varie d'un avis à l'autre. Le service et le
+// gabarit du formulaire sont constants sur toute la réponse — le `where` épingle
+// `product_id` et le slug vient du formulaire interrogé — donc ils vivent dans
+// `metadata`. `form_id`, lui, reste en ligne : sur un formulaire legacy les avis
+// migrés portent les pseudo-identifiants 1 ou 2, la valeur varie réellement.
 const reviewSchema = z.object({
 	id: z.number().int(),
 	created_at: z.string(),
 	form_id: z.number().int(),
-	product_id: z.number().int(),
 	button_id: z.number().int(),
-	form_template_slug: z.string(),
-	xwiki_id: z.number().int().nullable(),
 	has_verbatim: z.boolean(),
 	answers: z.array(answerSchema).optional()
 });
@@ -82,6 +83,8 @@ const reviewSchema = z.object({
 export const reviewsListOutputSchema = z.object({
 	data: z.array(reviewSchema),
 	metadata: z.object({
+		product_id: z.number().int(),
+		form_template_slug: z.string(),
 		next_cursor: z.string().nullable(),
 		has_more: z.boolean(),
 		limit: z.number().int()
@@ -92,9 +95,7 @@ const baseSelect: Prisma.ReviewSelect = {
 	id: true,
 	created_at: true,
 	form_id: true,
-	product_id: true,
 	button_id: true,
-	xwiki_id: true,
 	has_verbatim: true
 };
 
@@ -118,9 +119,7 @@ type ReviewRow = {
 	id: number;
 	created_at: Date;
 	form_id: number;
-	product_id: number;
 	button_id: number;
-	xwiki_id: number | null;
 	has_verbatim: boolean;
 	answers?: Array<{
 		field_code: string;
@@ -143,7 +142,6 @@ export const reviewsListQuery = async ({
 }) => {
 	const {
 		form_id,
-		product_id,
 		start_date,
 		end_date,
 		cursor,
@@ -173,13 +171,6 @@ export const reviewsListQuery = async ({
 		(!isAdmin && !authorized_products_ids.includes(form.product_id))
 	) {
 		throw notFound();
-	}
-
-	if (product_id !== undefined && product_id !== form.product_id) {
-		throw new TRPCError({
-			code: 'BAD_REQUEST',
-			message: 'product_id incohérent avec form_id'
-		});
 	}
 
 	// Sur un formulaire legacy, les avis migrés de l'ancienne plateforme portent
@@ -241,10 +232,7 @@ export const reviewsListQuery = async ({
 			id: r.id,
 			created_at: r.created_at.toISOString(),
 			form_id: r.form_id,
-			product_id: r.product_id,
 			button_id: r.button_id,
-			form_template_slug: form.form_template.slug,
-			xwiki_id: r.xwiki_id ?? null,
 			has_verbatim: r.has_verbatim
 		};
 		if (!r.answers) return base;
@@ -268,5 +256,14 @@ export const reviewsListQuery = async ({
 		};
 	});
 
-	return { data, metadata: { next_cursor, has_more, limit } };
+	return {
+		data,
+		metadata: {
+			product_id: form.product_id,
+			form_template_slug: form.form_template.slug,
+			next_cursor,
+			has_more,
+			limit
+		}
+	};
 };

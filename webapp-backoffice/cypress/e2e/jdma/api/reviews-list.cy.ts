@@ -101,11 +101,16 @@ describe('OpenAPI GET /avis', () => {
 				expect(res.status).to.eq(200);
 				expect(res.body.data).to.have.length(3);
 				res.body.data.forEach((r: any) => {
-					expect(r.form_template_slug).to.eq('bug');
-					expect(r.product_id).to.eq(ctx.product_ids[0]);
 					expect(r.answers).to.exist;
 					expect(r.answers.length).to.be.greaterThan(0);
+					// Ces deux champs ont migré vers metadata : ils sont constants
+					// sur toute la réponse et n'ont rien à faire dans chaque ligne.
+					expect(r.form_template_slug).to.eq(undefined);
+					expect(r.product_id).to.eq(undefined);
+					expect(r.xwiki_id).to.eq(undefined);
 				});
+				expect(res.body.metadata.form_template_slug).to.eq('bug');
+				expect(res.body.metadata.product_id).to.eq(ctx.product_ids[0]);
 				expect(res.body.metadata.has_more).to.eq(false);
 				expect(res.body.metadata.next_cursor).to.eq(null);
 			});
@@ -342,13 +347,16 @@ describe('OpenAPI GET /avis', () => {
 				.should('eq', 404);
 		});
 
-		it('rejects incoherent product_id', () => {
+		it('ignores a product_id passed by a legacy caller', () => {
 			apiRequest(owner.api_key, {
 				form_id: owner.form_id,
 				product_id: owner.product_ids[0] + 999_999
-			})
-				.its('status')
-				.should('eq', 400);
+			}).then(res => {
+				// Le paramètre n'existe plus : le service est déduit du formulaire,
+				// donc une valeur incohérente est écartée plutôt que rejetée.
+				expect(res.status).to.eq(200);
+				expect(res.body.metadata.product_id).to.eq(owner.product_ids[0]);
+			});
 		});
 	});
 
