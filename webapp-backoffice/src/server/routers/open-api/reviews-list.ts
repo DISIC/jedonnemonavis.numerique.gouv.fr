@@ -7,7 +7,8 @@ import {
 	LEGACY_FORM_IDS,
 	decodeCursor,
 	encodeCursor,
-	getAuthorizedProductIds
+	getAuthorizedProductIds,
+	isAvisApiEnabled
 } from './utils';
 
 const dateString = z
@@ -141,14 +142,23 @@ export const reviewsListQuery = async ({
 		include_answers
 	} = input;
 
-	const isAdmin = ctx.api_key?.scope.includes('admin') ?? false;
-	const authorized_products_ids = await getAuthorizedProductIds(ctx);
-
 	const notFound = () =>
 		new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'Formulaire introuvable ou inaccessible'
 		});
+
+	// Le `enabled` du .meta retire déjà la route REST et l'entrée du document
+	// OpenAPI. Ce contrôle-ci ferme l'autre porte : le routeur openAPI étant monté
+	// dans appRouter, la procédure resterait joignable par
+	// /api/trpc/openAPI.reviewsList avec une clé valide. Même message que pour un
+	// formulaire inconnu, pour ne pas révéler que l'endpoint existe.
+	if (!isAvisApiEnabled()) {
+		throw notFound();
+	}
+
+	const isAdmin = ctx.api_key?.scope.includes('admin') ?? false;
+	const authorized_products_ids = await getAuthorizedProductIds(ctx);
 
 	const form = await ctx.prisma.form.findUnique({
 		where: { id: form_id },
