@@ -91,20 +91,8 @@ export const parseExportParams = (rawParams?: string | null): ExportParams => {
 	}
 };
 
-export const sanitizeExportParams = (
-	rawParams: string,
-	isGlobalAdmin: boolean
-): string => {
-	if (isGlobalAdmin || !rawParams) return rawParams;
-
-	const parsed = parseExportParams(rawParams);
-	if (!parsed.filters?.onlyDeleted) return rawParams;
-
-	return JSON.stringify({
-		...parsed,
-		filters: { ...parsed.filters, onlyDeleted: false }
-	});
-};
+export const isDeletedReviewsExport = (params: ExportParams): boolean =>
+	!!params.filters?.onlyDeleted;
 
 const formatDateIfPresent = (value?: string | null): string => {
 	if (!value) return '';
@@ -172,16 +160,12 @@ export const getExportSummaryLabels = (
 	params: ExportParams,
 	buttons?: Button[],
 	filterableBlocks: FilterableBlock[] = []
-): string[] => {
-	if (params.filters?.onlyDeleted) return [DELETED_REVIEWS_EXPORT_NOTICE];
-
-	return [
-		`Période : ${getExportPeriodLabel(params)}`,
-		...(getExportFiltersLabel(
-			params,
-			true,
-			buttons,
-			filterableBlocks
-		) as string[])
-	];
-};
+): string[] => [
+	`Période : ${getExportPeriodLabel(params)}`,
+	...(getExportFiltersLabel(
+		params,
+		true,
+		buttons,
+		filterableBlocks
+	) as string[])
+];

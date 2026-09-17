@@ -155,7 +155,7 @@ export async function generateXlsStream(
 	}
 
 	if (!currentSheet) {
-		currentSheet = workbook.addWorksheet(String(new Date().getFullYear()));
+		currentSheet = workbook.addWorksheet('Aucune réponse');
 		setupSheet(currentSheet, columns);
 	}
 

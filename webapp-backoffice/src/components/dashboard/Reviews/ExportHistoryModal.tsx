@@ -1,9 +1,11 @@
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
+	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportFiltersLabel,
 	getExportPeriodLabel,
 	getFilterableBlocks,
+	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { useExportDownload } from '@/src/hooks/useExportDownload';
@@ -44,6 +46,15 @@ const ExportHistoryModal = ({ modal, exports, buttons, form }: Props) => {
 	const exportsWithLabels: ExportWithLabels[] = useMemo(() => {
 		return exports.map(record => {
 			const parsedParams = parseExportParams(record.params);
+
+			if (isDeletedReviewsExport(parsedParams)) {
+				return {
+					...record,
+					periodLabel: 'Depuis le début',
+					filtersLabel: 'Réponses supprimées'
+				};
+			}
+
 			const periodLabel = getExportPeriodLabel({
 				...parsedParams,
 				startDate: parsedParams.startDate,

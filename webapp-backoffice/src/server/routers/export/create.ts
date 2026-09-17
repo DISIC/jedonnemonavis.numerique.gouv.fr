@@ -2,7 +2,8 @@ import { TypeExportSchema } from '@/prisma/generated/zod';
 import { exportQueue } from '@/src/lib/queue';
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import { sanitizeExportParams } from '@/src/utils/export';
+import { TRPCError } from '@trpc/server';
+import { isDeletedReviewsExport, parseExportParams } from '@/src/utils/export';
 import { checkRightToProceed } from '../product';
 
 export const createExportInputSchema = z.object({
@@ -27,15 +28,18 @@ export const createExportMutation = async ({
 		authorizeCarrierUser: true
 	});
 
+	if (
+		isDeletedReviewsExport(parseExportParams(input.params)) &&
+		!ctx.session!.user.role.includes('admin')
+	) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Only global admins can export deleted reviews'
+		});
+	}
+
 	const exportCsv = await ctx.prisma.export.create({
-		data: {
-			...input,
-			params: sanitizeExportParams(
-				input.params,
-				ctx.session!.user.role.includes('admin')
-			),
-			status: 'idle'
-		}
+		data: { ...input, status: 'idle' }
 	});
 
 	await exportQueue.add(

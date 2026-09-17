@@ -62,11 +62,11 @@ type AnswerRow = {
 
 function buildReviewRow(
 	review: { id: number; created_at: Date },
-	answers: AnswerRow[],
+	answers: Omit<AnswerRow, 'review_id'>[],
 	formName: string,
 	buttonName: string
 ): ReviewRow {
-	const answerById = new Map<number, AnswerRow>();
+	const answerById = new Map<number, Omit<AnswerRow, 'review_id'>>();
 	for (const a of answers) answerById.set(a.id, a);
 
 	const answerAccumulator = new Map<string, string[]>();
@@ -123,20 +123,9 @@ function buildArchivedReviewRow(
 	formName: string,
 	buttonTitles: Map<number, string>
 ): ReviewRow {
-	const answers: AnswerRow[] = parseArchivedAnswers(archived.answers).map(
-		answer => ({
-			review_id: archived.original_review_id,
-			id: answer.id,
-			parent_answer_id: answer.parent_answer_id ?? null,
-			field_code: answer.field_code,
-			field_label: answer.field_label,
-			answer_text: answer.answer_text
-		})
-	);
-
 	return buildReviewRow(
 		{ id: archived.original_review_id, created_at: archived.review_created_at },
-		answers,
+		parseArchivedAnswers(archived.answers),
 		formName,
 		archived.button_id ? buttonTitles.get(archived.button_id) ?? '' : ''
 	);

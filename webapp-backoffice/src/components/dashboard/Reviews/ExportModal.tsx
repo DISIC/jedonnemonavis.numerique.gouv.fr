@@ -4,6 +4,7 @@ import {
 	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportSummaryLabels,
 	getFilterableBlocks,
+	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
@@ -59,7 +60,7 @@ const ExportModal = (props: Props) => {
 
 	const parsedParams = React.useMemo(() => parseExportParams(params), [params]);
 
-	const onlyDeleted = !!parsedParams.filters?.onlyDeleted;
+	const onlyDeleted = isDeletedReviewsExport(parsedParams);
 
 	const validateExport = () => {
 		createExport.mutate({
