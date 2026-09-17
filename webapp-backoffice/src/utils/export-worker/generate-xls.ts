@@ -154,6 +154,11 @@ export async function generateXlsStream(
 		currentSheetRowCount++;
 	}
 
-	if (currentSheet) currentSheet.commit();
+	if (!currentSheet) {
+		currentSheet = workbook.addWorksheet(String(new Date().getFullYear()));
+		setupSheet(currentSheet, columns);
+	}
+
+	currentSheet.commit();
 	await workbook.commit();
 }
