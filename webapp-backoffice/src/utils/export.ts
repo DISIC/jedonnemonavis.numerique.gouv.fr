@@ -3,6 +3,9 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { Button } from '@prisma/client';
 import { capitalizeFirstLetter, formatDateToFrenchString } from './tools';
 
+export const DELETED_REVIEWS_EXPORT_NOTICE =
+	'Les filtres ne sont pas pris en compte : toutes les réponses supprimées de ce formulaire seront exportées.';
+
 export const EXPORT_LINK_TTL_SECONDS = 604800;
 
 /**
@@ -88,6 +91,21 @@ export const parseExportParams = (rawParams?: string | null): ExportParams => {
 	}
 };
 
+export const sanitizeExportParams = (
+	rawParams: string,
+	isGlobalAdmin: boolean
+): string => {
+	if (isGlobalAdmin || !rawParams) return rawParams;
+
+	const parsed = parseExportParams(rawParams);
+	if (!parsed.filters?.onlyDeleted) return rawParams;
+
+	return JSON.stringify({
+		...parsed,
+		filters: { ...parsed.filters, onlyDeleted: false }
+	});
+};
+
 const formatDateIfPresent = (value?: string | null): string => {
 	if (!value) return '';
 	try {
@@ -154,12 +172,16 @@ export const getExportSummaryLabels = (
 	params: ExportParams,
 	buttons?: Button[],
 	filterableBlocks: FilterableBlock[] = []
-): string[] => [
-	`Période : ${getExportPeriodLabel(params)}`,
-	...(getExportFiltersLabel(
-		params,
-		true,
-		buttons,
-		filterableBlocks
-	) as string[])
-];
+): string[] => {
+	if (params.filters?.onlyDeleted) return [DELETED_REVIEWS_EXPORT_NOTICE];
+
+	return [
+		`Période : ${getExportPeriodLabel(params)}`,
+		...(getExportFiltersLabel(
+			params,
+			true,
+			buttons,
+			filterableBlocks
+		) as string[])
+	];
+};

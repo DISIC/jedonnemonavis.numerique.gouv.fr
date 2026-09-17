@@ -628,7 +628,7 @@ const ReviewsTab = (props: Props) => {
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && (
+				{(nbReviews > 0 || canBrowseDeleted) && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							form={form}
@@ -637,7 +637,10 @@ const ReviewsTab = (props: Props) => {
 							mustHaveVerbatims={true}
 							search={search}
 							button_id={buttonId}
-							filters={filters.productReviews.filters}
+							filters={{
+								...filters.productReviews.filters,
+								onlyDeleted: showDeleted
+							}}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
 							onExportCreated={exportId => {
