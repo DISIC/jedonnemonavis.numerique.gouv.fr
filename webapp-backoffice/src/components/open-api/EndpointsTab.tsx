@@ -288,21 +288,6 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 								</tr>
 								<tr>
 									<td>
-										<code>product_id</code>
-									</td>
-									<td>
-										ID du service numérique porteur du formulaire
-										<br />
-										<span className={fr.cx('fr-hint-text')}>
-											Facultatif, sert uniquement de garde-fou : une valeur
-											incohérente avec <code>form_id</code> renvoie une erreur
-										</span>
-									</td>
-									<td>number</td>
-									<td>Non</td>
-								</tr>
-								<tr>
-									<td>
 										<code>start_date</code>
 									</td>
 									<td>Date de début au format YYYY-MM-DD</td>
@@ -315,6 +300,22 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 									</td>
 									<td>Date de fin au format YYYY-MM-DD</td>
 									<td>string</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>has_verbatim</code>
+									</td>
+									<td>
+										Restreindre aux avis avec ou sans verbatim
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Omis: tous les avis | <code>true</code>: seulement ceux qui
+											portent un verbatim | <code>false</code>: seulement ceux
+											qui n&apos;en portent pas
+										</span>
+									</td>
+									<td>boolean</td>
 									<td>Non</td>
 								</tr>
 								<tr>

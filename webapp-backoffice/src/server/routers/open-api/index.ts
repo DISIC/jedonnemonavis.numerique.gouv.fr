@@ -188,7 +188,7 @@ const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information). Le paramètre has_verbatim restreint la liste : omis, tous les avis sont renvoyés ; à true, seuls ceux qui portent un verbatim ; à false, seuls ceux qui n'en portent pas. Un avis compte comme porteur de verbatim dès qu'un champ verbatim a été soumis, même vide — ce n'est pas une garantie que du texte a été saisi.",
+					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information). Le paramètre has_verbatim restreint aux avis avec ou sans verbatim.",
 				example: {
 					request: {
 						form_id: 1,
