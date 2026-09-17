@@ -22,10 +22,6 @@ export const reviewsListInputSchema = z
 		end_date: dateString.optional(),
 		cursor: z.string().optional(),
 		limit: z.number().int().min(1).max(100).default(50),
-		// Tri-état : absent = tous les avis, true = seulement ceux qui portent un
-		// verbatim, false = seulement ceux qui n'en portent pas. Le preprocess est
-		// indispensable : en query string, `?has_verbatim=false` arrive sous forme
-		// de chaîne, que `z.boolean()` refuserait et que JS jugerait vraie.
 		has_verbatim: z
 			.preprocess(
 				v => (v === 'false' ? false : v === 'true' ? true : v),
@@ -66,11 +62,6 @@ const answerSchema = z.object({
 		.nullable()
 });
 
-// `data[]` ne porte que ce qui varie d'un avis à l'autre. Le service et le
-// gabarit du formulaire sont constants sur toute la réponse — le `where` épingle
-// `product_id` et le slug vient du formulaire interrogé — donc ils vivent dans
-// `metadata`. `form_id`, lui, reste en ligne : sur un formulaire legacy les avis
-// migrés portent les pseudo-identifiants 1 ou 2, la valeur varie réellement.
 const reviewSchema = z.object({
 	id: z.number().int(),
 	created_at: z.string(),
@@ -185,10 +176,6 @@ export const reviewsListQuery = async ({
 			: form_id
 	};
 
-	// On filtre sur la colonne dénormalisée, pas sur une jointure vers Answer :
-	// le champ `has_verbatim` renvoyé dans chaque avis est ainsi toujours celui
-	// qui a servi de critère, et le partenaire peut refiltrer côté client sans
-	// obtenir un résultat différent du nôtre.
 	if (has_verbatim !== undefined) {
 		where.has_verbatim = has_verbatim;
 	}

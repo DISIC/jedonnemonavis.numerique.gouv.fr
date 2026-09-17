@@ -103,8 +103,6 @@ describe('OpenAPI GET /avis', () => {
 				res.body.data.forEach((r: any) => {
 					expect(r.answers).to.exist;
 					expect(r.answers.length).to.be.greaterThan(0);
-					// Ces deux champs ont migré vers metadata : ils sont constants
-					// sur toute la réponse et n'ont rien à faire dans chaque ligne.
 					expect(r.form_template_slug).to.eq(undefined);
 					expect(r.product_id).to.eq(undefined);
 					expect(r.xwiki_id).to.eq(undefined);
@@ -136,7 +134,6 @@ describe('OpenAPI GET /avis', () => {
 				api_scope: 'product'
 			}).then(c => {
 				ctx = c;
-				// Les fixtures « bug » portent une réponse verbatim, les « root » non.
 				cy.task('db:seedReviews', [
 					makeReview(ctx, 0, 'bug'),
 					makeReview(ctx, -1, 'root'),
@@ -352,8 +349,6 @@ describe('OpenAPI GET /avis', () => {
 				form_id: owner.form_id,
 				product_id: owner.product_ids[0] + 999_999
 			}).then(res => {
-				// Le paramètre n'existe plus : le service est déduit du formulaire,
-				// donc une valeur incohérente est écartée plutôt que rejetée.
 				expect(res.status).to.eq(200);
 				expect(res.body.metadata.product_id).to.eq(owner.product_ids[0]);
 			});
