@@ -5,11 +5,7 @@ import {
 	getDiffDaysBetweenTwoDates
 } from '@/src/utils/tools';
 import { z } from 'zod';
-import {
-	checkAndGetForm,
-	checkAndGetProduct,
-	queryCountByFieldCode
-} from './utils';
+import { checkAndGetFormForProduct, queryCountByFieldCode } from './utils';
 
 export const countByFieldCodePerMonthInputSchema = z.object({
 	field_code: z.string(),
@@ -30,8 +26,7 @@ export const countByFieldCodePerMonthQuery = async ({
 	const { field_code, product_id, form_id, button_id, start_date, end_date } =
 		input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 
 	// Comme `countByFieldCode`, ce endpoint n'expose que des `doc_count` (plus
 	// une moyenne numérique pour `comprehension`) : pas de valeur de réponse en
