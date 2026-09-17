@@ -16,8 +16,10 @@ import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
+	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportSummaryLabels,
 	getFilterableBlocks,
+	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { useExportDownload } from '@/src/hooks/useExportDownload';
@@ -278,6 +280,15 @@ const ReviewsTab = (props: Props) => {
 	const currentExport =
 		userExportInProgress || exports?.data.find(e => e.id === currentExportId);
 
+	const currentExportNotice = useMemo(
+		() =>
+			currentExport &&
+			isDeletedReviewsExport(parseExportParams(currentExport.params))
+				? DELETED_REVIEWS_EXPORT_NOTICE
+				: undefined,
+		[currentExport]
+	);
+
 	const currentExportAlert = useMemo((): {
 		severity: AlertProps.Severity;
 		title: NonNullable<ReactNode>;
@@ -292,9 +303,14 @@ const ReviewsTab = (props: Props) => {
 		}
 
 		const parsedParams = parseExportParams(currentExport.params);
-		const finalFilters = currentExport.params
-			? getExportSummaryLabels(parsedParams, buttons, getFilterableBlocks(form))
-			: undefined;
+		const finalFilters =
+			currentExport.params && !isDeletedReviewsExport(parsedParams)
+				? getExportSummaryLabels(
+						parsedParams,
+						buttons,
+						getFilterableBlocks(form)
+				  )
+				: undefined;
 
 		switch (currentExport.status) {
 			case 'idle':
@@ -628,7 +644,7 @@ const ReviewsTab = (props: Props) => {
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && (
+				{(nbReviews > 0 || showDeleted) && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							form={form}
@@ -637,7 +653,10 @@ const ReviewsTab = (props: Props) => {
 							mustHaveVerbatims={true}
 							search={search}
 							button_id={buttonId}
-							filters={filters.productReviews.filters}
+							filters={{
+								...filters.productReviews.filters,
+								onlyDeleted: showDeleted
+							}}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
 							onExportCreated={exportId => {
@@ -675,7 +694,12 @@ const ReviewsTab = (props: Props) => {
 							)}
 						>
 							{currentExport.isDownloadable && (
-								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
+								<p
+									className={fr.cx(
+										(currentExportAlert.filters || currentExportNotice) &&
+											'fr-mb-4v'
+									)}
+								>
 									Téléchargez l'export :{' '}
 									<button
 										type="button"
@@ -691,6 +715,7 @@ const ReviewsTab = (props: Props) => {
 									</button>
 								</p>
 							)}
+							{currentExportNotice && <p>{currentExportNotice}</p>}
 							{currentExportAlert.filters && (
 								<>
 									<strong>Filtres sélectionnés:</strong>

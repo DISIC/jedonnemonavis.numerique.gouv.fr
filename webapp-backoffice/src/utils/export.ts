@@ -3,6 +3,9 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { Button } from '@prisma/client';
 import { capitalizeFirstLetter, formatDateToFrenchString } from './tools';
 
+export const DELETED_REVIEWS_EXPORT_NOTICE =
+	'Les filtres ne sont pas pris en compte : toutes les réponses supprimées de ce formulaire seront exportées.';
+
 export const EXPORT_LINK_TTL_SECONDS = 604800;
 
 /**
@@ -87,6 +90,9 @@ export const parseExportParams = (rawParams?: string | null): ExportParams => {
 		return {};
 	}
 };
+
+export const isDeletedReviewsExport = (params: ExportParams): boolean =>
+	!!params.filters?.onlyDeleted;
 
 const formatDateIfPresent = (value?: string | null): string => {
 	if (!value) return '';
