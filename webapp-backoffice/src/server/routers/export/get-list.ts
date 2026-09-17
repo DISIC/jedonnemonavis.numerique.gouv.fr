@@ -37,10 +37,29 @@ export const getExportListQuery = async ({
 		},
 		orderBy: { created_at: 'desc' },
 		take: 10,
-		include: {
+		// `link` est une URL pré-signée valable 7 jours : elle ne sort pas d'ici,
+		// le téléchargement passe par export.getDownloadLink.
+		select: {
+			id: true,
+			created_at: true,
+			user_id: true,
+			product_id: true,
+			form_id: true,
+			params: true,
+			status: true,
+			type: true,
+			startDate: true,
+			endDate: true,
+			progress: true,
+			link: true,
 			user: { select: { firstName: true, lastName: true, email: true } }
 		}
 	});
 
-	return { data: exports };
+	return {
+		data: exports.map(({ link, ...rest }) => ({
+			...rest,
+			isDownloadable: !!link
+		}))
+	};
 };

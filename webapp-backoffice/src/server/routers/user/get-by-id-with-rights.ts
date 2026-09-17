@@ -1,5 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
+import { omitPassword } from './utils';
 
 export const getUserByIdWithRightsInputSchema = z.object({ id: z.number() });
 
@@ -36,5 +37,5 @@ export const getUserByIdWithRightsQuery = async ({
 		}
 	});
 
-	return { data: user };
+	return { data: user ? omitPassword(user) : null };
 };

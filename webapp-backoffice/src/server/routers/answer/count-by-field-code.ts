@@ -27,6 +27,11 @@ export const countByFieldCodeQuery = async ({
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
 
+	// Volontairement sans restriction sur `field_code` : ce endpoint ne renvoie
+	// qu'un compteur, et `field_code` y est une *valeur* de terme ES, pas un nom
+	// de champ — aucune réponse d'usager n'en sort. Il est appelé avec `verbatim`
+	// pour la tuile « Nombre de verbatims ». Seules les agrégations qui exposent
+	// les valeurs brutes sont restreintes, via `assertAggregatableFieldCode`.
 	const data = await ctx.elkClient.count({
 		index: 'jdma-answers',
 		query: queryCountByFieldCode({

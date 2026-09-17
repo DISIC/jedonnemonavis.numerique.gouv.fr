@@ -5,7 +5,8 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
-import { User, UserRole } from '@prisma/client';
+import { UserWithoutPassword } from '@/src/types/prismaTypesExtended';
+import { UserRole } from '@prisma/client';
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
@@ -14,7 +15,7 @@ interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
 	refetchUsers: () => void;
-	user?: User;
+	user?: UserWithoutPassword;
 }
 
 type FormValues = {

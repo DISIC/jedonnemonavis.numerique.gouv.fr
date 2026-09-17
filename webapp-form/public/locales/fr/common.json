@@ -298,7 +298,6 @@
 		"home_link_title": "Je donne mon avis",
 		"email_example_hint": "Exemple : nom@domaine.fr",
 		"invalid_email": "Veuillez saisir une adresse électronique valide.",
-		"optional": "(optionnel)",
 		"select_language": "Sélectionner une langue",
 		"skip_content": "Contenu",
 		"skip_footer": "Pied de page",
@@ -469,11 +468,6 @@
 			"title": "Service",
 			"c1": "Le suivi éditorial et graphique est assuré par la DINUM.",
 			"c2": "Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien (y compris profond) vers les informations diffusées sur le site."
-		},
-		"contact": {
-			"title": "Contact",
-			"c1": "L’adresse courriel de contact est la suivante : ",
-			"c2": "contact.jdma@design.numerique.gouv.fr"
 		}
 	},
 	"terms_of_use": {

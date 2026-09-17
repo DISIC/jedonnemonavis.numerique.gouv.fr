@@ -33,6 +33,9 @@ export const countByFieldCodePerMonthQuery = async ({
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
 
+	// Comme `countByFieldCode`, ce endpoint n'expose que des `doc_count` (plus
+	// une moyenne numérique pour `comprehension`) : pas de valeur de réponse en
+	// clé de bucket, donc pas de restriction sur `field_code`.
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
 	const data = await ctx.elkClient.search({

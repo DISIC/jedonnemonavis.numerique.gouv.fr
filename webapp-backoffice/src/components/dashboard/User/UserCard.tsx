@@ -1,14 +1,14 @@
 import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/users';
+import { UserWithoutPassword } from '@/src/types/prismaTypesExtended';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
-	user: User;
+	user: UserWithoutPassword;
 	onButtonClick: ({ type, user }: OnButtonClickUserParams) => void;
 };
 

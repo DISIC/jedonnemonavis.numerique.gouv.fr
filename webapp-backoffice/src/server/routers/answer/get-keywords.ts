@@ -2,6 +2,7 @@ import type { Context } from '@/src/server/trpc';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import { excludeKeywords } from '../../../utils/keywords';
+import { assertAggregatableFieldCode } from './field-codes';
 import { checkAndGetForm, checkAndGetProduct } from './utils';
 
 export const getKeywordsInputSchema = z.object({
@@ -37,6 +38,16 @@ export const getKeywordsQuery = async ({
 
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
+
+	// `field.field_code` sert de nom de champ ES dans la requête ci-dessous :
+	// le restreindre aux questions à choix fermé évite de cibler un champ libre.
+	for (const field of fields ?? []) {
+		await assertAggregatableFieldCode({
+			prisma: ctx.prisma,
+			form,
+			field_code: field.field_code
+		});
+	}
 
 	const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
 

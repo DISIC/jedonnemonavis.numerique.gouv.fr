@@ -171,17 +171,6 @@ export const LegalNotice: ContentStructure = {
 			{ key: 'legal_notice.service.c1' },
 			{ key: 'legal_notice.service.c2' }
 		]
-	},
-	contact: {
-		titleKey: 'legal_notice.contact.title',
-		content: [
-			{ key: 'legal_notice.contact.c1' },
-			{
-				key: 'legal_notice.contact.c2',
-				type: 'mailto',
-				href: 'mailto:contact.jdma@design.numerique.gouv.fr'
-			}
-		]
 	}
 };
 

@@ -1,5 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 export const countReviewsInputSchema = z.object({
@@ -52,11 +53,21 @@ export const countReviewsQuery = async ({
 }) => {
 	const { form_id } = input;
 
-	const form = await ctx.prisma.form.findUnique({
-		where: {
-			id: form_id
-		}
-	});
+	const form = form_id
+		? await ctx.prisma.form.findUnique({
+				where: {
+					id: form_id
+				},
+				include: { product: { select: { isPublic: true } } }
+		  })
+		: null;
+
+	if (!ctx.session?.user && !form?.product.isPublic) {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'This product is not public'
+		});
+	}
 
 	const { where } = formatWhereAndOrder(input, !!form?.legacy);
 

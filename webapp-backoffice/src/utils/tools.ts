@@ -42,10 +42,20 @@ export function isValidEmail(email: string): boolean {
 export function generateRandomString(length: number = 8): string {
 	const characters =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	// Les valeurs à partir de ce seuil sont rejetées : sans cela, les premiers
+	// caractères de l'alphabet seraient légèrement plus probables (biais modulo).
+	const unbiasedLimit = 256 - (256 % characters.length);
+	const buffer = new Uint8Array(length);
 	let otp = '';
-	for (let i = 0; i < length; i++) {
-		otp += characters.charAt(Math.floor(Math.random() * characters.length));
+
+	while (otp.length < length) {
+		globalThis.crypto.getRandomValues(buffer);
+		for (let i = 0; i < buffer.length && otp.length < length; i++) {
+			if (buffer[i] >= unbiasedLimit) continue;
+			otp += characters.charAt(buffer[i] % characters.length);
+		}
 	}
+
 	return otp;
 }
 
@@ -118,6 +128,43 @@ export function parseLocalDate(isoStr: string): Date | null {
 	if (!isValidDate(isoStr)) return null;
 	const [y, mo, d] = isoStr.split('-').map(Number);
 	return new Date(y, mo - 1, d);
+}
+
+export function startOfLocalDay(date: Date): Date {
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export type DateRangeErrors = { startDate?: string; endDate?: string };
+
+export const INVALID_DATE_ERROR = 'Date invalide';
+
+export function getDateRangeErrors(
+	start: Date | null,
+	end: Date | null,
+	today: Date
+): DateRangeErrors {
+	const errors: DateRangeErrors = {};
+
+	if (start && !isValidDate(dateToLocalISO(start))) {
+		errors.startDate = INVALID_DATE_ERROR;
+	}
+	if (end && !isValidDate(dateToLocalISO(end))) {
+		errors.endDate = INVALID_DATE_ERROR;
+	}
+	if (!errors.startDate && start && start > today) {
+		errors.startDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.endDate && end && end > today) {
+		errors.endDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.startDate && !errors.endDate && start && end && start > end) {
+		errors.startDate = 'La date de début doit précéder la date de fin';
+	}
+	if (!errors.startDate && !start && end) {
+		errors.startDate = 'Date de début requise';
+	}
+
+	return errors;
 }
 
 export function formatFullFrenchDateTime(date: string | Date): string {
@@ -492,7 +539,11 @@ export const handleActionTypeDisplay = (
 ) => {
 	if (!metadata) return '';
 
-	const metadataTyped = metadata as { json: { [key: string]: any } };
+	// Défensif : certains events (ex. anciens events DN) peuvent avoir un metadata
+	// « à plat » sans clé `json`. On évite alors que l'accès `metadata.json.x` ne fasse
+	// planter tout l'historique — on retombe sur un objet vide.
+	const rawMetadata = metadata as { json?: { [key: string]: any } };
+	const metadataTyped = { json: rawMetadata.json ?? {} };
 	const e = escapeHtmlValue;
 	const userEmail = () =>
 		e(

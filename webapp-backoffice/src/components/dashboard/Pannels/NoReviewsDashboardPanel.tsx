@@ -22,14 +22,16 @@ const NoReviewsDashboardPanel = () => {
 					Vous n’avez pas encore reçu d’avis de la part de vos utilisateurs.
 				</p>
 				<p className={fr.cx('fr-mb-3v')}>
-					En attendant, vous pouvez découvrir nos conseils pour bien placer le
-					bouton de récolte d’avis :
+					En attendant, vous pouvez découvrir nos conseils pour bien placer
+					votre formulaire sur votre site :
 				</p>
 				<a
-					href="https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff"
+					title="Comment définir le meilleur emplacement pour intégrer un formulaire sur son site ?"
+					href="https://docs.numerique.gouv.fr/docs/d9aab8c6-f70c-4cd7-9d07-0cf27b15cc17"
 					target="_blank"
 				>
-					Améliorer le placement de votre bouton
+					Comment définir le meilleur emplacement pour intégrer un formulaire
+					sur son site ?
 				</a>
 			</div>
 		</div>

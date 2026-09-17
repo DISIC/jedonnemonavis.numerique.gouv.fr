@@ -5,6 +5,7 @@ import { formatDateToFrenchString } from '@/src/utils/tools';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
 import { z } from 'zod';
+import { checkRightToProceed } from '../product';
 
 export const exportReviewDataInputSchema = z.object({
 	product_id: z.number().optional(),
@@ -42,6 +43,14 @@ export const exportReviewDataMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof exportReviewDataInputSchema>;
 }) => {
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id: input.product_id,
+		form_id: input.form_id,
+		authorizeCarrierUser: true
+	});
+
 	const OpinionLabels: { code: string; label: string }[] = [
 		{ code: 'satisfaction', label: 'Satisfaction démarche' },
 		{ code: 'easy', label: 'Facilité démarche' },

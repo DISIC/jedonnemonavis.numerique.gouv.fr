@@ -63,14 +63,19 @@ const ProductLayout = ({
 				href: `/administration/dashboard/product/${id}/infos`
 			}
 		},
-		{
-			text: ownRight && ownRight === 'carrier_admin' ? 'Clés API' : 'Clés API',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/api_keys`
-			}
-		},
+		...(ownRight === 'carrier_admin'
+			? [
+					{
+						text: 'Clés API',
+						isActive:
+							router.pathname ===
+							`/administration/dashboard/product/[id]/api_keys`,
+						linkProps: {
+							href: `/administration/dashboard/product/${id}/api_keys`
+						}
+					}
+			  ]
+			: []),
 		{
 			text: "Historique d'activité",
 			isActive:

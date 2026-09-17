@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import { dbTasks } from './cypress/plugins/db-tasks';
 
 export default defineConfig({
 	e2e: {
@@ -28,7 +29,8 @@ export default defineConfig({
 					console.table(message);
 
 					return null;
-				}
+				},
+				...dbTasks
 			});
 		},
 

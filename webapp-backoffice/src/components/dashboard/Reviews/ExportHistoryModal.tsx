@@ -1,4 +1,3 @@
-import { ExportWithPartialRelations } from '@/prisma/generated/zod';
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
@@ -7,31 +6,35 @@ import {
 	getFilterableBlocks,
 	parseExportParams
 } from '@/src/utils/export';
+import { useExportDownload } from '@/src/hooks/useExportDownload';
+import type { RouterOutputs } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Table from '@codegouvfr/react-dsfr/Table';
 import { Button as ButtonModel } from '@prisma/client';
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	modal: CustomModalProps;
-	exports: ExportWithPartialRelations[];
+	exports: ExportListItem[];
 	buttons: ButtonModel[];
 	form: FormWithElements;
 }
 
+type ExportListItem = RouterOutputs['export']['getList']['data'][number];
+
 type SortColumn = 'date' | 'user' | 'period' | null;
 type SortDirection = 'asc' | 'desc';
-type ExportWithLabels = ExportWithPartialRelations & {
+type ExportWithLabels = ExportListItem & {
 	periodLabel: string;
 	filtersLabel: string;
 };
 
 const ExportHistoryModal = ({ modal, exports, buttons, form }: Props) => {
 	const { classes, cx } = useStyles();
+	const { downloadExport, isDownloading } = useExportDownload();
 
 	const [sortColumn, setSortColumn] = useState<SortColumn>(null);
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -191,19 +194,20 @@ const ExportHistoryModal = ({ modal, exports, buttons, form }: Props) => {
 							record.periodLabel,
 							record.filtersLabel || '-',
 							<div className={classes.linkCell}>
-								{record.link ? (
-									<Link
+								{record.isDownloadable ? (
+									<button
 										key={record.id}
-										href={record.link}
+										type="button"
+										onClick={() => downloadExport(record.id)}
+										disabled={isDownloading}
 										className={fr.cx('fr-link', 'fr-link--sm')}
-										rel="noopener noreferrer"
 									>
 										Télécharger&nbsp;
 										<i
 											className={fr.cx('fr-icon-download-line', 'fr-icon--sm')}
 											aria-hidden="true"
 										/>
-									</Link>
+									</button>
 								) : (
 									<Badge small severity="warning" noIcon>
 										Bientôt disponible

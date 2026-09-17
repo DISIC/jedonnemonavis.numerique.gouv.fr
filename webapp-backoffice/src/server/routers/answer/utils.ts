@@ -1,8 +1,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PrismaClient } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
 import { Session } from 'next-auth';
 import { Buckets, ElkAnswer, ElkAnswerDefaults } from '../../../types/custom';
+import { checkRightToProceed } from '../product/utils';
 
 export const checkAndGetProduct = async ({
 	ctx,
@@ -18,8 +20,23 @@ export const checkAndGetProduct = async ({
 	});
 
 	if (!product) throw new Error('Product not found');
-	if (!product.isPublic && !ctx.session?.user)
-		throw new Error('Product is not public');
+
+	// Un service non public n'est lisible que par les personnes qui y ont des
+	// droits : une session quelconque ne suffit pas.
+	if (!product.isPublic) {
+		if (!ctx.session?.user)
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'This product is not public'
+			});
+
+		await checkRightToProceed({
+			prisma: ctx.prisma,
+			session: ctx.session,
+			product_id,
+			authorizeCarrierUser: true
+		});
+	}
 
 	return product;
 };

@@ -8,3 +8,5 @@ import './bo/reviewCheck.cy.ts';
 import './bo/account.cy.ts';
 import './bo/users.cy.ts';
 import './bo/logs.cy.ts';
+import './api/reviews-list.cy.ts';
+import './api/api-key-scope.cy.ts';

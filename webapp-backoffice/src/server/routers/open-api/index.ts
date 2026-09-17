@@ -30,6 +30,26 @@ import {
 	triggerSendNotifMailsOutputSchema
 } from './trigger-send-notif-mails';
 
+import {
+	provisionServiceMutation,
+	provisionServiceInputSchema,
+	provisionServiceOutputSchema
+} from './demarches-numeriques/provision-service';
+
+import {
+	addAdminMutation,
+	addAdminInputSchema,
+	addAdminOutputSchema
+} from './demarches-numeriques/add-admin';
+
+import {
+	reviewsListQuery,
+	reviewsListInputSchema,
+	reviewsListOutputSchema
+} from './reviews-list';
+
+import { isAvisApiEnabled } from './utils';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -114,7 +134,78 @@ const openAPIRouter = router({
 		})
 		.input(triggerSendNotifMailsInputSchema)
 		.output(triggerSendNotifMailsOutputSchema)
-		.mutation(triggerSendNotifMailsMutation)
+		.mutation(triggerSendNotifMailsMutation),
+
+	provisionDemarcheNumerique: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'POST',
+				path: '/demarches-numeriques/services',
+				protect: true,
+				enabled: true,
+				summary:
+					'Provisionne un service JDMA (service + formulaire observatoire + lien) depuis une démarche Démarches Numériques. Un même external_id ne crée pas de doublon : un nouvel appel renvoie le service déjà créé.',
+				example: {
+					request: {
+						external_id: 'dn-abc-123',
+						demarche_name: 'Demande de subvention culture 2026',
+						organisation_name: 'Ministère de la Culture',
+						creator_email: 'createur@culture.gouv.fr',
+						admin_emails: ['agent@culture.gouv.fr'],
+						integration_type: 'button'
+					}
+				}
+			}
+		})
+		.input(provisionServiceInputSchema)
+		.output(provisionServiceOutputSchema)
+		.mutation(provisionServiceMutation),
+
+	addDemarcheNumeriqueAdmins: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'POST',
+				path: '/demarches-numeriques/services/{external_id}/admins',
+				protect: true,
+				enabled: true,
+				summary:
+					'Ajoute des admins (carrier_admin) à un service DN existant, identifié par son external_id.',
+				example: {
+					request: {
+						external_id: 'dn-abc-123',
+						admin_emails: ['nouvel-agent@culture.gouv.fr']
+					}
+				}
+			}
+		})
+		.input(addAdminInputSchema)
+		.output(addAdminOutputSchema)
+		.mutation(addAdminMutation),
+
+	reviewsList: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'GET',
+				path: '/avis',
+				protect: true,
+				// Piloté par OPEN_API_AVIS_ENABLED, fermé par défaut. À false, la route
+				// REST n'est pas montée et l'endpoint n'apparaît pas dans le document
+				// OpenAPI publié.
+				enabled: isAvisApiEnabled(),
+				summary:
+					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information). Le paramètre has_verbatim restreint aux avis avec ou sans verbatim.",
+				example: {
+					request: {
+						form_id: 1,
+						limit: 50,
+						has_verbatim: true
+					}
+				}
+			}
+		})
+		.input(reviewsListInputSchema)
+		.output(reviewsListOutputSchema)
+		.query(reviewsListQuery)
 });
 
 export default openAPIRouter;

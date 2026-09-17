@@ -2,6 +2,7 @@ import type { Context } from '@/src/server/trpc';
 import { AnswerIntention } from '@prisma/client';
 import { z } from 'zod';
 import { Buckets, ElkAnswer } from '../../../types/custom';
+import { assertAggregatableFieldCode } from './field-codes';
 import {
 	checkAndGetForm,
 	checkAndGetProduct,
@@ -30,6 +31,11 @@ export const getByFieldCodeQuery = async ({
 
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
+	await assertAggregatableFieldCode({
+		prisma: ctx.prisma,
+		form,
+		field_code: input.field_code
+	});
 
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: 'jdma-answers',

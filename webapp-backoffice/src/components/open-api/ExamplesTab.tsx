@@ -2,7 +2,11 @@ import React from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import CodeBlock from './CodeBlock';
 
-const ExamplesTab = () => {
+interface ExamplesTabProps {
+	hasPath: (path: string) => boolean;
+}
+
+const ExamplesTab = ({ hasPath }: ExamplesTabProps) => {
 	const now = new Date();
 	const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 	const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -49,6 +53,34 @@ const ExamplesTab = () => {
     "field_codes": ["satisfaction"]
   }'`}
 			</CodeBlock>
+
+			{hasPath('/avis') && (
+				<>
+					<h3 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-10v')}>
+						Récupérer les avis bruts d'un formulaire
+					</h3>
+					<CodeBlock language="bash">
+						{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/avis?form_id=42&limit=100" \\
+  -H "Authorization: Bearer VOTRE_CLE_API" \\
+  -H "Content-Type: application/json"`}
+					</CodeBlock>
+
+					<h3 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-10v')}>
+						Parcourir toutes les pages d'avis
+					</h3>
+					<CodeBlock language="bash">
+						{`# Première page : on note metadata.next_cursor
+curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/avis?form_id=42&limit=100" \\
+  -H "Authorization: Bearer VOTRE_CLE_API"
+
+# Page suivante : on repasse le curseur tel quel
+curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/avis?form_id=42&limit=100&cursor=LE_CURSEUR_RENVOYE" \\
+  -H "Authorization: Bearer VOTRE_CLE_API"
+
+# À répéter tant que metadata.has_more vaut true`}
+					</CodeBlock>
+				</>
+			)}
 
 			<h3 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-10v')}>
 				Exemple avec JavaScript/Fetch
