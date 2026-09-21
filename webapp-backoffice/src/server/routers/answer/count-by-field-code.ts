@@ -1,10 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import {
-	checkAndGetForm,
-	checkAndGetProduct,
-	queryCountByFieldCode
-} from './utils';
+import { checkAndGetFormForProduct, queryCountByFieldCode } from './utils';
 
 export const countByFieldCodeInputSchema = z.object({
 	field_code: z.string(),
@@ -24,8 +20,7 @@ export const countByFieldCodeQuery = async ({
 }) => {
 	const { product_id, form_id, button_id } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 
 	// Volontairement sans restriction sur `field_code` : ce endpoint ne renvoie
 	// qu'un compteur, et `field_code` y est une *valeur* de terme ES, pas un nom
