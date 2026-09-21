@@ -431,16 +431,32 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	async function* streamArchivedReviewRows(): AsyncGenerator<ReviewRow> {
 		const buttonTitles = new Map<number, string>();
-		let offset = 0;
 		let retrieved = 0;
+		// Keyset pagination on (review_created_at, id): chronological order is required
+		// by generateXlsStream's one-sheet-per-year logic, and OFFSET would re-scan every
+		// skipped row on each page.
+		let cursor: { review_created_at: Date; id: number } | null = null;
 
 		while (true) {
+			const pageWhere: Prisma.ArchivedReviewWhereInput = cursor
+				? {
+						...archivedWhere,
+						OR: [
+							{ review_created_at: { gt: cursor.review_created_at } },
+							{
+								review_created_at: cursor.review_created_at,
+								id: { gt: cursor.id }
+							}
+						]
+				  }
+				: archivedWhere;
+
 			const archived = await prisma.archivedReview.findMany({
-				where: archivedWhere,
-				orderBy: { archived_at: 'desc' },
-				skip: offset,
+				where: pageWhere,
+				orderBy: [{ review_created_at: 'asc' }, { id: 'asc' }],
 				take: PAGE_SIZE,
 				select: {
+					id: true,
 					original_review_id: true,
 					review_created_at: true,
 					button_id: true,
@@ -471,7 +487,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 			}
 
 			retrieved += archived.length;
-			offset += PAGE_SIZE;
+
+			const last = archived[archived.length - 1];
+			cursor = { review_created_at: last.review_created_at, id: last.id };
 
 			await reportStreamingProgress(retrieved);
 		}

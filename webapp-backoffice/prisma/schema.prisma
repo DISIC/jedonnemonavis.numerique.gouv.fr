@@ -577,6 +577,7 @@ model ArchivedReview {
   archived_at        DateTime @default(now())
 
   @@index([product_id, form_id, archived_at])
+  @@index([product_id, form_id, review_created_at, id])
 }
 
 model ReviewViewLog {
