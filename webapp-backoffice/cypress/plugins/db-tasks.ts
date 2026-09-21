@@ -305,7 +305,7 @@ export const dbTasks = {
 			data: { name: `EK-${suffix}`, acronym: `EK${suffix}` }
 		});
 		const product = await prisma.product.create({
-			data: { title: `PK-${suffix}`, entity_id: entity.id, isPublic: true }
+			data: { title: `PK-${suffix}`, entity_id: entity.id}
 		});
 
 		const [carrierUser, carrierAdmin, entityAdmin] = await Promise.all([
