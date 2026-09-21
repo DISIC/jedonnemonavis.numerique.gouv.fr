@@ -3,7 +3,6 @@ import { exportQueue } from '@/src/lib/queue';
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { isDeletedReviewsExport, parseExportParams } from '@/src/utils/export';
 import { checkRightToProceed } from '../product';
 
 export const createExportInputSchema = z.object({
@@ -11,7 +10,8 @@ export const createExportInputSchema = z.object({
 	params: z.string(),
 	product_id: z.number(),
 	form_id: z.number(),
-	type: TypeExportSchema
+	type: TypeExportSchema,
+	only_deleted_reviews: z.boolean().default(false)
 });
 
 export const createExportMutation = async ({
@@ -28,10 +28,7 @@ export const createExportMutation = async ({
 		authorizeCarrierUser: true
 	});
 
-	if (
-		isDeletedReviewsExport(parseExportParams(input.params)) &&
-		!ctx.session!.user.role.includes('admin')
-	) {
+	if (input.only_deleted_reviews && !ctx.session!.user.role.includes('admin')) {
 		throw new TRPCError({
 			code: 'FORBIDDEN',
 			message: 'Only global admins can export deleted reviews'

@@ -19,7 +19,6 @@ import {
 	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportSummaryLabels,
 	getFilterableBlocks,
-	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { useExportDownload } from '@/src/hooks/useExportDownload';
@@ -280,14 +279,9 @@ const ReviewsTab = (props: Props) => {
 	const currentExport =
 		userExportInProgress || exports?.data.find(e => e.id === currentExportId);
 
-	const currentExportNotice = useMemo(
-		() =>
-			currentExport &&
-			isDeletedReviewsExport(parseExportParams(currentExport.params))
-				? DELETED_REVIEWS_EXPORT_NOTICE
-				: undefined,
-		[currentExport]
-	);
+	const currentExportNotice = currentExport?.only_deleted_reviews
+		? DELETED_REVIEWS_EXPORT_NOTICE
+		: undefined;
 
 	const currentExportAlert = useMemo((): {
 		severity: AlertProps.Severity;
@@ -304,7 +298,7 @@ const ReviewsTab = (props: Props) => {
 
 		const parsedParams = parseExportParams(currentExport.params);
 		const finalFilters =
-			currentExport.params && !isDeletedReviewsExport(parsedParams)
+			currentExport.params && !currentExport.only_deleted_reviews
 				? getExportSummaryLabels(
 						parsedParams,
 						buttons,
@@ -653,10 +647,8 @@ const ReviewsTab = (props: Props) => {
 							mustHaveVerbatims={true}
 							search={search}
 							button_id={buttonId}
-							filters={{
-								...filters.productReviews.filters,
-								onlyDeleted: showDeleted
-							}}
+							filters={filters.productReviews.filters}
+							onlyDeleted={showDeleted}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
 							onExportCreated={exportId => {
@@ -669,7 +661,7 @@ const ReviewsTab = (props: Props) => {
 							buttons={buttons}
 						/>
 						<ExportHistory
-							exports={(exports?.data || []) as any}
+							exports={exports?.data || []}
 							buttons={buttons}
 							form={form}
 							isDisabled={isLoading || isLoadingExports}

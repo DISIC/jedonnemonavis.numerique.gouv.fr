@@ -275,7 +275,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		exportRecord.form?.legacy ?? false
 	);
 
-	const onlyDeleted = !!filterParams.filters?.onlyDeleted;
+	const onlyDeleted = exportRecord.only_deleted_reviews;
 
 	const archivedWhere: Prisma.ArchivedReviewWhereInput = {
 		product_id: exportRecord.product_id,

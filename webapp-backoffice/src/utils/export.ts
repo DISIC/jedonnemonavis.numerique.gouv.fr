@@ -91,9 +91,6 @@ export const parseExportParams = (rawParams?: string | null): ExportParams => {
 	}
 };
 
-export const isDeletedReviewsExport = (params: ExportParams): boolean =>
-	!!params.filters?.onlyDeleted;
-
 const formatDateIfPresent = (value?: string | null): string => {
 	if (!value) return '';
 	try {

@@ -4,7 +4,6 @@ import {
 	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportSummaryLabels,
 	getFilterableBlocks,
-	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
@@ -25,6 +24,7 @@ interface Props {
 		countAll: number;
 	};
 	params: string;
+	onlyDeleted: boolean;
 	onExportCreated: (exportId: number) => void;
 	hasExportsInProgress: boolean;
 	form: FormWithElements;
@@ -37,6 +37,7 @@ const ExportModal = (props: Props) => {
 		counts,
 		form,
 		params,
+		onlyDeleted,
 		onExportCreated,
 		hasExportsInProgress,
 		buttons
@@ -60,19 +61,14 @@ const ExportModal = (props: Props) => {
 
 	const parsedParams = React.useMemo(() => parseExportParams(params), [params]);
 
-	const onlyDeleted = isDeletedReviewsExport(parsedParams);
-
 	const validateExport = () => {
 		createExport.mutate({
 			user_id: parseInt(session?.user?.id as string),
-			params: onlyDeleted
-				? JSON.stringify({ filters: { onlyDeleted: true } })
-				: choice === 'filtered'
-				? params
-				: '',
+			params: choice === 'filtered' ? params : '',
 			product_id: form.product_id,
 			form_id: form.id,
-			type: format ?? 'csv'
+			type: format ?? 'csv',
+			only_deleted_reviews: onlyDeleted
 		});
 	};
 

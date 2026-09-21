@@ -5,7 +5,6 @@ import {
 	getExportFiltersLabel,
 	getExportPeriodLabel,
 	getFilterableBlocks,
-	isDeletedReviewsExport,
 	parseExportParams
 } from '@/src/utils/export';
 import { useExportDownload } from '@/src/hooks/useExportDownload';
@@ -47,7 +46,7 @@ const ExportHistoryModal = ({ modal, exports, buttons, form }: Props) => {
 		return exports.map(record => {
 			const parsedParams = parseExportParams(record.params);
 
-			if (isDeletedReviewsExport(parsedParams)) {
+			if (record.only_deleted_reviews) {
 				return {
 					...record,
 					periodLabel: 'Depuis le début',
