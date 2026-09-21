@@ -20,7 +20,11 @@ export const setTop250Mutation = async ({
 
 	const requestedForms = await ctx.prisma.form.findMany({
 		where: { id: { in: form_ids } },
-		select: { id: true, form_template: { select: { slug: true } } }
+		select: {
+			id: true,
+			isDeleted: true,
+			form_template: { select: { slug: true } }
+		}
 	});
 
 	const missingFormIds = form_ids.filter(
@@ -30,6 +34,16 @@ export const setTop250Mutation = async ({
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: `Les form_ids suivants n'existent pas en base : ${missingFormIds.join(
+				', '
+			)}`
+		});
+	}
+
+	const closedFormIds = requestedForms.filter(f => f.isDeleted).map(f => f.id);
+	if (closedFormIds.length > 0) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: `Les form_ids suivants sont des formulaires fermés : ${closedFormIds.join(
 				', '
 			)}`
 		});
