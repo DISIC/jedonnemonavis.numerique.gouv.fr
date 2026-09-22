@@ -13,6 +13,7 @@ interface Props {
 	search: string;
 	button_id: number | undefined;
 	filters: ReviewFiltersType;
+	onlyDeleted: boolean;
 	reviewsCountfiltered: number;
 	reviewsCountAll: number;
 	onExportCreated: (exportId: number) => void;
@@ -34,6 +35,7 @@ const ExportReviews = (props: Props) => {
 		search,
 		button_id,
 		filters,
+		onlyDeleted,
 		reviewsCountfiltered,
 		reviewsCountAll,
 		isDisabled,
@@ -58,6 +60,7 @@ const ExportReviews = (props: Props) => {
 					button_id,
 					filters
 				})}
+				onlyDeleted={onlyDeleted}
 				onExportCreated={onExportCreated}
 				hasExportsInProgress={isDisabled || false}
 				buttons={buttons}

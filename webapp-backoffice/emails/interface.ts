@@ -34,6 +34,7 @@ export interface JdmaClosedButtonOrFormEmailProps {
 export interface JdmaInviteEmailProps {
 	inviterName: string;
 	productTitle?: string;
+	productId?: number;
 	entityName?: string;
 	baseUrl?: string;
 }
@@ -66,6 +67,13 @@ export interface JdmaUserInviteEmailProps {
 	inviteToken: string;
 	productTitle?: string;
 	entityName?: string;
+	baseUrl?: string;
+}
+
+export interface JdmaDnCreatorInviteEmailProps {
+	recipientEmail: string;
+	inviteToken: string;
+	demarcheName: string;
 	baseUrl?: string;
 }
 

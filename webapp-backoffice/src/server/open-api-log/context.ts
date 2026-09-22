@@ -35,6 +35,14 @@ export type ApiLogEntry = {
 	/** Réponse brute telle qu'écrite sur le socket, tronquée. Interprétée au flush. */
 	raw_response: string | null;
 	error_message: string | null;
+
+	/**
+	 * Un mécanisme de protection a décidé de rejeter cet appel — que le rejet ait
+	 * été appliqué ou non. En mode observation l'appel passe quand même, et c'est
+	 * cette marque qui permet ensuite de mesurer l'impact des seuils.
+	 */
+	would_block: boolean;
+	block_reason: 'quota' | 'brute_force_ban' | 'key_blocked' | null;
 };
 
 const API_LOG = Symbol.for('jdma.openApiLog');
@@ -71,7 +79,9 @@ export const startApiLog = (req: NextApiRequest): ApiLogEntry => {
 		request_body: undefined,
 		status_code: null,
 		raw_response: null,
-		error_message: null
+		error_message: null,
+		would_block: false,
+		block_reason: null
 	};
 
 	(req as RequestWithLog)[API_LOG] = entry;
@@ -98,4 +108,26 @@ export const enrichApiLog = (
 	if (!entry) return;
 
 	Object.assign(entry, patch);
+};
+
+/**
+ * Marque un rejet, **sans écraser un motif déjà posé**.
+ *
+ * Plusieurs mécanismes peuvent vouloir rejeter le même appel : une IP bannie qui
+ * dépasse aussi son quota, par exemple. C'est le premier — donc le plus en amont,
+ * celui qui aurait effectivement coupé l'appel — qui doit rester au journal.
+ * Sans cette précaution, la mesure d'impact attribue les rejets au mauvais
+ * mécanisme.
+ */
+export const markWouldBlock = (
+	req: NextApiRequest | undefined,
+	reason: NonNullable<ApiLogEntry['block_reason']>
+): void => {
+	if (!req) return;
+
+	const entry = getApiLog(req);
+	if (!entry || entry.block_reason !== null) return;
+
+	entry.would_block = true;
+	entry.block_reason = reason;
 };

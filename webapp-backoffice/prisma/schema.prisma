@@ -46,6 +46,11 @@ enum ProductStatus {
   archived
 }
 
+enum ProductSource {
+  manual
+  demarches_numeriques
+}
+
 enum FormConfigStatus {
   draft
   published
@@ -143,6 +148,7 @@ enum TypeAction {
   service_form_create
   service_form_edit
   service_form_delete
+  service_form_stats_visibility_update
   form_alert_sent
 }
 
@@ -348,6 +354,14 @@ model ApiKey {
   id           Int         @id @default(autoincrement())
   key          String
   scope        UserRole
+  /// Coupure manuelle d'une clé, indépendante des quotas.
+  ///
+  /// Lue dans `isKeyAllowed`, où la clé est de toute façon chargée depuis
+  /// Postgres : c'est le seul mécanisme de blocage qui ne dépend pas de Redis,
+  /// donc celui qui reste disponible quand le cache est éteint. Une clé
+  /// compromise doit pouvoir être coupée en toutes circonstances.
+  blocked_at   DateTime?
+  block_reason String?
   user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
   product      Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
@@ -356,6 +370,11 @@ model ApiKey {
   entity_id    Int?
   api_key_logs ApiKeyLog[]
   UserEvent    UserEvent[]
+
+  // Partner (server-to-server) key, e.g. Démarches Numériques provisioning.
+  // Gated by assertPartnerKey — never set via the self-service apiKey.create flow.
+  is_partner     Boolean        @default(false)
+  partner_source ProductSource?
 }
 
 /// Journal d'audit des appels aux open API (`/api/open-api/*`).
@@ -399,12 +418,48 @@ model ApiKeyLog {
   error_message String?
   duration_ms   Int?
 
+  /// Un mécanisme de protection a décidé de rejeter cet appel — que le rejet
+  /// ait été appliqué ou non. En mode observation (drapeaux à `0`), l'appel
+  /// passe quand même : c'est en interrogeant cette colonne qu'on mesure
+  /// l'impact qu'auraient les seuils avant de les activer.
+  would_block  Boolean @default(false)
+  /// `quota` | `brute_force_ban` | `key_blocked`
+  block_reason String?
+
   created_at DateTime @default(now())
 
   @@index([apikey_id, created_at])
   @@index([ip, created_at])
   @@index([route, created_at])
   @@index([created_at])
+}
+
+/// Bannissements d'IP sur les open API.
+///
+/// Redis porte la décision temps réel (rapide, TTL natif, partagé entre
+/// instances) ; cette table en est la trace durable : elle survit à un
+/// redémarrage de Redis, elle est auditable, et elle accueille les
+/// bannissements posés à la main.
+///
+/// Les bans actifs sont rechargés depuis ici dans un cache de processus
+/// rafraîchi périodiquement — ce qui les rend applicables même Redis éteint.
+model ApiIpBan {
+  id         Int       @id @default(autoincrement())
+  ip         String
+  reason     String
+  /// `auto` pour la garde anti-force brute, sinon l'e-mail de l'agent.
+  created_by String    @default("auto")
+  /// Rang de récidive au moment du bannissement, pour suivre l'escalade.
+  strike     Int       @default(1)
+  expires_at DateTime
+  created_at DateTime  @default(now())
+  /// Levée manuelle : on ne supprime pas la ligne, on la neutralise, pour que
+  /// l'historique des bannissements reste lisible.
+  lifted_at  DateTime?
+  lifted_by  String?
+
+  @@index([ip, expires_at])
+  @@index([expires_at])
 }
 
 model Product {
@@ -423,11 +478,19 @@ model Product {
   forms           Form[]
   favorites       Favorite[]
   reviews         Review[]
-  isPublic        Boolean?
-  hasBeenTop250   Boolean?
   api_keys        ApiKey[]
   Export          Export[]
   UserEvent       UserEvent[]
+
+  // Origin of the service. `demarches_numeriques` = provisioned via the DN API.
+  // external_id holds the DN démarche id; (source, external_id) is the idempotency key.
+  source      ProductSource @default(manual)
+  external_id String?
+  // Organisation name as provided by the source (DN). The service lands in a shared
+  // tampon Entity, so the real org name is kept here for later manual reassignment.
+  external_organisation_name String?
+
+  @@unique([source, external_id])
 }
 
 model AdminEntityRight {
@@ -513,6 +576,7 @@ model ArchivedReview {
   archived_at        DateTime @default(now())
 
   @@index([product_id, form_id, archived_at])
+  @@index([product_id, form_id, review_created_at, id])
 }
 
 model ReviewViewLog {
@@ -566,6 +630,8 @@ model Export {
   endDate    DateTime?
   link       String?
   progress   Int          @default(0)
+
+  only_deleted_reviews Boolean @default(false)
 }
 
 model LimiterReporting {
@@ -591,6 +657,7 @@ model FormTemplate {
   description              String?
   active                   Boolean                  @default(false)
   hasStepper               Boolean                  @default(false)
+  hasStats                 Boolean                  @default(false)
   review_save_mode         ReviewSaveMode           @default(each_step)
   form_template_steps      FormTemplateStep[]
   form_template_buttons    FormTemplateButton[]
@@ -717,6 +784,7 @@ model Form {
   deleted_at               DateTime?
   isDeleted                Boolean?                @default(false)
   isTop250                 Boolean                 @default(false)
+  isPublic                 Boolean                 @default(false)
   last_review_at           DateTime?
   alert_max_window_minutes Int?
   last_alert_sent_at       DateTime?

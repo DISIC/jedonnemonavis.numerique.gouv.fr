@@ -225,11 +225,7 @@ export const Field = (props: Props) => {
 					]
 						.filter(Boolean)
 						.join(' ')}
-					label={
-						<h3 className={fr.cx('fr-mb-2v')}>
-							{t(field.label)} {t('global.optional')}
-						</h3>
-					}
+					label={<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>}
 					state={hasError ? 'error' : 'default'}
 					stateRelatedMessage={
 						errorKind === 'invalid_email'

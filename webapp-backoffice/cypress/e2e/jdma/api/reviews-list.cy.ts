@@ -101,11 +101,14 @@ describe('OpenAPI GET /avis', () => {
 				expect(res.status).to.eq(200);
 				expect(res.body.data).to.have.length(3);
 				res.body.data.forEach((r: any) => {
-					expect(r.form_template_slug).to.eq('bug');
-					expect(r.product_id).to.eq(ctx.product_ids[0]);
 					expect(r.answers).to.exist;
 					expect(r.answers.length).to.be.greaterThan(0);
+					expect(r.form_template_slug).to.eq(undefined);
+					expect(r.product_id).to.eq(undefined);
+					expect(r.xwiki_id).to.eq(undefined);
 				});
+				expect(res.body.metadata.form_template_slug).to.eq('bug');
+				expect(res.body.metadata.product_id).to.eq(ctx.product_ids[0]);
 				expect(res.body.metadata.has_more).to.eq(false);
 				expect(res.body.metadata.next_cursor).to.eq(null);
 			});
@@ -119,6 +122,75 @@ describe('OpenAPI GET /avis', () => {
 				expect(res.status).to.eq(200);
 				res.body.data.forEach((r: any) => expect(r.answers).to.eq(undefined));
 			});
+		});
+	});
+
+	describe('has_verbatim filter', () => {
+		let ctx: Ctx;
+
+		before(() => {
+			cy.task<Ctx>('db:setupApiCtx', {
+				template_slug: 'bug',
+				api_scope: 'product'
+			}).then(c => {
+				ctx = c;
+				cy.task('db:seedReviews', [
+					makeReview(ctx, 0, 'bug'),
+					makeReview(ctx, -1, 'root'),
+					makeReview(ctx, -2, 'bug'),
+					makeReview(ctx, -3, 'root')
+				]);
+			});
+		});
+
+		after(() => cy.task('db:cleanupApiCtx', ctx));
+
+		it('returns every review when the filter is omitted', () => {
+			apiRequest(ctx.api_key, { form_id: ctx.form_id }).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(4);
+			});
+		});
+
+		it('keeps only reviews with a verbatim when has_verbatim=true', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'true'
+			}).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(2);
+				res.body.data.forEach((r: any) => {
+					expect(r.has_verbatim).to.eq(true);
+					expect(
+						r.answers.some((a: any) => a.field_code === 'verbatim')
+					).to.eq(true);
+				});
+			});
+		});
+
+		it('keeps only reviews without a verbatim when has_verbatim=false', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'false'
+			}).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(2);
+				res.body.data.forEach((r: any) => {
+					expect(r.has_verbatim).to.eq(false);
+					expect(
+						r.answers.some((a: any) => a.field_code === 'verbatim')
+					).to.eq(false);
+				});
+			});
+		});
+
+		it('rejects a non-boolean has_verbatim', () => {
+			apiRequest(ctx.api_key, {
+				form_id: ctx.form_id,
+				has_verbatim: 'oui'
+			})
+				.its('status')
+				.should('eq', 400);
 		});
 	});
 
@@ -272,13 +344,14 @@ describe('OpenAPI GET /avis', () => {
 				.should('eq', 404);
 		});
 
-		it('rejects incoherent product_id', () => {
+		it('ignores a product_id passed by a legacy caller', () => {
 			apiRequest(owner.api_key, {
 				form_id: owner.form_id,
 				product_id: owner.product_ids[0] + 999_999
-			})
-				.its('status')
-				.should('eq', 400);
+			}).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.metadata.product_id).to.eq(owner.product_ids[0]);
+			});
 		});
 	});
 

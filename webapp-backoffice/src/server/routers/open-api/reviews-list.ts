@@ -7,7 +7,8 @@ import {
 	LEGACY_FORM_IDS,
 	decodeCursor,
 	encodeCursor,
-	getAuthorizedProductIds
+	getAuthorizedProductIds,
+	isAvisApiEnabled
 } from './utils';
 
 const dateString = z
@@ -18,11 +19,16 @@ const dateString = z
 export const reviewsListInputSchema = z
 	.object({
 		form_id: z.number().int().positive(),
-		product_id: z.number().int().positive().optional(),
 		start_date: dateString.optional(),
 		end_date: dateString.optional(),
 		cursor: z.string().optional(),
 		limit: z.number().int().min(1).max(100).default(50),
+		has_verbatim: z
+			.preprocess(
+				v => (v === 'false' ? false : v === 'true' ? true : v),
+				z.boolean()
+			)
+			.optional(),
 		include_answers: z
 			.preprocess(
 				v => (v === 'false' ? false : v === 'true' ? true : v),
@@ -61,10 +67,7 @@ const reviewSchema = z.object({
 	id: z.number().int(),
 	created_at: z.string(),
 	form_id: z.number().int(),
-	product_id: z.number().int(),
 	button_id: z.number().int(),
-	form_template_slug: z.string(),
-	xwiki_id: z.number().int().nullable(),
 	has_verbatim: z.boolean(),
 	answers: z.array(answerSchema).optional()
 });
@@ -72,6 +75,8 @@ const reviewSchema = z.object({
 export const reviewsListOutputSchema = z.object({
 	data: z.array(reviewSchema),
 	metadata: z.object({
+		product_id: z.number().int(),
+		form_template_slug: z.string(),
 		next_cursor: z.string().nullable(),
 		has_more: z.boolean(),
 		limit: z.number().int()
@@ -82,9 +87,7 @@ const baseSelect: Prisma.ReviewSelect = {
 	id: true,
 	created_at: true,
 	form_id: true,
-	product_id: true,
 	button_id: true,
-	xwiki_id: true,
 	has_verbatim: true
 };
 
@@ -108,9 +111,7 @@ type ReviewRow = {
 	id: number;
 	created_at: Date;
 	form_id: number;
-	product_id: number;
 	button_id: number;
-	xwiki_id: number | null;
 	has_verbatim: boolean;
 	answers?: Array<{
 		field_code: string;
@@ -133,22 +134,31 @@ export const reviewsListQuery = async ({
 }) => {
 	const {
 		form_id,
-		product_id,
 		start_date,
 		end_date,
 		cursor,
 		limit,
+		has_verbatim,
 		include_answers
 	} = input;
-
-	const isAdmin = ctx.api_key?.scope.includes('admin') ?? false;
-	const authorized_products_ids = await getAuthorizedProductIds(ctx);
 
 	const notFound = () =>
 		new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'Formulaire introuvable ou inaccessible'
 		});
+
+	// Le `enabled` du .meta retire déjà la route REST et l'entrée du document
+	// OpenAPI. Ce contrôle-ci ferme l'autre porte : le routeur openAPI étant monté
+	// dans appRouter, la procédure resterait joignable par
+	// /api/trpc/openAPI.reviewsList avec une clé valide. Même message que pour un
+	// formulaire inconnu, pour ne pas révéler que l'endpoint existe.
+	if (!isAvisApiEnabled()) {
+		throw notFound();
+	}
+
+	const isAdmin = ctx.api_key?.scope.includes('admin') ?? false;
+	const authorized_products_ids = await getAuthorizedProductIds(ctx);
 
 	const form = await ctx.prisma.form.findUnique({
 		where: { id: form_id },
@@ -164,13 +174,6 @@ export const reviewsListQuery = async ({
 		throw notFound();
 	}
 
-	if (product_id !== undefined && product_id !== form.product_id) {
-		throw new TRPCError({
-			code: 'BAD_REQUEST',
-			message: 'product_id incohérent avec form_id'
-		});
-	}
-
 	// Sur un formulaire legacy, les avis migrés de l'ancienne plateforme portent
 	// un form_id valant 1 ou 2 : ce sont des pseudo-identifiants de l'ancien
 	// outil, sans rapport avec les clés primaires 1 et 2 de la table Form. On les
@@ -182,6 +185,10 @@ export const reviewsListQuery = async ({
 			? { in: Array.from(new Set([...LEGACY_FORM_IDS, form_id])) }
 			: form_id
 	};
+
+	if (has_verbatim !== undefined) {
+		where.has_verbatim = has_verbatim;
+	}
 
 	if (start_date || end_date) {
 		where.created_at = getDateWhereFromUTCRange(start_date, end_date);
@@ -214,22 +221,15 @@ export const reviewsListQuery = async ({
 			? encodeCursor({ ts: last.created_at.toISOString(), id: last.id })
 			: null;
 
-	await ctx.prisma.apiKeyLog.create({
-		data: {
-			apikey_id: ctx.api_key?.id ?? 0,
-			url: ctx.req.url ?? ''
-		}
-	});
+	// La journalisation est assurée par le wrapper HTTP des open API
+	// (`pages/api/open-api/[...trpc].ts`), pas ici.
 
 	const data = page.map(r => {
 		const base = {
 			id: r.id,
 			created_at: r.created_at.toISOString(),
 			form_id: r.form_id,
-			product_id: r.product_id,
 			button_id: r.button_id,
-			form_template_slug: form.form_template.slug,
-			xwiki_id: r.xwiki_id ?? null,
 			has_verbatim: r.has_verbatim
 		};
 		if (!r.answers) return base;
@@ -253,5 +253,14 @@ export const reviewsListQuery = async ({
 		};
 	});
 
-	return { data, metadata: { next_cursor, has_more, limit } };
+	return {
+		data,
+		metadata: {
+			product_id: form.product_id,
+			form_template_slug: form.form_template.slug,
+			next_cursor,
+			has_more,
+			limit
+		}
+	};
 };

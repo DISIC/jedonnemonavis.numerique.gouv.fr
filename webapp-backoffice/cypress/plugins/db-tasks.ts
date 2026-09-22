@@ -40,6 +40,15 @@ type OutsiderCtx = {
 	foreign_product_id: number;
 };
 
+type ApiKeyRightsCtx = {
+	entity_id: number;
+	product_id: number;
+	carrier_user_email: string;
+	carrier_admin_email: string;
+	entity_admin_email: string;
+	user_ids: number[];
+};
+
 type Ctx = {
 	entity_id: number;
 	product_ids: number[];
@@ -75,8 +84,7 @@ export const dbTasks = {
 				prisma.product.create({
 					data: {
 						title: `P-${suffix}-${i}`,
-						entity_id: entity.id,
-						isPublic: true
+						entity_id: entity.id
 					}
 				})
 			)
@@ -86,7 +94,8 @@ export const dbTasks = {
 				title: `F-${suffix}`,
 				form_template_id: tpl.id,
 				product_id: products[0].id,
-				user_id: user.id
+				user_id: user.id,
+				isPublic: true
 			}
 		});
 		const button = await prisma.button.create({
@@ -209,8 +218,7 @@ export const dbTasks = {
 		const product = await prisma.product.create({
 			data: {
 				title: `PO-${suffix}`,
-				entity_id: entity.id,
-				isPublic: true
+				entity_id: entity.id
 			}
 		});
 
@@ -272,6 +280,87 @@ export const dbTasks = {
 		await prisma.entity.deleteMany({ where: { id: ctx.foreign_entity_id } });
 		// UserDetails est en onDelete: Cascade sur User.
 		await prisma.user.deleteMany({ where: { id: ctx.user_id } });
+		return null;
+	},
+
+	'db:setupApiKeyRightsCtx': async (arg: {
+		password: string;
+	}): Promise<ApiKeyRightsCtx> => {
+		const suffix = crypto.randomBytes(4).toString('hex');
+		const hashedPassword = bcrypt.hashSync(arg.password, 10);
+
+		const createUser = (prefix: string) =>
+			prisma.user.create({
+				data: {
+					email: `${prefix}-${suffix}@example.org`,
+					firstName: prefix,
+					lastName: 'Test',
+					password: hashedPassword,
+					role: 'user',
+					active: true
+				}
+			});
+
+		const entity = await prisma.entity.create({
+			data: { name: `EK-${suffix}`, acronym: `EK${suffix}` }
+		});
+		const product = await prisma.product.create({
+			data: { title: `PK-${suffix}`, entity_id: entity.id}
+		});
+
+		const [carrierUser, carrierAdmin, entityAdmin] = await Promise.all([
+			createUser('carrieruser'),
+			createUser('carrieradmin'),
+			createUser('entityadmin')
+		]);
+
+		await prisma.accessRight.createMany({
+			data: [
+				{
+					user_email: carrierUser.email,
+					product_id: product.id,
+					status: 'carrier_user'
+				},
+				{
+					user_email: carrierAdmin.email,
+					product_id: product.id,
+					status: 'carrier_admin'
+				}
+			]
+		});
+		await prisma.adminEntityRight.create({
+			data: { user_email: entityAdmin.email, entity_id: entity.id }
+		});
+
+		return {
+			entity_id: entity.id,
+			product_id: product.id,
+			carrier_user_email: carrierUser.email,
+			carrier_admin_email: carrierAdmin.email,
+			entity_admin_email: entityAdmin.email,
+			user_ids: [carrierUser.id, carrierAdmin.id, entityAdmin.id]
+		};
+	},
+
+	'db:cleanupApiKeyRightsCtx': async (ctx: ApiKeyRightsCtx): Promise<null> => {
+		await prisma.apiKey.deleteMany({
+			where: {
+				OR: [
+					{ product_id: ctx.product_id },
+					{ entity_id: ctx.entity_id },
+					{ user_id: { in: ctx.user_ids } }
+				]
+			}
+		});
+		await prisma.accessRight.deleteMany({
+			where: { product_id: ctx.product_id }
+		});
+		await prisma.adminEntityRight.deleteMany({
+			where: { entity_id: ctx.entity_id }
+		});
+		await prisma.product.deleteMany({ where: { id: ctx.product_id } });
+		await prisma.entity.deleteMany({ where: { id: ctx.entity_id } });
+		await prisma.user.deleteMany({ where: { id: { in: ctx.user_ids } } });
 		return null;
 	}
 };

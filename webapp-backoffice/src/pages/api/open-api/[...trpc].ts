@@ -2,9 +2,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createOpenApiNextHandler } from 'trpc-openapi';
 
 import {
+	banEnforced,
 	captureResponse,
 	flushApiLog,
+	isIpBanned,
+	markWouldBlock,
 	resolveRoute,
+	shouldLogBannedHit,
 	startApiLog
 } from '@/src/server/open-api-log';
 import { appRouter } from '@/src/server/routers/root';
@@ -58,6 +62,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	entry.request_body = requestPayload(req);
 
 	captureResponse(res, entry);
+
+	// Bannissement : vérifié avant `createContext`, qui ouvrirait une session et
+	// un client Elasticsearch — inutile de payer ça pour un appelant qu'on
+	// s'apprête à rejeter.
+	if (await isIpBanned(entry.ip)) {
+		markWouldBlock(req, 'brute_force_ban');
+
+		if (banEnforced()) {
+			// Le rejet doit rester gratuit : une IP bannie qui martèle ne doit pas
+			// provoquer une écriture par requête, sinon la protection devient
+			// elle-même le vecteur d'abus.
+			const worthLogging = shouldLogBannedHit(entry.ip);
+
+			res
+				.status(403)
+				.json({ code: 'FORBIDDEN', message: 'Access temporarily blocked' });
+
+			if (worthLogging) await flushApiLog(entry);
+
+			return;
+		}
+	}
 
 	try {
 		return await createOpenApiNextHandler({

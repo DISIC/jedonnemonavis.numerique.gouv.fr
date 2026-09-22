@@ -15,9 +15,12 @@ const unauthorized = () =>
  * scopée sur le service ou l'entité d'autrui, et lire ses données via l'API
  * partenaire.
  *
- * Les droits acceptés suivent la même règle que `checkRightToProceed` :
- * porteur non révoqué du service, administrateur de l'entité qui le porte,
- * ou administrateur de la plateforme.
+ * Une clé donne accès à toutes les données du périmètre via l'API partenaire,
+ * verbatims compris : seuls les profils qui l'administrent y ont droit, soit
+ * l'administrateur du service numérique (`carrier_admin`), l'administrateur de
+ * l'organisation qui le porte (`adminEntityRight`), ou l'administrateur de la
+ * plateforme. Un utilisateur du service (`carrier_user`) n'en voit aucune et
+ * ne peut pas en créer.
  */
 export const assertApiKeyScopeAccess = async (
 	ctx: Context,
@@ -47,7 +50,7 @@ export const assertApiKeyScopeAccess = async (
 				where: {
 					user_email: ctx_user_email,
 					product_id: input.product_id,
-					status: { in: ['carrier_admin', 'carrier_user'] }
+					status: 'carrier_admin'
 				}
 			}),
 			ctx.prisma.adminEntityRight.findFirst({

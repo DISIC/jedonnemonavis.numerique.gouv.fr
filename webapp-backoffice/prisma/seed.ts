@@ -19,6 +19,7 @@ import {
 import { products } from './seeds/products';
 import { users } from './seeds/users';
 import { whiteListedDomains } from './seeds/white-listed-domains';
+import { seed_demarches_numeriques } from './seeds/demarches-numeriques';
 
 const prisma = new PrismaClient();
 
@@ -67,10 +68,18 @@ async function main() {
 		case 'whiteList':
 			await Promise.all(getWLDPromises());
 			break;
+		case 'seedDemarchesNumeriques':
+			await seed_demarches_numeriques(prisma);
+			break;
 		default:
 			await seed_root_form_template();
 			await seed_bug_form_template();
 			await seed_users_products();
+			// Socle « Démarches Numériques » (compte de service, clé partenaire, orga
+			// tampon) volontairement HORS du seed par défaut : c'est de l'infrastructure,
+			// pas des fixtures de test, et l'ajout d'un utilisateur/entité fausserait les
+			// comptages des tests Cypress. Le seeder explicitement via la commande
+			// `seedDemarchesNumeriques`.
 			await formatted_title();
 	}
 }
@@ -147,13 +156,14 @@ async function seed_users_products() {
 		const formTemplate = formTemplates.find(
 			ft => ft.slug === product.templateSlug
 		);
+		const isTop250Form = !!(
+			product.isDemarcheEssentielle && formTemplate?.slug === 'root'
+		);
 
 		await prisma.product.create({
 			data: {
 				title: product.title,
-				isPublic: product.isPublic,
 				urls: product.urls,
-				hasBeenTop250: product.isDemarcheEssentielle || undefined,
 				entity: {
 					connect: {
 						name: randomEntity.name
@@ -171,8 +181,9 @@ async function seed_users_products() {
 					create: [
 						{
 							title: formTemplate?.title,
-							isTop250:
-								product.isDemarcheEssentielle && formTemplate?.slug === 'root',
+							isTop250: isTop250Form,
+							isPublic:
+								isTop250Form || !!(product.isPublic && formTemplate?.hasStats),
 							form_template: {
 								connect: {
 									slug: formTemplate?.slug || 'root'

@@ -210,8 +210,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					{
 						text: t('global.footer.terms_of_use'),
 						linkProps: { href: '/termsOfUse' }
-					},
-					{ text: t('global.footer.contact'), linkProps: { href: '/contact' } }
+					}
 				]}
 				license={
 					<>

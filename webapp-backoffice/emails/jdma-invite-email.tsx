@@ -6,26 +6,39 @@ import { JdmaInviteEmailProps } from './interface';
 const JdmaInviteEmail = ({
 	inviterName = 'Jean Dupont',
 	productTitle,
+	productId,
 	entityName,
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaInviteEmailProps) => {
-	const accessType = productTitle
-		? `la démarche « ${productTitle} »`
-		: entityName
-		? `l'organisation « ${entityName} »`
-		: 'un service numérique';
+	const serviceUrl =
+		productId !== undefined
+			? `${baseUrl}/administration/dashboard/product/${productId}`
+			: undefined;
 
 	return (
 		<JdmaLayout baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				<strong>{inviterName}</strong> vient de vous donner accès à {accessType}
-				&nbsp; sur la plateforme «&nbsp;
-				<Link href={baseUrl} target="_blank" style={linkStyle}>
-					Je donne mon avis
-				</Link>
-				&nbsp; ».
+				<strong>{inviterName}</strong> vient de vous donner accès à{' '}
+				{productTitle ? (
+					<>
+						la démarche «&nbsp;
+						{serviceUrl ? (
+							<Link href={serviceUrl} target="_blank" style={linkStyle}>
+								{productTitle}
+							</Link>
+						) : (
+							<strong>{productTitle}</strong>
+						)}
+						&nbsp;»
+					</>
+				) : entityName ? (
+					<>l&apos;organisation «&nbsp;{entityName}&nbsp;»</>
+				) : (
+					<>un service numérique</>
+				)}{' '}
+				sur la plateforme «&nbsp;Je donne mon avis&nbsp;».
 			</Text>
 
 			<Text style={paragraph}>

@@ -13,6 +13,7 @@ import {
 	uploadStreamToS3,
 	validateS3EnvVars
 } from '@/src/utils/export-worker/upload-s3';
+import type { ArchivedAnswerSnapshot } from '@/src/types/prismaTypesExtended';
 import { PassThrough } from 'stream';
 import type { Prisma } from '@prisma/client';
 import { $Enums } from '@prisma/client';
@@ -62,11 +63,11 @@ type AnswerRow = {
 
 function buildReviewRow(
 	review: { id: number; created_at: Date },
-	answers: AnswerRow[],
+	answers: Omit<AnswerRow, 'review_id'>[],
 	formName: string,
 	buttonName: string
 ): ReviewRow {
-	const answerById = new Map<number, AnswerRow>();
+	const answerById = new Map<number, Omit<AnswerRow, 'review_id'>>();
 	for (const a of answers) answerById.set(a.id, a);
 
 	const answerAccumulator = new Map<string, string[]>();
@@ -95,6 +96,32 @@ function buildReviewRow(
 		button_name: buttonName,
 		answers: answersMap
 	};
+}
+
+function parseArchivedAnswers(
+	answers: Prisma.JsonValue
+): ArchivedAnswerSnapshot[] {
+	return Array.isArray(answers)
+		? (answers as unknown as ArchivedAnswerSnapshot[])
+		: [];
+}
+
+function buildArchivedReviewRow(
+	archived: {
+		original_review_id: number;
+		review_created_at: Date;
+		button_id: number | null;
+		answers: Prisma.JsonValue;
+	},
+	formName: string,
+	buttonTitles: Map<number, string>
+): ReviewRow {
+	return buildReviewRow(
+		{ id: archived.original_review_id, created_at: archived.review_created_at },
+		parseArchivedAnswers(archived.answers),
+		formName,
+		archived.button_id ? buttonTitles.get(archived.button_id) ?? '' : ''
+	);
 }
 
 async function loadDynamicColumns(
@@ -221,6 +248,13 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		exportRecord.form?.legacy ?? false
 	);
 
+	const onlyDeleted = exportRecord.only_deleted_reviews;
+
+	const archivedWhere: Prisma.ArchivedReviewWhereInput = {
+		product_id: exportRecord.product_id,
+		...(exportRecord.form_id && { form_id: exportRecord.form_id })
+	};
+
 	const startDate = filterParams.startDate
 		? new Date(filterParams.startDate)
 		: new Date('2018-01-01T00:00:00.000Z');
@@ -246,7 +280,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		columns = await loadDynamicColumns(baseReviewWhere, startDate, endDate);
 	}
 
-	const totalReviews = await prisma.review.count({ where: baseReviewWhere });
+	const totalReviews = onlyDeleted
+		? await prisma.archivedReview.count({ where: archivedWhere })
+		: await prisma.review.count({ where: baseReviewWhere });
 
 	console.log(
 		`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`
@@ -254,9 +290,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
-	const fileName = `Avis_${safeName}_${currentDate}.${
-		exportFormat === 'csv' ? 'csv' : 'xlsx'
-	}`;
+	const fileName = `Avis${
+		onlyDeleted ? '_supprimes' : ''
+	}_${safeName}_${currentDate}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`;
 	const contentType =
 		exportFormat === 'csv'
 			? 'text/csv; charset=utf-8'
@@ -271,10 +307,40 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	// Streaming pipeline: paginated review fetch → row generator → file writer → S3 multipart upload.
 	// Memory stays bounded to ~one page of reviews + small upload buffer, regardless of total size.
+	// Progress 0-95% during streaming. Fetch and S3 upload run in parallel here,
+	// so this range covers the bulk of the work. The 95-98% range is reserved
+	// for the final S3 multipart commits that happen after the generator finishes.
+	let lastProgressPercent = -1;
+	async function reportStreamingProgress(retrieved: number): Promise<void> {
+		if (totalReviews === 0) return;
+
+		const percent = Math.min(95, Math.floor((retrieved * 95) / totalReviews));
+		if (percent !== lastProgressPercent) {
+			lastProgressPercent = percent;
+			await Promise.all([
+				job.updateProgress(percent),
+				prisma.export.update({
+					where: { id: exportId },
+					data: { progress: percent }
+				})
+			]);
+		}
+
+		const overallPercent = Math.floor((retrieved * 100) / totalReviews);
+		if (
+			overallPercent - lastLoggedPercent >= logEveryPercent ||
+			retrieved === totalReviews
+		) {
+			lastLoggedPercent = overallPercent;
+			console.log(
+				`[export-worker] Export ${exportId}: ${retrieved}/${totalReviews} (${overallPercent}%)`
+			);
+		}
+	}
+
 	async function* streamReviewRows(): AsyncGenerator<ReviewRow> {
 		let offset = 0;
 		let retrieved = 0;
-		let lastProgressPercent = -1;
 
 		// Date range in the WHERE clause lets PostgreSQL prune the partitioned review/answer tables
 		while (true) {
@@ -328,40 +394,81 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 			retrieved += reviews.length;
 			offset += PAGE_SIZE;
 
-			if (totalReviews > 0) {
-				// Progress 0-95% during streaming. Fetch and S3 upload run in parallel here,
-				// so this range covers the bulk of the work. The 95-98% range is reserved
-				// for the final S3 multipart commits that happen after the generator finishes.
-				const percent = Math.min(
-					95,
-					Math.floor((retrieved * 95) / totalReviews)
-				);
-				if (percent !== lastProgressPercent) {
-					lastProgressPercent = percent;
-					await Promise.all([
-						job.updateProgress(percent),
-						prisma.export.update({
-							where: { id: exportId },
-							data: { progress: percent }
-						})
-					]);
-				}
-
-				const overallPercent = Math.floor((retrieved * 100) / totalReviews);
-				if (
-					overallPercent - lastLoggedPercent >= logEveryPercent ||
-					retrieved === totalReviews
-				) {
-					lastLoggedPercent = overallPercent;
-					console.log(
-						`[export-worker] Export ${exportId}: ${retrieved}/${totalReviews} (${overallPercent}%)`
-					);
-				}
-			}
+			await reportStreamingProgress(retrieved);
 		}
 
 		generatorDone = true;
 	}
+
+	async function* streamArchivedReviewRows(): AsyncGenerator<ReviewRow> {
+		const buttonTitles = new Map<number, string>();
+		let retrieved = 0;
+		// Keyset pagination on (review_created_at, id): chronological order is required
+		// by generateXlsStream's one-sheet-per-year logic, and OFFSET would re-scan every
+		// skipped row on each page.
+		let cursor: { review_created_at: Date; id: number } | null = null;
+
+		while (true) {
+			const pageWhere: Prisma.ArchivedReviewWhereInput = cursor
+				? {
+						...archivedWhere,
+						OR: [
+							{ review_created_at: { gt: cursor.review_created_at } },
+							{
+								review_created_at: cursor.review_created_at,
+								id: { gt: cursor.id }
+							}
+						]
+				  }
+				: archivedWhere;
+
+			const archived = await prisma.archivedReview.findMany({
+				where: pageWhere,
+				orderBy: [{ review_created_at: 'asc' }, { id: 'asc' }],
+				take: PAGE_SIZE,
+				select: {
+					id: true,
+					original_review_id: true,
+					review_created_at: true,
+					button_id: true,
+					answers: true
+				}
+			});
+
+			if (archived.length === 0) break;
+
+			const missingButtonIds = Array.from(
+				new Set(
+					archived
+						.map(row => row.button_id)
+						.filter((id): id is number => !!id && !buttonTitles.has(id))
+				)
+			);
+
+			if (missingButtonIds.length > 0) {
+				const buttons = await prisma.button.findMany({
+					where: { id: { in: missingButtonIds } },
+					select: { id: true, title: true }
+				});
+				for (const button of buttons) buttonTitles.set(button.id, button.title);
+			}
+
+			for (const row of archived) {
+				yield buildArchivedReviewRow(row, formName, buttonTitles);
+			}
+
+			retrieved += archived.length;
+
+			const last = archived[archived.length - 1];
+			cursor = { review_created_at: last.review_created_at, id: last.id };
+
+			await reportStreamingProgress(retrieved);
+		}
+
+		generatorDone = true;
+	}
+
+	const streamRows = onlyDeleted ? streamArchivedReviewRows : streamReviewRows;
 
 	const passThrough = new PassThrough();
 
@@ -400,9 +507,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	try {
 		if (exportFormat === 'csv') {
-			await generateCsvStream(streamReviewRows(), columns, passThrough);
+			await generateCsvStream(streamRows(), columns, passThrough);
 		} else {
-			await generateXlsStream(streamReviewRows(), columns, passThrough);
+			await generateXlsStream(streamRows(), columns, passThrough);
 		}
 	} catch (err) {
 		passThrough.destroy(err instanceof Error ? err : new Error(String(err)));

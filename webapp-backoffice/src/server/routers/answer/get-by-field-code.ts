@@ -4,8 +4,7 @@ import { z } from 'zod';
 import { Buckets, ElkAnswer } from '../../../types/custom';
 import { assertAggregatableFieldCode } from './field-codes';
 import {
-	checkAndGetForm,
-	checkAndGetProduct,
+	checkAndGetFormForProduct,
 	getDefaultValues,
 	queryCountByFieldCode
 } from './utils';
@@ -29,8 +28,7 @@ export const getByFieldCodeQuery = async ({
 }) => {
 	const { product_id, xwiki, button_id, form_id } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 	await assertAggregatableFieldCode({
 		prisma: ctx.prisma,
 		form,
