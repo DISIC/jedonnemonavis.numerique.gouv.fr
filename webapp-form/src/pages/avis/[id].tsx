@@ -424,7 +424,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const buttonId = parseInt(query.button as string);
 	const formConfigParam = query.formConfig as string | undefined;
 
-	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
+	if (!isPreview && (!buttonId || isNaN(buttonId) || !!formConfigParam)) {
 		return {
 			notFound: true
 		};
@@ -432,7 +432,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$connect();
 
-	if (!isPreview && !isWidget) {
+	if (!isPreview) {
 		const button = await prisma.button.findUnique({
 			where: { id: buttonId },
 			select: { id: true, form_id: true }
@@ -475,7 +475,8 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			product: {
 				select: {
 					id: true,
-					title: true
+					title: true,
+					status: true
 				}
 			}
 		}
@@ -483,7 +484,12 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$disconnect();
 
-	if (!form) {
+	if (
+		!form ||
+		form.isDeleted ||
+		form.product.status === 'archived' ||
+		(!isPreview && form.form_template.slug === 'root')
+	) {
 		return {
 			notFound: true
 		};
