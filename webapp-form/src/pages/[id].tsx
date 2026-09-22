@@ -599,15 +599,45 @@ export const getServerSideProps: GetServerSideProps<{
 	let isButtonDeleted: boolean = false;
 
 	if (buttonId) {
-		const button = await prisma.button.findUnique({
-			where: { id: parseInt(buttonId) },
-			select: { id: true, form_id: true, isDeleted: true }
-		});
-		buttonFormId = button?.form_id;
+		const parsedButtonId = parseInt(buttonId);
 
-		if (button?.isDeleted) {
-			isButtonDeleted = true;
+		if (isNaN(parsedButtonId)) {
+			await prisma.$disconnect();
+			return {
+				notFound: true
+			};
 		}
+
+		const button = await prisma.button.findUnique({
+			where: { id: parsedButtonId },
+			select: {
+				id: true,
+				form_id: true,
+				isDeleted: true,
+				form: {
+					select: {
+						product_id: true,
+						isDeleted: true,
+						form_template: { select: { slug: true } }
+					}
+				}
+			}
+		});
+
+		if (
+			!button ||
+			button.form.product_id !== parseInt(productId) ||
+			button.form.isDeleted ||
+			button.form.form_template.slug !== 'root'
+		) {
+			await prisma.$disconnect();
+			return {
+				notFound: true
+			};
+		}
+
+		buttonFormId = button.form_id;
+		isButtonDeleted = !!button.isDeleted;
 	}
 
 	const product = await prisma.product.findUnique({
@@ -616,8 +646,9 @@ export const getServerSideProps: GetServerSideProps<{
 			: { id: parseInt(productId) },
 		include: {
 			forms: {
-				// Si buttonFormId est défini, on filtre les forms, sinon on les laisse tous
-				where: buttonFormId ? { id: buttonFormId } : undefined,
+				where: buttonFormId
+					? { id: buttonFormId }
+					: { NOT: { isDeleted: true } },
 				include: {
 					product: {
 						select: {
@@ -689,6 +720,10 @@ export const getServerSideProps: GetServerSideProps<{
 	}
 
 	if (product && product.status !== 'archived') {
+		if (isButtonDeleted) {
+			res.statusCode = 404;
+		}
+
 		return {
 			props: {
 				product: {
