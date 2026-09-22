@@ -79,8 +79,14 @@ const ExportModal = (props: Props) => {
 
 	const currentFiltersLabels = React.useMemo(
 		() =>
-			getExportSummaryLabels(parsedParams, buttons, getFilterableBlocks(form)),
-		[parsedParams, buttons, form]
+			onlyDeleted
+				? []
+				: getExportSummaryLabels(
+						parsedParams,
+						buttons,
+						getFilterableBlocks(form)
+				  ),
+		[onlyDeleted, parsedParams, buttons, form]
 	);
 
 	return (

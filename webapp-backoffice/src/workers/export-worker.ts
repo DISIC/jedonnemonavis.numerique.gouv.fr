@@ -13,6 +13,7 @@ import {
 	uploadStreamToS3,
 	validateS3EnvVars
 } from '@/src/utils/export-worker/upload-s3';
+import type { ArchivedAnswerSnapshot } from '@/src/types/prismaTypesExtended';
 import { PassThrough } from 'stream';
 import type { Prisma } from '@prisma/client';
 import { $Enums } from '@prisma/client';
@@ -97,14 +98,6 @@ function buildReviewRow(
 	};
 }
 
-type ArchivedAnswerSnapshot = {
-	id: number;
-	field_code: string;
-	field_label: string;
-	answer_text: string;
-	parent_answer_id: number | null;
-};
-
 function parseArchivedAnswers(
 	answers: Prisma.JsonValue
 ): ArchivedAnswerSnapshot[] {
@@ -129,26 +122,6 @@ function buildArchivedReviewRow(
 		formName,
 		archived.button_id ? buttonTitles.get(archived.button_id) ?? '' : ''
 	);
-}
-
-async function loadArchivedColumns(
-	where: Prisma.ArchivedReviewWhereInput
-): Promise<TemplateColumn[]> {
-	const archived = await prisma.archivedReview.findMany({
-		where,
-		select: { answers: true }
-	});
-
-	const columns = new Map<string, string>();
-	for (const row of archived) {
-		for (const answer of parseArchivedAnswers(row.answers)) {
-			if (answer.field_code && !columns.has(answer.field_code)) {
-				columns.set(answer.field_code, answer.field_label || answer.field_code);
-			}
-		}
-	}
-
-	return Array.from(columns, ([code, label]) => ({ code, label }));
 }
 
 async function loadDynamicColumns(
@@ -303,8 +276,6 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	let columns: TemplateColumn[];
 	if (exportRecord.form_id) {
 		columns = await loadTemplateColumns(exportRecord.form_id);
-	} else if (onlyDeleted) {
-		columns = await loadArchivedColumns(archivedWhere);
 	} else {
 		columns = await loadDynamicColumns(baseReviewWhere, startDate, endDate);
 	}
