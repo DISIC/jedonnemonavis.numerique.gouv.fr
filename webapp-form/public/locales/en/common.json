@@ -343,7 +343,10 @@
 		},
 		"not_found": {
 			"h1": "Form not found",
-			"text": "The link is invalid or this form no longer exists."
+			"text": "The link is invalid or this form no longer exists.",
+			"error_code": "Error 404",
+			"share_text": "If you wish, you can share your experience publicly and anonymously. The administration will respond to it and use it to improve its digital services.",
+			"share_link": "Share my experience publicly"
 		},
 		"form_closed": {
 			"h1": "This form is closed",
@@ -468,11 +471,6 @@
 			"title": "Service",
 			"c1": "Editorial and graphic oversight is provided by the DINUM.",
 			"c2": "Any public or private website is authorised to establish, without prior authorisation, a link (including a deep link) to the information published on the site."
-		},
-		"contact": {
-			"title": "Contact",
-			"c1": "The contact email address is the following: ",
-			"c2": "contact.jdma@design.numerique.gouv.fr"
 		}
 	},
 	"terms_of_use": {

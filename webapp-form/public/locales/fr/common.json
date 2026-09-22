@@ -343,7 +343,10 @@
 		},
 		"not_found": {
 			"h1": "Formulaire non trouvé",
-			"text": "Le lien est invalide ou ce formulaire n'existe plus."
+			"text": "Le lien est invalide ou ce formulaire n'existe plus.",
+			"error_code": "Erreur 404",
+			"share_text": "Si vous souhaitez vous pouvez partager votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services numériques.",
+			"share_link": "Partager mon expérience publiquement"
 		},
 		"form_closed": {
 			"h1": "Ce formulaire est fermé",
@@ -468,11 +471,6 @@
 			"title": "Service",
 			"c1": "Le suivi éditorial et graphique est assuré par la DINUM.",
 			"c2": "Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien (y compris profond) vers les informations diffusées sur le site."
-		},
-		"contact": {
-			"title": "Contact",
-			"c1": "L’adresse courriel de contact est la suivante : ",
-			"c2": "contact.jdma@design.numerique.gouv.fr"
 		}
 	},
 	"terms_of_use": {

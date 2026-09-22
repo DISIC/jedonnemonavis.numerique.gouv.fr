@@ -520,7 +520,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'formConfig.create': TypeAction.form_config_create,
 	'form.create': TypeAction.service_form_create,
 	'form.update': TypeAction.service_form_edit,
-	'form.delete': TypeAction.service_form_delete
+	'form.delete': TypeAction.service_form_delete,
+	'form.setVisibility': TypeAction.service_form_stats_visibility_update
 };
 
 const escapeHtmlValue = (value: unknown): string => {
@@ -620,6 +621,14 @@ export const handleActionTypeDisplay = (
 			return `Fermeture du formulaire <strong>${e(
 				metadataTyped.json.form?.title
 			)}</strong>`;
+		case TypeAction.service_form_stats_visibility_update:
+			return metadataTyped.json.isPublic
+				? `Publication des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`
+				: `Passage en privé des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`;
 	}
 };
 
@@ -652,7 +661,11 @@ export const filtersLabel = [
 	{ value: 'form_config_create', label: 'Modification du formulaire' },
 	{ value: 'service_form_create', label: 'Création d’un formulaire' },
 	{ value: 'service_form_edit', label: 'Modification d’un formulaire' },
-	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' }
+	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' },
+	{
+		value: 'service_form_stats_visibility_update',
+		label: 'Modification de la visibilité des statistiques'
+	}
 ];
 
 export const getHelperFromFormConfig = (
