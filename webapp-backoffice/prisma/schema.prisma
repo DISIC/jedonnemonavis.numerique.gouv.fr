@@ -576,6 +576,7 @@ model ArchivedReview {
   archived_at        DateTime @default(now())
 
   @@index([product_id, form_id, archived_at])
+  @@index([product_id, form_id, review_created_at, id])
 }
 
 model ReviewViewLog {
@@ -629,6 +630,8 @@ model Export {
   endDate    DateTime?
   link       String?
   progress   Int          @default(0)
+
+  only_deleted_reviews Boolean @default(false)
 }
 
 model LimiterReporting {

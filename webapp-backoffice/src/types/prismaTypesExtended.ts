@@ -1,4 +1,4 @@
-import { Prisma, User } from '@prisma/client';
+import { AnswerIntention, AnswerKind, Prisma, User } from '@prisma/client';
 
 /** Utilisateur tel qu'exposé par l'API : le hash de mot de passe n'en fait jamais partie. */
 export type UserWithoutPassword = Omit<User, 'password'>;
@@ -201,3 +201,14 @@ const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
 export type FormConfigWithChildren = Prisma.FormConfigGetPayload<
 	typeof FormConfigWithChildren
 >;
+
+export type ArchivedAnswerSnapshot = {
+	id: number;
+	field_code: string;
+	field_label: string;
+	answer_text: string;
+	answer_item_id: number;
+	intention: AnswerIntention | null;
+	kind: AnswerKind;
+	parent_answer_id: number | null;
+};

@@ -1,10 +1,5 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import {
-	AnswerIntention,
-	AnswerKind,
-	Prisma,
-	TypeAction
-} from '@prisma/client';
+import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -15,6 +10,7 @@ import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/Produc
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import {
+	ArchivedAnswerSnapshot,
 	ButtonWithElements,
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
@@ -879,17 +875,6 @@ export const getModalCode = ({
 	const widgetScriptUrl = `https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`;
 
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
-};
-
-type ArchivedAnswerSnapshot = {
-	id: number;
-	field_code: string;
-	field_label: string;
-	answer_text: string;
-	answer_item_id: number;
-	intention: AnswerIntention | null;
-	kind: AnswerKind;
-	parent_answer_id: number | null;
 };
 
 type ArchivedReviewSnapshot = {
