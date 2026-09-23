@@ -928,3 +928,5 @@ export const closeHeaderMenuModal = (headerId: string) => {
 
 	if (modal && typeof dsfr === 'function') dsfr(modal).modal?.conceal();
 };
+
+export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];

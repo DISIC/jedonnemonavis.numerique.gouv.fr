@@ -1,4 +1,4 @@
-import { closeHeaderMenuModal } from '@/src/utils/tools';
+import { closeHeaderMenuModal, stripQueryAndHash } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -15,7 +15,9 @@ import router, { useRouter } from 'next/router';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import UserDetailsForm from '../components/auth/UserDetailsForm';
-import HeaderMobileAccountMenu from '../components/ui/HeaderMobileAccountMenu';
+import HeaderMobileMenu from '../components/ui/HeaderMobileMenu';
+import Link from 'next/link';
+import { HELP_MENU_LINKS } from '@/src/utils/helpers';
 import { useUserSettings } from '../contexts/UserSettingsContext';
 
 const HEADER_ID = 'fr-header-public-header';
@@ -34,11 +36,14 @@ type NavigationItem = {
 };
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
-	const { pathname } = useRouter();
+	const { pathname, asPath } = useRouter();
+	const currentPath = stripQueryAndHash(asPath);
 	const { settings } = useUserSettings();
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [helpAnchorEl, setHelpAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
+	const helpMenuOpen = Boolean(helpAnchorEl);
 	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 		event.stopPropagation();
@@ -52,8 +57,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		event.stopPropagation();
 		setAnchorEl(null);
 	};
+	const handleHelpMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setHelpAnchorEl(event.currentTarget);
+		push(['trackEvent', 'Help', 'Open-Menu']);
+	};
+	const handleHelpClose = () => setHelpAnchorEl(null);
 
 	const { data: session, status } = useSession();
+
+	const isAdmin = !!session?.user.role.includes('admin');
+	const shouldDisplayMobileMenu = !!session?.user && !light;
 
 	useEffect(() => {
 		const close = () => closeHeaderMenuModal(HEADER_ID);
@@ -143,21 +158,54 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 			  ]
 			: [
-					<Button
-						title={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
-						aria-label={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
-						linkProps={{
-							href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
-							target: '_blank',
-							rel: 'noopener noreferrer',
-							className: cx(
-								fr.cx('fr-icon-external-link-line', 'fr-link--icon-left'),
-								classes.externalLink
-							)
-						}}
-					>
-						Nouveautés
-					</Button>,
+					isAdmin ? (
+						<Button
+							title={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+							aria-label={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+							linkProps={{
+								href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
+								target: '_blank',
+								rel: 'noopener noreferrer',
+								className: cx(
+									fr.cx('fr-icon-external-link-line', 'fr-link--icon-left'),
+									classes.externalLink
+								)
+							}}
+						>
+							Nouveautés
+						</Button>
+					) : (
+						<Button
+							id="button-help"
+							className={cx(
+								classes.accountButton,
+								fr.cx(
+									'fr-btn--icon-right',
+									helpMenuOpen
+										? 'fr-icon-arrow-up-s-line'
+										: 'fr-icon-arrow-down-s-line'
+								)
+							)}
+							priority="tertiary"
+							size="large"
+							onClick={handleHelpMenuClick}
+							nativeButtonProps={{
+								'aria-haspopup': 'menu',
+								'aria-expanded': helpMenuOpen,
+								'aria-controls': helpMenuOpen ? 'help-menu' : undefined
+							}}
+						>
+							<i
+								className={fr.cx(
+									'fr-icon-question-line',
+									'fr-icon--sm',
+									'fr-mr-1-5v'
+								)}
+								aria-hidden
+							/>
+							Aide &amp; Ressources
+						</Button>
+					),
 					<Button
 						id="button-account"
 						className={cx(
@@ -190,6 +238,48 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					</Button>
 			  ];
 
+	const helpMenu =
+		!session?.user || isAdmin ? null : (
+			<Menu
+				id="help-menu"
+				open={helpMenuOpen}
+				anchorEl={helpAnchorEl}
+				onClose={handleHelpClose}
+				MenuListProps={{ className: classes.menuList }}
+				PaperProps={{
+					component: 'nav',
+					'aria-label': 'Menu aide et ressources'
+				}}
+			>
+				{HELP_MENU_LINKS.map(({ label, href, iconId, isExternal }) => (
+					<MenuItem
+						key={label}
+						component={Link}
+						href={href}
+						{...(isExternal
+							? {
+									target: '_blank',
+									rel: 'noopener noreferrer',
+									'aria-label': `${label} (nouvelle fenêtre)`
+							  }
+							: {})}
+						className={cx(
+							fr.cx('fr-px-4v', 'fr-py-3v', 'fr-text--sm'),
+							classes.item,
+							classes.helpItem
+						)}
+						onClick={handleHelpClose}
+					>
+						<i
+							className={fr.cx(iconId, 'fr-icon--sm', 'fr-mr-1-5v')}
+							aria-hidden
+						/>
+						{label}
+					</MenuItem>
+				))}
+			</Menu>
+		);
+
 	const accountMenu = !session?.user ? null : (
 		<Menu
 			id="option-menu"
@@ -214,6 +304,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</MenuItem>
 			<MenuItem
 				className={cx(fr.cx('fr-p-4v'), classes.item)}
+				selected={
+					currentPath ===
+					`/administration/dashboard/user/${session.user.id}/infos`
+				}
 				onClick={e => {
 					handleClose(e);
 					router.push(
@@ -228,6 +322,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</MenuItem>
 			<MenuItem
 				className={cx(fr.cx('fr-p-4v'), classes.item)}
+				selected={
+					currentPath ===
+					`/administration/dashboard/user/${session.user.id}/notifications`
+				}
 				onClick={e => {
 					handleClose(e);
 					router.push(
@@ -356,27 +454,27 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 
 	const shouldDisplayMainNavigation =
 		!!navigationItems.length && !pathname.startsWith('/public');
-	const shouldDisplayMobileAccountMenu = !!session?.user && !light;
+
+	const mainNavigation = shouldDisplayMainNavigation ? (
+		<MainNavigation
+			id={`${HEADER_ID}-main-navigation`}
+			items={navigationItems}
+		/>
+	) : undefined;
 
 	const navigation =
-		shouldDisplayMainNavigation || shouldDisplayMobileAccountMenu ? (
-			<>
-				{shouldDisplayMainNavigation && (
-					<MainNavigation
-						id={`${HEADER_ID}-main-navigation`}
-						items={navigationItems}
-					/>
-				)}
-				{shouldDisplayMobileAccountMenu && session && (
-					<HeaderMobileAccountMenu
-						id={`${HEADER_ID}-mobile-account`}
-						userId={session.user.id}
-						userName={session.user.name}
-						userEmail={session.user.email}
-					/>
-				)}
-			</>
-		) : undefined;
+		shouldDisplayMobileMenu && session ? (
+			<HeaderMobileMenu
+				id={`${HEADER_ID}-mobile`}
+				isAdmin={isAdmin}
+				userId={session.user.id}
+				userName={session.user.name}
+				userEmail={session.user.email}
+				navigation={mainNavigation}
+			/>
+		) : (
+			mainNavigation
+		);
 
 	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
@@ -414,7 +512,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						href: !session?.user ? '/' : '/administration/dashboard/products',
 						title: "Je donne mon avis, retour à l'accueil"
 					}}
-					className={classes.navigation}
+					className={cx(
+						classes.navigation,
+						!!session?.user && !isAdmin && classes.hiddenMobileQuickAccess
+					)}
 					id={HEADER_ID}
 					quickAccessItems={light ? undefined : quickAccessItems}
 					navigation={navigation}
@@ -422,6 +523,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					serviceTagline="La voix de vos usagers"
 				/>
 			)}
+			{!shouldDisplayUserDetailsForm && !light && helpMenu}
 			{!shouldDisplayUserDetailsForm && !light && accountMenu}
 			<div id="jdma-widget-anchor" className={classes.widgetAnchor} />
 
@@ -524,6 +626,32 @@ const useStyles = tss
 			'&:nth-of-type(2)': {
 				fontSize: '0.8rem',
 				color: fr.colors.decisions.text.disabled.grey.default
+			}
+		},
+		hiddenMobileQuickAccess: {
+			[fr.breakpoints.down('lg')]: {
+				'.fr-header__menu-links': {
+					display: 'none'
+				}
+			}
+		},
+		menuList: {
+			paddingTop: 0,
+			paddingBottom: 0,
+			minWidth: '16rem'
+		},
+		helpItem: {
+			color: fr.colors.decisions.text.label.grey.default,
+			fontWeight: 500,
+			textDecoration: 'none',
+			backgroundImage: 'none',
+			'--hover-tint': fr.colors.decisions.background.default.grey.hover,
+			'--active-tint': fr.colors.decisions.background.default.grey.active,
+			'&:first-of-type': {
+				borderTop: 'none'
+			},
+			'&::after': {
+				marginLeft: fr.spacing('2v')
 			}
 		},
 		accountButton: {
