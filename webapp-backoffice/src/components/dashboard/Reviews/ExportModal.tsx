@@ -60,6 +60,7 @@ const ExportModal = (props: Props) => {
 	});
 
 	const parsedParams = React.useMemo(() => parseExportParams(params), [params]);
+	const s = counts.countFiltered === 1 ? '' : 's';
 
 	const validateExport = () => {
 		createExport.mutate({
@@ -131,7 +132,7 @@ const ExportModal = (props: Props) => {
 				<Alert
 					severity="info"
 					small
-					description={`${DELETED_REVIEWS_EXPORT_NOTICE} (${counts.countFiltered} réponses)`}
+					description={`${DELETED_REVIEWS_EXPORT_NOTICE} (${counts.countFiltered} réponse${s})`}
 					className={fr.cx('fr-mt-6v')}
 				/>
 			) : (
@@ -163,7 +164,7 @@ const ExportModal = (props: Props) => {
 						}`}
 						options={[
 							{
-								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
+								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponse${s})`,
 								nativeInputProps: {
 									value: 'filtered',
 									checked: choice === 'filtered',
@@ -174,7 +175,7 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Toutes les réponses (${counts.countAll} réponses)`,
+								label: `Toutes les réponses (${counts.countAll} réponse${s})`,
 								nativeInputProps: {
 									value: 'all',
 									checked: choice === 'all',
