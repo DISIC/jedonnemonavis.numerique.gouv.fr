@@ -23,6 +23,7 @@ import {
 	renderExportReadyEmail
 } from '../utils/emails';
 import { sendMail } from '../utils/mailer';
+import { maskAnswerText } from '../utils/personal-data';
 import { formatWhereAndOrder } from '../utils/reviews';
 
 const PAGE_SIZE = parseInt(process.env.WORKER_EXPORT_PAGE_SIZE ?? '500', 10);
@@ -59,6 +60,8 @@ type AnswerRow = {
 	field_code: string;
 	field_label: string;
 	answer_text: string;
+	/** Nécessaire au masquage : seules les réponses libres sont concernées. */
+	kind: string;
 };
 
 function buildReviewRow(
@@ -73,11 +76,14 @@ function buildReviewRow(
 	const answerAccumulator = new Map<string, string[]>();
 	for (const answer of answers) {
 		const code = answer.field_code || answer.field_label;
-		let text = answer.answer_text;
+		// Masquage appliqué ici plutôt qu'au moment de l'écriture du fichier :
+		// c'est le point de passage unique des exports CSV et XLSX.
+		let text = maskAnswerText(answer, answer.answer_text);
 
 		if (answer.parent_answer_id !== null) {
 			const parent = answerById.get(answer.parent_answer_id);
-			if (parent) text = `${parent.answer_text} : ${text}`;
+			if (parent)
+				text = `${maskAnswerText(parent, parent.answer_text)} : ${text}`;
 		}
 
 		if (!answerAccumulator.has(code)) answerAccumulator.set(code, []);
@@ -370,7 +376,8 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 					parent_answer_id: true,
 					field_code: true,
 					field_label: true,
-					answer_text: true
+					answer_text: true,
+					kind: true
 				}
 			});
 
