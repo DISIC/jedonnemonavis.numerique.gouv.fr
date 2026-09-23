@@ -148,8 +148,17 @@ const PATTERNS: PersonalDataPattern[] = [
 		// Pas de drapeau `i` : la phrase déclenchante tolère sa majuscule de début
 		// de phrase explicitement, mais le nom capturé doit rester sensible à la
 		// casse — sinon « je m'appelle et rien ne marche » capturerait « et rien ne ».
+		//
+		// Plages Latin-1 explicites plutôt que `\p{Lu}` / `\p{L}` : les deux apps
+		// compilent avec Babel (`babel.config.js`), dont la réécriture des regex
+		// Unicode plante sur une classe mêlant échappement de propriété et
+		// littéraux (`TypeError: e.charCodeAt is not a function`, build cassé).
+		// Ailleurs le projet contourne en construisant la regex par `new RegExp`,
+		// que Babel ne transpile pas ; ici on garde un littéral, comme les onze
+		// autres motifs. Conséquence assumée : un nom en écriture non latine
+		// n'est pas reconnu.
 		regex:
-			/(?:[Jj]e m['’]appelle|[Mm]on nom est|[Jj]e me nomme)\s+((?:\p{Lu}[\p{L}'’-]+\s*){1,3})/gu,
+			/(?:[Jj]e m['’]appelle|[Mm]on nom est|[Jj]e me nomme)\s+((?:[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’\-]+\s*){1,3})/g,
 		group: 1
 	},
 	{
@@ -251,7 +260,7 @@ export function detectPersonalData(text: string): PersonalDataMatch[] {
 			}
 
 			// Un groupe peut se terminer par l'espace qu'il a consommé en répétant
-			// (`(?:\p{Lu}\p{L}+\s*){1,3}`). L'inclure dans les bornes collerait le
+			// (`(?:[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ]+\s*){1,3}`). L'inclure dans les bornes collerait
 			// remplaçant au mot suivant.
 			const captured = (
 				pattern.group !== undefined ? execResult[pattern.group] : execResult[0]
