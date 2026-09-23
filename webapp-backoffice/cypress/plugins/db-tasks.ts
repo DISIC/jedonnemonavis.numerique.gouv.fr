@@ -230,6 +230,22 @@ export const dbTasks = {
 		};
 	},
 
+	'db:getRootFormButtonId': async (product_id: number): Promise<number> => {
+		const button = await prisma.button.findFirstOrThrow({
+			where: {
+				NOT: { isDeleted: true },
+				form: {
+					product_id,
+					NOT: { isDeleted: true },
+					form_template: { slug: 'root' }
+				}
+			},
+			orderBy: { id: 'asc' },
+			select: { id: true }
+		});
+		return button.id;
+	},
+
 	'db:markFormLegacy': async (form_id: number): Promise<null> => {
 		await prisma.form.update({
 			where: { id: form_id },
@@ -305,7 +321,7 @@ export const dbTasks = {
 			data: { name: `EK-${suffix}`, acronym: `EK${suffix}` }
 		});
 		const product = await prisma.product.create({
-			data: { title: `PK-${suffix}`, entity_id: entity.id}
+			data: { title: `PK-${suffix}`, entity_id: entity.id }
 		});
 
 		const [carrierUser, carrierAdmin, entityAdmin] = await Promise.all([
