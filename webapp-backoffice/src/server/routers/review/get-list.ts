@@ -1,6 +1,7 @@
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { buildSearchWhereRaw, formatWhereAndOrder } from '@/src/utils/reviews';
+import { maskAnswerText } from '@/src/utils/personal-data';
 import { getDateWhereFromUTCRange } from '@/src/utils/tools';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
@@ -242,8 +243,42 @@ export const getReviewListQuery = async ({
 		}
 	}
 
+	// Masquage des données personnelles, côté serveur et non côté composant :
+	// masquer à l'affichage laisserait quand même partir le texte brut dans la
+	// réponse tRPC, lisible dans l'onglet Réseau du navigateur.
+	//
+	// L'`include` des réponses est conditionné par `shouldIncludeAnswers`, ce que
+	// l'inférence de Prisma ne sait pas traverser : elle retombe sur le type
+	// scalaire d'Answer, sans `parent_answer`. On redit donc ici ce que la
+	// requête produit réellement quand l'include est actif.
+	type AnswerWithParent = Prisma.AnswerGetPayload<{
+		include: { parent_answer: true };
+	}>;
+
+	const maskedReviews = reviews.map(review => {
+		const answers = review.answers as AnswerWithParent[] | undefined;
+		if (!answers) return review;
+
+		return {
+			...review,
+			answers: answers.map(answer => ({
+				...answer,
+				answer_text: maskAnswerText(answer, answer.answer_text),
+				...(answer.parent_answer && {
+					parent_answer: {
+						...answer.parent_answer,
+						answer_text: maskAnswerText(
+							answer.parent_answer,
+							answer.parent_answer.answer_text
+						)
+					}
+				})
+			}))
+		};
+	});
+
 	return {
-		data: reviews,
+		data: maskedReviews,
 		metadata: {
 			countFiltered,
 			countAll,

@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import type { Context } from '@/src/server/trpc';
+import { maskAnswerText } from '@/src/utils/personal-data';
 import { getDateWhereFromUTCRange, isValidDate } from '@/src/utils/tools';
 import {
 	LEGACY_FORM_IDS,
@@ -102,7 +103,11 @@ const selectWithAnswers: Prisma.ReviewSelect = {
 			intention: true,
 			kind: true,
 			parent_answer_id: true,
-			parent_answer: { select: { field_code: true, answer_text: true } }
+			// `kind` est remonté pour le masquage : la réponse parente a le sien,
+			// celui de l'enfant ne dit rien de sa nature.
+			parent_answer: {
+				select: { field_code: true, answer_text: true, kind: true }
+			}
 		}
 	}
 };
@@ -121,7 +126,11 @@ type ReviewRow = {
 		intention: string | null;
 		kind: string;
 		parent_answer_id: number | null;
-		parent_answer: { field_code: string; answer_text: string } | null;
+		parent_answer: {
+			field_code: string;
+			answer_text: string;
+			kind: string;
+		} | null;
 	}>;
 };
 
@@ -235,10 +244,13 @@ export const reviewsListQuery = async ({
 		if (!r.answers) return base;
 		return {
 			...base,
+			// Le partenaire reçoit le verbatim amputé de ses données personnelles.
+			// Même règle que la liste back-office et les exports : la donnée reste
+			// intacte en base, elle ne sort simplement pas.
 			answers: r.answers.map(a => ({
 				field_code: a.field_code,
 				field_label: a.field_label,
-				answer_text: a.answer_text,
+				answer_text: maskAnswerText(a, a.answer_text),
 				answer_item_id: a.answer_item_id,
 				intention: a.intention,
 				kind: a.kind,
@@ -246,7 +258,10 @@ export const reviewsListQuery = async ({
 				parent: a.parent_answer
 					? {
 							field_code: a.parent_answer.field_code,
-							answer_text: a.parent_answer.answer_text
+							answer_text: maskAnswerText(
+								a.parent_answer,
+								a.parent_answer.answer_text
+							)
 					  }
 					: null
 			}))
