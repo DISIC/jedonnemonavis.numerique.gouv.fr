@@ -919,3 +919,14 @@ export const mapArchivedReviewToReview = (
 		}))
 	};
 };
+
+type DsfrApi = (node: HTMLElement) => { modal?: { conceal: () => void } };
+
+export const closeHeaderMenuModal = (headerId: string) => {
+	const modal = document.getElementById(`header-menu-modal-${headerId}`);
+	const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr;
+
+	if (modal && typeof dsfr === 'function') dsfr(modal).modal?.conceal();
+};
+
+export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];
