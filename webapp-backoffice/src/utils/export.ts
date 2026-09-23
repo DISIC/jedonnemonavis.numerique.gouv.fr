@@ -3,6 +3,9 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { Button } from '@prisma/client';
 import { capitalizeFirstLetter, formatDateToFrenchString } from './tools';
 
+export const DELETED_REVIEWS_EXPORT_NOTICE =
+	'Le filtre "Afficher les réponses supprimées" étant actif, toutes les réponses supprimées seront exportées.';
+
 export const EXPORT_LINK_TTL_SECONDS = 604800;
 
 /**

@@ -84,8 +84,7 @@ export const dbTasks = {
 				prisma.product.create({
 					data: {
 						title: `P-${suffix}-${i}`,
-						entity_id: entity.id,
-						isPublic: true
+						entity_id: entity.id
 					}
 				})
 			)
@@ -95,7 +94,8 @@ export const dbTasks = {
 				title: `F-${suffix}`,
 				form_template_id: tpl.id,
 				product_id: products[0].id,
-				user_id: user.id
+				user_id: user.id,
+				isPublic: true
 			}
 		});
 		const button = await prisma.button.create({
@@ -218,8 +218,7 @@ export const dbTasks = {
 		const product = await prisma.product.create({
 			data: {
 				title: `PO-${suffix}`,
-				entity_id: entity.id,
-				isPublic: true
+				entity_id: entity.id
 			}
 		});
 
@@ -229,6 +228,22 @@ export const dbTasks = {
 			foreign_entity_id: entity.id,
 			foreign_product_id: product.id
 		};
+	},
+
+	'db:getRootFormButtonId': async (product_id: number): Promise<number> => {
+		const button = await prisma.button.findFirstOrThrow({
+			where: {
+				NOT: { isDeleted: true },
+				form: {
+					product_id,
+					NOT: { isDeleted: true },
+					form_template: { slug: 'root' }
+				}
+			},
+			orderBy: { id: 'asc' },
+			select: { id: true }
+		});
+		return button.id;
 	},
 
 	'db:markFormLegacy': async (form_id: number): Promise<null> => {
@@ -306,7 +321,7 @@ export const dbTasks = {
 			data: { name: `EK-${suffix}`, acronym: `EK${suffix}` }
 		});
 		const product = await prisma.product.create({
-			data: { title: `PK-${suffix}`, entity_id: entity.id, isPublic: true }
+			data: { title: `PK-${suffix}`, entity_id: entity.id }
 		});
 
 		const [carrierUser, carrierAdmin, entityAdmin] = await Promise.all([

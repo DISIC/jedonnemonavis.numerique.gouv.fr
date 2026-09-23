@@ -1,5 +1,6 @@
 import { secondSectionA } from '@/src/utils/form';
 import { isValidEmail } from '@/src/utils/form-validation';
+import { hasPersonalData } from '@/src/utils/personal-data';
 import { FormField, Opinion, Product, Step } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
@@ -54,6 +55,18 @@ export const FormStepper = (props: Props) => {
 		return () => clearTimeout(timer);
 	}, [currentStep]);
 
+	// Variante bloquante : tant qu'une donnée personnelle reste saisie dans un
+	// champ libre de l'étape, on ne laisse ni continuer ni envoyer. L'alerte qui
+	// la nomme est rendue sous le champ concerné, par `Field`.
+	//
+	// `input-email` est exclu : c'est le champ « Adresse mail », opt-in, dont le
+	// contenu est une donnée personnelle explicitement demandée.
+	const hasPersonalDataInStep = steps[currentStep].section.some(
+		f =>
+			(f.kind === 'input-textarea' || f.kind === 'input-text') &&
+			hasPersonalData((tmpOpinion[f.name] as string) || '')
+	);
+
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
 		fts => fts.title === t(`${steps[currentStep].name}`, { lng: 'fr' })
 	);
@@ -88,6 +101,13 @@ export const FormStepper = (props: Props) => {
 							!isValidEmail((tmpOpinion[f.name] as string) || '')
 					);
 					if (hasInvalidEmail) {
+						setShowValidationErrors(true);
+						return;
+					}
+
+					// Le bouton est déjà désactivé, mais le formulaire reste
+					// soumettable à la touche Entrée depuis un champ texte.
+					if (hasPersonalDataInStep) {
 						setShowValidationErrors(true);
 						return;
 					}
@@ -133,6 +153,7 @@ export const FormStepper = (props: Props) => {
 						type="submit"
 						disabled={
 							!tmpOpinion.satisfaction ||
+							hasPersonalDataInStep ||
 							(router.query.preview === 'true' &&
 								t(steps[currentStep].name) === 'Informations complémentaires')
 						}

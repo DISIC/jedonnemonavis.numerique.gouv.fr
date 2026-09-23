@@ -5,6 +5,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
+import { withoutVisibilityFlags } from './utils';
 
 export const deleteFormInputSchema = z.object({
 	id: z.number(),
@@ -24,7 +25,8 @@ export const deleteFormMutation = async ({
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
-		product_id: product_id
+		product_id: product_id,
+		form_id: id
 	});
 
 	const currentForm = await ctx.prisma.form.findUnique({
@@ -35,7 +37,8 @@ export const deleteFormMutation = async ({
 	const deletedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...form
+			...withoutVisibilityFlags(form),
+			...(form.isDeleted === true && { isPublic: false })
 		},
 		include: { form_template: true }
 	});

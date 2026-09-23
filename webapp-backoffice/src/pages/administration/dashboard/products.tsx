@@ -665,7 +665,9 @@ const useStyles = tss.withName({ ProductModal }).create(() => ({
 		}
 	},
 	pageTitle: {
-		textWrap: 'nowrap'
+		[fr.breakpoints.up('md')]: {
+			textWrap: 'nowrap'
+		}
 	},
 	tagContainer: {
 		display: 'flex',

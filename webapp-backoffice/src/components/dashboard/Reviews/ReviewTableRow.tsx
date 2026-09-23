@@ -20,6 +20,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { MaskedText } from './MaskedText';
 
 const highlightSearchTerms = (
 	text: string,
@@ -206,9 +207,18 @@ const ReviewTableRow = ({
 			{hasVerbatimBlock && (
 				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
 					<p className={cx(classes.content, classes.contentVerbatim)}>
-						{verbatimAnswer
-							? highlightSearchTerms(verbatimAnswer.answer_text || '', search)
-							: '-'}
+						{verbatimAnswer ? (
+							<MaskedText
+								text={verbatimAnswer.answer_text || ''}
+								renderSegment={(segment, key) => (
+									<React.Fragment key={key}>
+										{highlightSearchTerms(segment, search)}
+									</React.Fragment>
+								)}
+							/>
+						) : (
+							'-'
+						)}
 					</p>
 				</td>
 			)}

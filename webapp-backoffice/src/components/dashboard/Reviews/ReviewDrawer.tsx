@@ -29,6 +29,7 @@ import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
+import { MaskedText } from './MaskedText';
 
 const deleteReviewModal = createModal({
 	id: 'delete-review-modal',
@@ -139,13 +140,17 @@ const AnswerValues = ({
 			<ul className={cx(classes.answerList)}>
 				{values.map((v, i) => (
 					<li key={i} className={cx(classes.boldText)}>
-						{v}
+						<MaskedText text={v} />
 					</li>
 				))}
 			</ul>
 		);
 	}
-	return <span className={cx(classes.boldText)}>{values[0] ?? '-'}</span>;
+	return (
+		<span className={cx(classes.boldText)}>
+			<MaskedText text={values[0] ?? '-'} />
+		</span>
+	);
 };
 
 const ChildAnswerValue = ({
@@ -161,7 +166,9 @@ const ChildAnswerValue = ({
 		{value.parentOptionLabel && (
 			<span className={fr.cx('fr-text--sm')}>{value.parentOptionLabel} : </span>
 		)}
-		<span className={cx(classes.boldText)}>{value.text}</span>
+		<span className={cx(classes.boldText)}>
+			<MaskedText text={value.text} />
+		</span>
 	</>
 );
 

@@ -12,7 +12,6 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
-import Link from 'next/link';
 import Head from 'next/head';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
@@ -217,23 +216,6 @@ const ProductInformationPage = (props: Props) => {
 							</Tag>
 						))}
 					</div>
-				</div>
-				<div>
-					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
-						Données statistiques publiques
-					</h3>
-					{product.isPublic ? 'Oui' : 'Non'}
-					{product.isPublic && (
-						<div className={fr.cx('fr-mt-1v')}>
-							<Link
-								className={fr.cx('fr-link', 'fr-text--sm')}
-								href={`/public/product/${product.id}/stats`}
-								target="_blank"
-							>
-								Voir la page publique
-							</Link>
-						</div>
-					)}
 				</div>
 				{ownRight === 'carrier_admin' && !hasLockedForm && (
 					<div>

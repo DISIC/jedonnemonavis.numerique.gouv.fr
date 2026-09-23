@@ -10,6 +10,7 @@ import { useTranslation } from 'next-i18next';
 import { SetStateAction, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ArrayRadio } from './ArrayRadio';
+import { PersonalDataAlert } from './PersonalDataAlert';
 import { CheckboxInput } from './CheckboxInput';
 import { MarkInput } from './MarkInput';
 import { SmileyInput } from './SmileyInput';
@@ -187,26 +188,37 @@ export const Field = (props: Props) => {
 					>
 						{opinion[field.name]?.length || 0} / 15000
 					</div>
+					{/*
+					  Pas de Notice permanente ici : sur ce rendu historique, le
+					  `downLabel` du gabarit porte déjà le rappel (« Ne partagez
+					  aucune information personnelle »), juste au-dessus.
+					*/}
+					<PersonalDataAlert value={opinion[field.name] || ''} />
 				</div>
 			);
 		case 'input-text':
 			return (
-				<Input
-					hintText={field.hint ? t(field.hint) : undefined}
-					label={<h3>{t(field.label)}</h3>}
-					state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
-					stateRelatedMessage="Maximum 250 caractères"
-					nativeInputProps={{
-						value: opinion[field.name] as string,
-						maxLength: 250,
-						onChange: e => {
-							setOpinion({
-								...opinion,
-								[field.name]: e.target.value
-							});
+				<>
+					<Input
+						hintText={field.hint ? t(field.hint) : undefined}
+						label={<h3>{t(field.label)}</h3>}
+						state={
+							(opinion[field.name] || '').length > 250 ? 'error' : 'default'
 						}
-					}}
-				/>
+						stateRelatedMessage="Maximum 250 caractères"
+						nativeInputProps={{
+							value: opinion[field.name] as string,
+							maxLength: 250,
+							onChange: e => {
+								setOpinion({
+									...opinion,
+									[field.name]: e.target.value
+								});
+							}
+						}}
+					/>
+					<PersonalDataAlert value={opinion[field.name] || ''} />
+				</>
 			);
 		case 'input-email': {
 			const emailValue = (opinion[field.name] as string) || '';
