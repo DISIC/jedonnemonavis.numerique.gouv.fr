@@ -1,3 +1,4 @@
+import { ProConnectMigration } from '@/src/components/auth/ProConnectMigration';
 import { closeHeaderMenuModal, stripQueryAndHash } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -476,6 +477,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			<div id="jdma-widget-anchor" className={classes.widgetAnchor} />
 
 			<main id="main" role="main" tabIndex={-1}>
+				{session?.user && !session.user.proconnect && (
+					<ProConnectMigration legacyLoginUntil={session.legacyLoginUntil} />
+				)}
 				{!!session?.user && !shouldDisplayUserDetailsForm && (
 					<Notice
 						isClosable

@@ -91,9 +91,9 @@ const DashBoard = () => {
 	}, [resetContext, router.events]);
 
 	useEffect(() => {
-		if (isLoadingSettings) return;
-		setShouldModalOpen(!settings.newsModalSeen);
-	}, [isLoadingSettings, settings.newsModalSeen]);
+		if (isLoadingSettings || !session) return;
+		setShouldModalOpen(!settings.newsModalSeen && session.user.proconnect);
+	}, [isLoadingSettings, settings.newsModalSeen, session]);
 
 	useEffect(() => {
 		if (!shouldModalOpen || !newsModal || hasOpenedNewsModalRef.current) return;
