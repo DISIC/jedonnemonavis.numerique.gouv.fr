@@ -1,18 +1,13 @@
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { dynamicAnswersInputSchema } from './schemas';
 import { createOrUpdateAnswers, formatDynamicAnswer } from './utils';
 
 export const dynamicInsertOrUpdateReviewInputSchema = z.object({
 	review_id: z.number(),
 	review_created_at: z.date(),
-	answers: z.array(
-		z.object({
-			block_id: z.number(),
-			answer_item_id: z.number().optional(),
-			answer_text: z.string().optional()
-		})
-	)
+	answers: dynamicAnswersInputSchema
 });
 
 export const dynamicInsertOrUpdateReviewMutation = async ({
