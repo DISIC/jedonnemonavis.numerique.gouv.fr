@@ -379,8 +379,6 @@ export const middleware = t.middleware;
 // Unprotected procedure
 export const publicProcedure = t.procedure;
 
-// Les procédures publiques touchant à l'authentification (énumération de
-// comptes, envoi d'OTP, réinitialisation de mot de passe) sont limitées par IP.
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 20;
 

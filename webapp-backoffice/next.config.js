@@ -20,6 +20,11 @@ const nextConfig = {
 	rewrites() {
 		return [{ source: '/v2/_next/:path*', destination: '/_next/:path*' }];
 	},
+	async redirects() {
+		return ['/register/:path*', '/login/otp', '/reset-password/:path*'].map(
+			source => ({ source, destination: '/login', permanent: true })
+		);
+	},
 	async headers() {
 		return [
 			{

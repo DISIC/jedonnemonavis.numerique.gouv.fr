@@ -1,4 +1,4 @@
-import { LoginForm } from '@/src/components/auth/LoginForm';
+import { ProConnectLogin } from '@/src/components/auth/ProConnectLogin';
 import { ProconnectError } from '@/src/components/auth/ProConnectError';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -49,7 +49,7 @@ export default function Login() {
 							{error === 'INVALID_PROVIDER' ? (
 								<ProconnectError />
 							) : (
-								<LoginForm />
+								<ProConnectLogin />
 							)}
 						</div>
 					</div>

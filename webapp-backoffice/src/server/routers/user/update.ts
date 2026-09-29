@@ -1,5 +1,6 @@
 import { UserUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
+import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { checkUserDomain, omitPassword } from './utils';
@@ -28,25 +29,19 @@ export const updateUserMutation = async ({
 
 	const {
 		role,
-		password,
+		email,
+		password: _ignoredPassword,
 		active,
-		xwiki_account,
-		proconnect_account,
+		xwiki_account: _ignoredXwikiAccount,
+		proconnect_account: _ignoredProconnectAccount,
 		created_at,
 		updated_at,
 		id: _ignoredId,
 		...userWithoutSensitive
 	} = user;
 
-	const dataToUpdate = isAdmin
-		? {
-				...userWithoutSensitive,
-				role,
-				password,
-				active,
-				xwiki_account,
-				proconnect_account
-		  }
+	const dataToUpdate: Prisma.UserUncheckedUpdateInput = isAdmin
+		? { ...userWithoutSensitive, role, email, active }
 		: { ...userWithoutSensitive };
 
 	if (dataToUpdate.email) {

@@ -8,7 +8,6 @@ import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { exportRouter } from './export';
 import { domainRouter } from './domain';
-import { userRequestRouter } from './userRequest';
 import { userEventRouter } from './userEvent';
 import { answerRouter } from './answer';
 import openAPIRouter from './open-api';
@@ -32,7 +31,6 @@ export const appRouter = router({
 	favorite: favoriteRouter,
 	export: exportRouter,
 	domain: domainRouter,
-	userRequest: userRequestRouter,
 	userEvent: userEventRouter,
 	userDetails: userDetailsRouter,
 	answer: answerRouter,
