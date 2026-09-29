@@ -2,11 +2,16 @@ import { ProConnectLogin } from '@/src/components/auth/ProConnectLogin';
 import { ProconnectError } from '@/src/components/auth/ProConnectError';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import { getLegacyLoginUntil } from '@/src/utils/proconnect';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 
-export default function Login() {
+interface Props {
+	legacyLoginUntil: string | null;
+}
+
+export default function Login({ legacyLoginUntil }: Props) {
 	const { classes, cx } = useStyles();
 	const router = useRouter();
 	const { error } = router.query;
@@ -49,7 +54,7 @@ export default function Login() {
 							{error === 'INVALID_PROVIDER' ? (
 								<ProconnectError />
 							) : (
-								<ProConnectLogin />
+								<ProConnectLogin legacyLoginUntil={legacyLoginUntil} />
 							)}
 						</div>
 					</div>
@@ -67,3 +72,7 @@ const useStyles = tss
 			backgroundColor: fr.colors.decisions.background.alt.grey.default
 		}
 	}));
+
+export const getServerSideProps = () => ({
+	props: { legacyLoginUntil: getLegacyLoginUntil() }
+});

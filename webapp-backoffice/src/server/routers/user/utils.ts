@@ -9,6 +9,32 @@ export function generateUnusablePassword() {
 	return bcrypt.hashSync(generateRandomString(32), bcrypt.genSaltSync(10));
 }
 
+export async function linkLegacyAccountToProConnect(
+	prisma: PrismaClient,
+	legacyEmail: string,
+	proconnectEmail: string
+): Promise<string | null> {
+	const legacyUser = await prisma.user.findUnique({
+		where: { email: legacyEmail }
+	});
+
+	if (!legacyUser || legacyUser.proconnect_account) return null;
+
+	if (legacyEmail !== proconnectEmail) {
+		const emailTaken = await prisma.user.findUnique({
+			where: { email: proconnectEmail }
+		});
+		if (emailTaken) throw new Error('LINK_CONFLICT');
+	}
+
+	await prisma.user.update({
+		where: { id: legacyUser.id },
+		data: { email: proconnectEmail, proconnect_account: true, active: true }
+	});
+
+	return legacyEmail;
+}
+
 export async function makeRelationFromUserInvite(
 	prisma: PrismaClient,
 	email: string
