@@ -14,6 +14,8 @@ const errorMessages: Record<string, string> = {
 	CredentialsSignin: 'Adresse e-mail ou mot de passe incorrect.',
 	PROCONNECT_ACCOUNT:
 		'Ce compte est déjà associé à ProConnect : utilisez le bouton « S’identifier avec ProConnect ».',
+	TOO_MANY_ATTEMPTS:
+		'Trop de tentatives de connexion. Réessayez dans quelques minutes ou utilisez ProConnect.',
 	LEGACY_LOGIN_DISABLED:
 		'La connexion par mot de passe n’est plus disponible : utilisez ProConnect.'
 };

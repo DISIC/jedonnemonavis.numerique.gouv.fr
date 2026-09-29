@@ -12,6 +12,8 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 import { getSiretInfo } from '@/src/utils/queries';
+import { getClientIp } from '@/src/server/utils/client-ip';
+import { consumeRateLimit } from '@/src/server/utils/rate-limit';
 import {
 	getLegacyLoginUntil,
 	isAuthTokenValid,
@@ -222,7 +224,7 @@ export const authOptions: NextAuthOptions = {
 	providers: [
 		CredentialsProvider({
 			credentials: {},
-			async authorize(credentials: Record<string, string> | undefined) {
+			async authorize(credentials: Record<string, string> | undefined, req) {
 				if (!isLegacyLoginEnabled()) {
 					throw new Error('LEGACY_LOGIN_DISABLED');
 				}
@@ -232,6 +234,22 @@ export const authOptions: NextAuthOptions = {
 				}
 
 				const { email, password } = credentials;
+
+				try {
+					consumeRateLimit({
+						key: `login:ip:${getClientIp({ headers: req.headers ?? {} })}`,
+						max: 10,
+						windowMs: 60 * 1000
+					});
+					consumeRateLimit({
+						key: `login:email:${email.toLowerCase()}`,
+						max: 5,
+						windowMs: 15 * 60 * 1000
+					});
+				} catch {
+					throw new Error('TOO_MANY_ATTEMPTS');
+				}
+
 				const user = await prisma.user.findUnique({
 					where: { email: email.toLowerCase() }
 				});
@@ -342,7 +360,7 @@ export const authOptions: NextAuthOptions = {
 					email: profile.email,
 					name: `${profile.given_name} ${profile.usual_name}`.trim(),
 					firstName: profile.given_name,
-					lastName: profile.family_name,
+					lastName: profile.usual_name,
 					active: true,
 					xwiki_account: false,
 					xwiki_username: null,
@@ -353,7 +371,7 @@ export const authOptions: NextAuthOptions = {
 					alerts_enabled: true,
 					created_at: new Date(),
 					updated_at: new Date(),
-					proconnect_account: false
+					proconnect_account: true
 				};
 			}
 		}
