@@ -1,19 +1,21 @@
 import { ReviewWithButtonAndProduct } from '@/prisma/augmented';
-import { Answer, Prisma, PrismaClient } from '@prisma/client';
+import { Answer, PrismaClient } from '@prisma/client';
 import { Client } from '@elastic/elasticsearch';
 import { ElkAnswer } from '@/src/utils/types';
 import { TRPCError } from '@trpc/server';
 import { FormStepNames } from '@/src/pages/[id]';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
+import type {
+	DynamicAnswerInput,
+	ReviewAnswerInput,
+	ReviewChildAnswerInput,
+	ReviewInput
+} from './schemas';
 
 export async function formatDynamicAnswer(
 	prisma: PrismaClient,
-	answer: {
-		block_id: number;
-		answer_item_id?: number;
-		answer_text?: string;
-	}
-): Promise<Prisma.AnswerCreateInput> {
+	answer: DynamicAnswerInput
+): Promise<ReviewAnswerInput> {
 	const block = await prisma.formTemplateBlock.findUnique({
 		where: { id: answer.block_id },
 		include: { options: true }
@@ -27,7 +29,7 @@ export async function formatDynamicAnswer(
 	}
 
 	let answerText = answer.answer_text || '';
-	let intention = 'neutral';
+	const intention = 'neutral' as const;
 	let answerItemId = 0;
 
 	if (answer.answer_item_id) {
@@ -38,7 +40,7 @@ export async function formatDynamicAnswer(
 		}
 	}
 
-	const kind =
+	const kind: ReviewAnswerInput['kind'] =
 		block.type_bloc === 'input_text' ||
 		block.type_bloc === 'input_text_area' ||
 		block.type_bloc === 'input_email'
@@ -53,15 +55,25 @@ export async function formatDynamicAnswer(
 		kind,
 		answer_text: answerText,
 		intention,
-		answer_item_id: answerItemId,
-		review: {}
-	} as Prisma.AnswerCreateInput;
+		answer_item_id: answerItemId
+	};
+}
+
+function pickAnswerScalars(answer: ReviewChildAnswerInput) {
+	return {
+		field_code: answer.field_code,
+		field_label: answer.field_label,
+		answer_item_id: answer.answer_item_id,
+		answer_text: answer.answer_text,
+		intention: answer.intention,
+		kind: answer.kind
+	};
 }
 
 export async function createOrUpdateAnswers(
 	ctx: { prisma: PrismaClient; elkClient: Client },
 	input: {
-		answers: Prisma.AnswerCreateInput[];
+		answers: ReviewAnswerInput[];
 		review: ReviewWithButtonAndProduct;
 		step_name?: FormStepNames;
 	}
@@ -120,15 +132,12 @@ export async function createOrUpdateAnswers(
 
 			const formatAnswer = {
 				data: {
-					...answer,
+					...pickAnswerScalars(answer),
 					child_answers: answer.child_answers
 						? {
 								createMany: {
-									data: (
-										answer.child_answers.createMany
-											?.data as Prisma.AnswerCreateManyParent_answerInput[]
-									).map(item => ({
-										...item,
+									data: answer.child_answers.createMany.data.map(item => ({
+										...pickAnswerScalars(item),
 										review_id: review.id,
 										review_created_at: review.created_at
 									}))
@@ -240,15 +249,20 @@ export async function createOrUpdateAnswers(
 export async function createReview(
 	ctx: { prisma: PrismaClient; elkClient: Client },
 	input: {
-		review: Prisma.ReviewUncheckedCreateInput;
-		answers: Prisma.AnswerCreateInput[];
+		review: ReviewInput;
+		answers: ReviewAnswerInput[];
 	}
 ) {
 	const { prisma } = ctx;
 	const { review, answers } = input;
 
 	const newReview = await prisma.review.create({
-		data: review,
+		data: {
+			product_id: review.product_id,
+			button_id: review.button_id,
+			form_id: review.form_id,
+			user_id: review.user_id
+		},
 		include: {
 			product: true,
 			button: true
