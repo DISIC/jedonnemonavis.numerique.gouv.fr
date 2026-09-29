@@ -1,6 +1,7 @@
 import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 
 const AccountPage = () => {
 	return;
@@ -40,10 +41,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		secret: process.env.JWT_SECRET
 	});
 
-	if (
-		!currentUserToken ||
-		(currentUserToken.exp as number) < new Date().getTime() / 1000
-	) {
+	if (!isAuthTokenValid(currentUserToken)) {
 		await prisma.$disconnect();
 		return {
 			redirect: {

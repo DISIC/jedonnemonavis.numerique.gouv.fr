@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import {
 	buildUserScopedKey,
 	deleteMemoryValue,
@@ -32,7 +33,7 @@ export default async function handler(
 		req,
 		secret: process.env.JWT_SECRET
 	});
-	if (!token || (token.exp as number) * 1000 < Date.now())
+	if (!isAuthTokenValid(token))
 		return res.status(401).json({ msg: 'You shall not pass.' });
 
 	const userEmail = ((token.email as string) || '').toLowerCase();
