@@ -141,8 +141,8 @@ Un unique appel, atomique, qui crée l'ensemble.
 6. `Button` créé selon `integration_type`, avec le style de bouton par défaut du template
    (`FormTemplateButton.isDefault`).
 7. Droits & invitations : pour chaque email (créateur + admins), création d'un
-   `AccessRight` `carrier_admin` (réutilise la logique de `accessRight.create`) ; un
-   `UserInviteToken` est généré si le compte n'existe pas encore.
+   `AccessRight` `carrier_admin` (réutilise la logique de `accessRight.create`) ; si le
+   compte n'existe pas encore, l'invitation est rattachée à sa première connexion ProConnect.
 8. **Après commit** (effets de bord) : envoi des mails, journalisation `ApiKeyLog` et
    `UserEvent`.
 
@@ -159,7 +159,7 @@ Un unique appel, atomique, qui crée l'ensemble.
     {
       "email": "createur@culture.gouv.fr",
       "account_existed": false,
-      "register_url": "https://…/register?email=…&inviteToken=…"
+      "register_url": "https://…/login"
     }
   ],
   "already_existed": false
@@ -200,16 +200,17 @@ sera ouvert.
 ## Emails
 
 - **Créateur de la démarche** : un **nouveau template** react-email dédié au parcours
-  DN×JDMA (`webapp-backoffice/emails/`), l'invitant à créer/activer son compte JDMA.
+  DN×JDMA (`webapp-backoffice/emails/`), l'invitant à se connecter à JDMA via ProConnect.
 - **Autres admins invités** : le template d'invitation classique existant
   (`renderUserInviteEmail`).
-- Mécanique réutilisée : `sendMail`, `UserInviteToken`, lien
-  `${baseUrl}/register?email=…&inviteToken=…`. À l'inscription,
-  `makeRelationFromUserInvite` convertit l'invitation (email seul) en droits réels.
+- Mécanique réutilisée : `sendMail`, lien `${baseUrl}/login`. À la première connexion
+  ProConnect, `makeRelationFromUserInvite` convertit l'invitation (email seul) en droits
+  réels.
 
-> **Contrainte domaine** : l'inscription (`register`) n'autorise que les domaines
-> whitelistés ou en `.gouv.fr` (`checkUserDomain`). Les admins DN hors `.gouv.fr` devront
-> voir leur domaine whitelisté.
+> **Contrainte compte** : la connexion se fait uniquement via ProConnect avec double
+> authentification ; un compte JDMA n'est créé que si le SIRET ProConnect correspond à une
+> entité publique (forme juridique 7 ou 8). L'email ProConnect doit correspondre à l'email
+> invité.
 
 ## Journalisation
 

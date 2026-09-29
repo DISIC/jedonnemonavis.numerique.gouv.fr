@@ -5,16 +5,11 @@ import { JdmaUserInviteEmailProps } from './interface';
 
 export const JdmaUserInviteEmail = ({
 	inviterName = 'Jean Dupont',
-	recipientEmail = 'user@example.com',
-	inviteToken = 'example-token-123',
 	productTitle,
 	entityName,
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaUserInviteEmailProps) => {
-	const link = `${baseUrl}/register?${new URLSearchParams({
-		email: recipientEmail,
-		inviteToken
-	})}`;
+	const link = `${baseUrl}/login`;
 
 	const accessType = productTitle
 		? `la démarche « ${productTitle} »`
@@ -31,8 +26,8 @@ export const JdmaUserInviteEmail = ({
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>
-				&nbsp; » et vous donne accès à {accessType}. Afin de créer votre compte,
-				veuillez cliquer sur le lien ci-dessous.
+				&nbsp; » et vous donne accès à {accessType}. Pour y accéder,
+				connectez-vous avec ProConnect en cliquant sur le lien ci-dessous.
 			</Text>
 			<Link href={link} target="_blank" style={buttonLink}>
 				{link}
