@@ -1,12 +1,15 @@
-import { EntityUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { normalizeString } from '@/src/utils/tools';
 import { z } from 'zod';
+import { checkEntityRight } from './utils';
 
 export const updateEntityInputSchema = z.object({
 	id: z.number(),
-	entity: EntityUncheckedUpdateInputSchema
+	entity: z.object({
+		name: z.string().min(1),
+		acronym: z.string()
+	})
 });
 
 export const updateEntityMutation = async ({
@@ -18,21 +21,29 @@ export const updateEntityMutation = async ({
 }) => {
 	const { id, entity } = input;
 
-	const existsEntity = await ctx.prisma.entity.findUnique({
-		where: { name: typeof entity.name === 'string' ? entity.name : undefined }
+	await checkEntityRight({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		entity_id: id
 	});
 
-	if (existsEntity && existsEntity.id !== entity.id)
+	const existsEntity = await ctx.prisma.entity.findUnique({
+		where: { name: entity.name }
+	});
+
+	if (existsEntity && existsEntity.id !== id)
 		throw new TRPCError({
 			code: 'CONFLICT',
 			message: 'Entity with this name already exists'
 		});
 
-	entity.name_formatted = normalizeString(entity.name as string);
-
 	const updatedEntity = await ctx.prisma.entity.update({
 		where: { id },
-		data: { ...entity }
+		data: {
+			name: entity.name,
+			acronym: entity.acronym,
+			name_formatted: normalizeString(entity.name)
+		}
 	});
 
 	return { data: updatedEntity };

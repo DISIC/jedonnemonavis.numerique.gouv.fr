@@ -1,3 +1,4 @@
+import { omitPassword } from '@/src/server/routers/user/utils';
 import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
@@ -85,7 +86,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		props: {
 			isOwn: focusedUser?.id === currentUser.id,
 			userId: focusedUser?.id,
-			user: JSON.parse(JSON.stringify(focusedUser))
+			user: JSON.parse(
+				JSON.stringify(focusedUser ? omitPassword(focusedUser) : null)
+			)
 		}
 	};
 };

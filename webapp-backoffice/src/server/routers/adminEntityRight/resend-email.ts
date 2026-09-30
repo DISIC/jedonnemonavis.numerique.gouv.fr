@@ -3,6 +3,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkEntityRight } from '../entity/utils';
 
 export const resendAdminEntityRightEmailInputSchema = z.object({
 	entity_id: z.number(),
@@ -19,12 +20,21 @@ export const resendAdminEntityRightEmailMutation = async ({
 	const { user_email, entity_id } = input;
 	const contextUser = ctx.session!.user;
 
-	const entity = await ctx.prisma.entity.findUnique({
-		where: { id: entity_id }
+	const pendingInvite = await ctx.prisma.adminEntityRight.findFirst({
+		where: { entity_id, user_email_invite: user_email.toLowerCase() }
 	});
 
-	if (!entity)
-		throw new TRPCError({ code: 'NOT_FOUND', message: 'Entity not found' });
+	if (!pendingInvite)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Pending invite not found'
+		});
+
+	const { entity } = await checkEntityRight({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		entity_id: pendingInvite.entity_id
+	});
 
 	const emailHtml = await renderUserInviteEmail({
 		inviterName: contextUser.name || "Quelqu'un",

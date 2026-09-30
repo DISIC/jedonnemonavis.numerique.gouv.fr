@@ -1,13 +1,23 @@
-import { UserUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { Prisma } from '@prisma/client';
+import { NotificationFrequency, UserRole } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { checkUserDomain, omitPassword } from './utils';
+import { assertAdminOrOwn, checkUserDomain, omitPassword } from './utils';
 
 export const updateUserInputSchema = z.object({
 	id: z.number(),
-	user: UserUncheckedUpdateInputSchema
+	user: z.object({
+		firstName: z.string().nullable().optional(),
+		lastName: z.string().nullable().optional(),
+		email: z.string().email().optional(),
+		notifications: z.boolean().optional(),
+		notifications_frequency: z.nativeEnum(NotificationFrequency).optional(),
+		alerts_enabled: z.boolean().optional(),
+		// Réservés aux administrateurs (ignorés sinon).
+		role: z.nativeEnum(UserRole).optional(),
+		active: z.boolean().optional()
+	})
 });
 
 export const updateUserMutation = async ({
@@ -20,47 +30,40 @@ export const updateUserMutation = async ({
 	const { id, user } = input;
 	const isAdmin = ctx.session?.user?.role.includes('admin');
 
-	if (!isAdmin && ctx.session?.user?.id !== id.toString()) {
-		throw new TRPCError({
-			code: 'FORBIDDEN',
-			message: 'Cannot update another user'
-		});
-	}
+	assertAdminOrOwn(ctx.session, id);
 
-	const {
-		role,
-		email,
-		password: _ignoredPassword,
-		active,
-		xwiki_account: _ignoredXwikiAccount,
-		proconnect_account: _ignoredProconnectAccount,
-		created_at,
-		updated_at,
-		id: _ignoredId,
-		...userWithoutSensitive
-	} = user;
+	const { role, active, ...userWithoutSensitive } = user;
 
-	const dataToUpdate: Prisma.UserUncheckedUpdateInput = isAdmin
-		? { ...userWithoutSensitive, role, email, active }
+	const dataToUpdate = isAdmin
+		? { ...userWithoutSensitive, role, active }
 		: { ...userWithoutSensitive };
+
+	if (dataToUpdate.email) {
+		dataToUpdate.email = dataToUpdate.email.toLowerCase();
+
+		const currentUser = await ctx.prisma.user.findUnique({ where: { id } });
+		if (currentUser?.email === dataToUpdate.email) delete dataToUpdate.email;
+		else if (currentUser?.proconnect_account)
+			throw new TRPCError({
+				code: 'FORBIDDEN',
+				message: 'ProConnect account email cannot be changed'
+			});
+	}
 
 	if (dataToUpdate.email) {
 		const userHasConflict = await ctx.prisma.user.findUnique({
 			where: {
-				email: ((dataToUpdate.email as string) || '').toLowerCase()
+				email: dataToUpdate.email
 			}
 		});
 
-		if (userHasConflict)
+		if (userHasConflict && userHasConflict.id !== id)
 			throw new TRPCError({
 				code: 'CONFLICT',
 				message: 'User already exists'
 			});
 
-		const isWhiteListed = await checkUserDomain(
-			ctx.prisma,
-			((dataToUpdate.email as string) || '').toLowerCase()
-		);
+		const isWhiteListed = await checkUserDomain(ctx.prisma, dataToUpdate.email);
 
 		if (!isWhiteListed)
 			throw new TRPCError({

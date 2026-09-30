@@ -4,6 +4,8 @@ import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
+import { checkRightToProceed } from '../product/utils';
+
 export const createAccessRightInputSchema = z.object({
 	user_email: z.string().email(),
 	product_id: z.number(),
@@ -19,6 +21,12 @@ export const createAccessRightMutation = async ({
 }) => {
 	const contextUser = ctx.session!.user;
 	const { user_email, product_id, role } = input;
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id
+	});
 
 	const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({
 		where: {
@@ -73,7 +81,10 @@ export const createAccessRightMutation = async ({
 			status: role,
 			product_id
 		},
-		include: { user: true, product: true }
+		include: {
+			user: { select: { firstName: true, lastName: true, email: true } },
+			product: true
+		}
 	});
 
 	if (newAccessRight.user === null) {

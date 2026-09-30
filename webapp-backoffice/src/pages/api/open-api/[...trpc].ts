@@ -8,10 +8,12 @@ import {
 	isIpBanned,
 	markWouldBlock,
 	resolveRoute,
+	resolveRoutePath,
 	shouldLogBannedHit,
-	startApiLog
+	startApiLog,
+	toRoutedPath
 } from '@/src/server/open-api-log';
-import { appRouter } from '@/src/server/routers/root';
+import { openApiRouter } from '@/src/server/routers/open-api-root';
 import { createContext } from '@/src/server/trpc';
 
 /**
@@ -58,7 +60,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	// n'atteignent jamais un endpoint et sont pourtant les plus instructifs.
 	// Voir `src/server/open-api-log/`.
 	const entry = startApiLog(req);
-	entry.route = resolveRoute(entry.method, entry.url);
+	const routedPath = toRoutedPath(req.query.trpc);
+	entry.route = routedPath
+		? resolveRoutePath(entry.method, routedPath)
+		: resolveRoute(entry.method, entry.url);
 	entry.request_body = requestPayload(req);
 
 	captureResponse(res, entry);
@@ -87,7 +92,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	try {
 		return await createOpenApiNextHandler({
-			router: appRouter,
+			router: openApiRouter,
 			createContext,
 			responseMeta: undefined,
 			onError: undefined

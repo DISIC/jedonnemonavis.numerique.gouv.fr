@@ -1,5 +1,4 @@
 import {
-	AccessRightSchema,
 	AccessRightWithRelations,
 	AdminEntityRightWithRelations,
 	User
@@ -163,11 +162,11 @@ const UserAccess: React.FC<Props> = props => {
 
 	const handleSwitchStatus = async (id: number) => {
 		const ar = user?.accessRights.find(ar => ar.id === id);
-		let parsedAr = AccessRightSchema.parse(ar);
 		if (ar) {
 			updateAccessRight.mutate({
-				...parsedAr,
-				status: ar.status.includes('admin') ? 'carrier_user' : 'carrier_admin'
+				id: ar.id,
+				status: ar.status.includes('admin') ? 'carrier_user' : 'carrier_admin',
+				product_id: ar.product_id
 			});
 			setDisplayToast(
 				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${

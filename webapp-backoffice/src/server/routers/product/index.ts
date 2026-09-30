@@ -13,6 +13,13 @@ import { restoreProductInputSchema, restoreProductMutation } from './restore';
 
 export { checkRightToProceed } from './utils';
 
+// Exposée en REST par le routeur dédié aux open API (open-api-root.ts)
+export const getXWikiIdsProcedure = publicProcedure
+	.meta({ openapi: { method: 'GET', path: '/products/xwiki' } })
+	.input(getProductXWikiIdsInputSchema)
+	.output(getProductXWikiIdsOutputSchema)
+	.query(getProductXWikiIdsQuery);
+
 export const productRouter = router({
 	getById: publicProcedure
 		.meta({ logEvent: true })
@@ -24,11 +31,7 @@ export const productRouter = router({
 		.input(getProductListInputSchema)
 		.query(getProductListQuery),
 
-	getXWikiIds: publicProcedure
-		.meta({ openapi: { method: 'GET', path: '/products/xwiki' } })
-		.input(getProductXWikiIdsInputSchema)
-		.output(getProductXWikiIdsOutputSchema)
-		.query(getProductXWikiIdsQuery),
+	getXWikiIds: getXWikiIdsProcedure,
 
 	create: protectedProcedure
 		.input(createProductInputSchema)

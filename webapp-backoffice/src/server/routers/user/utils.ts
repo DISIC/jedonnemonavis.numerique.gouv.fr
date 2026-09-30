@@ -2,8 +2,10 @@ import {
 	extractDomainFromEmail,
 	generateRandomString
 } from '@/src/utils/tools';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, User } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
+import { Session } from 'next-auth';
 
 export function generateUnusablePassword() {
 	return bcrypt.hashSync(generateRandomString(32), bcrypt.genSaltSync(10));
@@ -36,6 +38,19 @@ export async function makeRelationFromUserInvite(
 			data: { user_email: normalizedEmail }
 		});
 	}
+}
+
+/** Contrôle « admin ou soi-même » sur l'input parsé de la procédure. */
+export function assertAdminOrOwn(session: Session | null, id: number) {
+	const isAdmin = !!session?.user?.role?.includes('admin');
+	const isOwn =
+		session?.user?.id !== undefined && Number(session.user.id) === id;
+
+	if (!isAdmin && !isOwn)
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not authorized to perform this action'
+		});
 }
 
 export function omitPassword<T extends { password?: string | null }>(

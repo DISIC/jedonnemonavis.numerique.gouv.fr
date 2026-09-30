@@ -1,6 +1,6 @@
 import { generateOpenApiDocument } from 'trpc-openapi';
 
-import { appRouter } from './routers/root';
+import { openApiRouter } from './routers/open-api-root';
 
 /**
  * Préfixe des points d'accès réservés aux partenaires (clé API `is_partner`, voir
@@ -29,7 +29,8 @@ const keepPaths = (
  * à la résolution des routes journalisées (`open-api-log/routes.ts`), qui doit continuer
  * à reconnaître les appels partenaires.
  */
-export const openApiDocument = generateOpenApiDocument(appRouter, {
+// Generate OpenAPI schema document
+export const openApiDocument = generateOpenApiDocument(openApiRouter, {
 	title: 'JDMA API',
 	description: '',
 	version: '1.0',

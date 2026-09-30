@@ -3,6 +3,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkEntityRight } from '../entity/utils';
 
 export const createAdminEntityRightInputSchema = z.object({
 	user_email: z.string().email(),
@@ -19,6 +20,12 @@ export const createAdminEntityRightMutation = async ({
 }) => {
 	const contextUser = ctx.session!.user;
 	const { user_email, entity_id } = input;
+
+	await checkEntityRight({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		entity_id
+	});
 
 	const adminEntityRightAlreadyExists =
 		await ctx.prisma.adminEntityRight.findFirst({
@@ -48,7 +55,10 @@ export const createAdminEntityRightMutation = async ({
 			user_email_invite: !userExists ? user_email.toLowerCase() : null,
 			entity_id
 		},
-		include: { user: true, entity: true }
+		include: {
+			user: { select: { firstName: true, lastName: true, email: true } },
+			entity: true
+		}
 	});
 
 	if (newAdminEntityRight.user === null) {
