@@ -92,6 +92,18 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 
 - 40+ Prisma models in `webapp-backoffice/prisma/schema.prisma`
 - **The schema is duplicated in `webapp-form/prisma/schema.prisma`** — mirror any changes to both, then run `npx prisma generate` in both apps
+
+### Mirrored files
+
+There is no monorepo tooling: each app resolves `@/*` inside its own root, so code needed by both is duplicated byte for byte. Mirror any change to **every** file in this list, in both apps:
+
+| File                         | Purpose                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma`       | Data model                                                                                                      |
+| `src/utils/personal-data.ts` | Personal-data detection in verbatims — blocks submission in `webapp-form`, masks on read in `webapp-backoffice` |
+
+Verify with `diff webapp-form/src/utils/personal-data.ts webapp-backoffice/src/utils/personal-data.ts`.
+
 - Multi-tenant: `Entity` (organisations) with hierarchical access rights
 - Configurable form templates with `FormTemplate`, `FormStep`, `FormBlock`, `FormBlockOption`
 - `UserEvent` model for full audit trail (service_create, service_update, …)
@@ -107,6 +119,7 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 ### Form app rendering modes
 
 The public form page (`webapp-form/src/pages/[id].tsx`) reads query parameters:
+
 - `preview=true` → preview mode (disables submission)
 - `mode=widget` → embedded in the floating widget panel (strips chrome)
 

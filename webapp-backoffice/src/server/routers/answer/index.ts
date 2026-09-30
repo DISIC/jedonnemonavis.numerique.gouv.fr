@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '@/src/server/trpc';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import {
 	getByFieldCodeInputSchema,
 	getByFieldCodeQuery
@@ -66,7 +66,7 @@ export const answerRouter = router({
 		.input(getObservatoireStatsInputSchema)
 		.query(getObservatoireStatsQuery),
 
-	getKeywords: publicProcedure
+	getKeywords: protectedProcedure
 		.input(getKeywordsInputSchema)
 		.query(getKeywordsQuery)
 });

@@ -2,12 +2,13 @@ import type { Context } from '@/src/server/trpc';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkFormVisibility } from '../answer/utils';
 
 export const countReviewsInputSchema = z.object({
 	numberPerPage: z.number(),
 	page: z.number().default(1),
 	product_id: z.number().optional(),
-	form_id: z.number().optional(),
+	form_id: z.number(),
 	shouldIncludeAnswers: z.boolean().optional().default(false),
 	mustHaveVerbatims: z.boolean().optional().default(false),
 	sort: z.string().optional(),
@@ -53,33 +54,35 @@ export const countReviewsQuery = async ({
 }) => {
 	const { form_id } = input;
 
-	const form = form_id
-		? await ctx.prisma.form.findUnique({
-				where: {
-					id: form_id
-				},
-				include: { product: { select: { isPublic: true } } }
-		  })
-		: null;
+	const form = await ctx.prisma.form.findUnique({
+		where: {
+			id: form_id
+		},
+		include: { product: { select: { status: true } } }
+	});
 
-	if (!ctx.session?.user && !form?.product.isPublic) {
+	if (!form) {
 		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: 'This product is not public'
+			code: 'NOT_FOUND',
+			message: 'Form not found'
 		});
 	}
 
-	const { where } = formatWhereAndOrder(input, !!form?.legacy);
+	await checkFormVisibility({ ctx, form });
+
+	const { where } = formatWhereAndOrder(
+		{ ...input, product_id: form.product_id },
+		form.legacy
+	);
 
 	const [countFiltered, countAll, countForm1, countForm2] = await Promise.all([
 		ctx.prisma.review.count({ where }),
 		ctx.prisma.review.count({
 			where: {
-				product_id: input.product_id,
-				...(form_id &&
-					(form?.legacy
-						? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
-						: { form_id }))
+				product_id: form.product_id,
+				...(form.legacy
+					? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+					: { form_id })
 			}
 		}),
 		ctx.prisma.review.count({

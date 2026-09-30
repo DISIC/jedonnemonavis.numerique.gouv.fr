@@ -28,11 +28,14 @@ export const getExportListQuery = async ({
 
 	const expiryCutoff = new Date(Date.now() - EXPORT_LINK_TTL_SECONDS * 1000);
 
+	const isGlobalAdmin = ctx.session!.user.role.includes('admin');
+
 	const exports = await ctx.prisma.export.findMany({
 		where: {
 			...(status && { status: { in: status } }),
 			product_id,
 			form_id,
+			...(!isGlobalAdmin && { only_deleted_reviews: false }),
 			OR: [{ status: { not: 'done' } }, { endDate: { gt: expiryCutoff } }]
 		},
 		orderBy: { created_at: 'desc' },
@@ -48,6 +51,7 @@ export const getExportListQuery = async ({
 			params: true,
 			status: true,
 			type: true,
+			only_deleted_reviews: true,
 			startDate: true,
 			endDate: true,
 			progress: true,

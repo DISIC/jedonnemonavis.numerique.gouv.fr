@@ -1,12 +1,14 @@
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
+	DELETED_REVIEWS_EXPORT_NOTICE,
 	getExportSummaryLabels,
 	getFilterableBlocks,
 	parseExportParams
 } from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Button } from '@prisma/client';
@@ -22,6 +24,7 @@ interface Props {
 		countAll: number;
 	};
 	params: string;
+	onlyDeleted: boolean;
 	onExportCreated: (exportId: number) => void;
 	hasExportsInProgress: boolean;
 	form: FormWithElements;
@@ -34,6 +37,7 @@ const ExportModal = (props: Props) => {
 		counts,
 		form,
 		params,
+		onlyDeleted,
 		onExportCreated,
 		hasExportsInProgress,
 		buttons
@@ -55,29 +59,35 @@ const ExportModal = (props: Props) => {
 		}
 	});
 
+	const parsedParams = React.useMemo(() => parseExportParams(params), [params]);
+	const s = counts.countFiltered === 1 ? '' : 's';
+
 	const validateExport = () => {
 		createExport.mutate({
 			user_id: parseInt(session?.user?.id as string),
-			params: choice == 'filtered' ? params : '',
+			params: choice === 'filtered' ? params : '',
 			product_id: form.product_id,
 			form_id: form.id,
-			type: format ?? 'csv'
+			type: format ?? 'csv',
+			only_deleted_reviews: onlyDeleted
 		});
 	};
 
 	React.useEffect(() => {
-		setStartDate(JSON.parse(params).startDate || null);
-		setEndDate(JSON.parse(params).endDate || null);
-	}, [params]);
+		setStartDate(parsedParams.startDate || null);
+		setEndDate(parsedParams.endDate || null);
+	}, [parsedParams]);
 
 	const currentFiltersLabels = React.useMemo(
 		() =>
-			getExportSummaryLabels(
-				parseExportParams(params),
-				buttons,
-				getFilterableBlocks(form)
-			),
-		[params, buttons, form]
+			onlyDeleted
+				? []
+				: getExportSummaryLabels(
+						parsedParams,
+						buttons,
+						getFilterableBlocks(form)
+				  ),
+		[onlyDeleted, parsedParams, buttons, form]
 	);
 
 	return (
@@ -118,51 +128,67 @@ const ExportModal = (props: Props) => {
 			title={'Exporter les réponses'}
 			size="large"
 		>
-			<section className={fr.cx('fr-mt-6v')}>
-				<h2 className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-mb-2v')}>
-					Filtres sélectionnés
-				</h2>
-				<ul
-					className={cx(classes.filtersList, fr.cx('fr-text--xs', 'fr-my-0'))}
-				>
-					{currentFiltersLabels.map((filter, index) => (
-						<li key={index}>{filter}</li>
-					))}
-				</ul>
-			</section>
-			<RadioButtons
-				legend="Mode d'exportation"
-				name="choice"
-				hintText={`Le délais des exports volumineux peut prendre jusqu'à une heure. ${
-					!startDate || !endDate
-						? `Les formats de date de vos filtres sont actuellement invalides`
-						: ''
-				}`}
-				options={[
-					{
-						label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
-						nativeInputProps: {
-							value: 'filtered',
-							checked: choice === 'filtered',
-							onChange: () => {
-								setChoice('filtered');
+			{onlyDeleted ? (
+				<Alert
+					severity="info"
+					small
+					description={`${DELETED_REVIEWS_EXPORT_NOTICE} (${counts.countFiltered} réponse${s})`}
+					className={fr.cx('fr-mt-6v')}
+				/>
+			) : (
+				<>
+					<section className={fr.cx('fr-mt-6v')}>
+						<h2
+							className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-mb-2v')}
+						>
+							Filtres sélectionnés
+						</h2>
+						<ul
+							className={cx(
+								classes.filtersList,
+								fr.cx('fr-text--xs', 'fr-my-0')
+							)}
+						>
+							{currentFiltersLabels.map((filter, index) => (
+								<li key={index}>{filter}</li>
+							))}
+						</ul>
+					</section>
+					<RadioButtons
+						legend="Mode d'exportation"
+						name="choice"
+						hintText={`Le délais des exports volumineux peut prendre jusqu'à une heure. ${
+							!startDate || !endDate
+								? `Les formats de date de vos filtres sont actuellement invalides`
+								: ''
+						}`}
+						options={[
+							{
+								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponse${s})`,
+								nativeInputProps: {
+									value: 'filtered',
+									checked: choice === 'filtered',
+									onChange: () => {
+										setChoice('filtered');
+									},
+									disabled: !startDate || !endDate
+								}
 							},
-							disabled: !startDate || !endDate
-						}
-					},
-					{
-						label: `Toutes les réponses (${counts.countAll} réponses)`,
-						nativeInputProps: {
-							value: 'all',
-							checked: choice === 'all',
-							onChange: () => {
-								setChoice('all');
+							{
+								label: `Toutes les réponses (${counts.countAll} réponse${s})`,
+								nativeInputProps: {
+									value: 'all',
+									checked: choice === 'all',
+									onChange: () => {
+										setChoice('all');
+									}
+								}
 							}
-						}
-					}
-				]}
-				className={fr.cx('fr-mt-10v')}
-			/>
+						]}
+						className={fr.cx('fr-mt-10v')}
+					/>
+				</>
+			)}
 			<RadioButtons
 				legend="Format de fichier"
 				name="format"

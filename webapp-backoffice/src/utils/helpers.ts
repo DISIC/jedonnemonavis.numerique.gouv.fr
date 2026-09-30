@@ -1,3 +1,8 @@
+import type {
+	FrIconClassName,
+	RiIconClassName
+} from '@codegouvfr/react-dsfr/fr/generatedFromCss/classNames';
+
 export const FIELD_CODE_BOOLEAN_VALUES = [
 	{
 		slug: 'contact_reached',
@@ -117,3 +122,39 @@ export const HELP_LABELS = [
 		value: 'Autre'
 	}
 ] as const;
+
+export type HeaderMenuLink = {
+	label: string;
+	href: string;
+	iconId: FrIconClassName | RiIconClassName;
+	isExternal: boolean;
+};
+
+export const HELP_MENU_LINKS: HeaderMenuLink[] = [
+	{
+		label: 'Nouveautés',
+		href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
+		iconId: 'fr-icon-flashlight-line',
+		isExternal: true
+	},
+	{
+		label: 'Documentation',
+		href: 'https://docs.numerique.gouv.fr/docs/99f0a063-5bfd-49a6-97b5-7ec5fb83206d/',
+		iconId: 'fr-icon-file-text-line',
+		isExternal: true
+	},
+	{
+		label: 'Signaler un problème',
+		href:
+			process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ||
+			'https://jedonnemonavis.numerique.gouv.fr',
+		iconId: 'fr-icon-edit-line',
+		isExternal: false
+	},
+	{
+		label: 'Nous contacter',
+		href: '/public/contact',
+		iconId: 'fr-icon-chat-3-line',
+		isExternal: false
+	}
+];

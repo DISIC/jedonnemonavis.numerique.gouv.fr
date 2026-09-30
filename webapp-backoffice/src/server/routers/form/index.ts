@@ -8,6 +8,11 @@ import { getFormTemplatesQuery } from './get-form-templates';
 import { createFormInputSchema, createFormMutation } from './create';
 import { updateFormInputSchema, updateFormMutation } from './update';
 import { deleteFormInputSchema, deleteFormMutation } from './delete';
+import {
+	setFormVisibilityInputSchema,
+	setFormVisibilityOutputSchema,
+	setFormVisibilityMutation
+} from './set-visibility';
 
 export const formRouter = router({
 	getById: protectedProcedure
@@ -33,5 +38,11 @@ export const formRouter = router({
 	delete: protectedProcedure
 		.meta({ logEvent: true })
 		.input(deleteFormInputSchema)
-		.mutation(deleteFormMutation)
+		.mutation(deleteFormMutation),
+
+	setVisibility: protectedProcedure
+		.meta({ logEvent: true })
+		.input(setFormVisibilityInputSchema)
+		.output(setFormVisibilityOutputSchema)
+		.mutation(setFormVisibilityMutation)
 });

@@ -1,10 +1,67 @@
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProductStatus } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { Session } from 'next-auth';
 import { Buckets, ElkAnswer, ElkAnswerDefaults } from '../../../types/custom';
 import { checkRightToProceed } from '../product/utils';
+
+export const checkFormVisibility = async ({
+	ctx,
+	form
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	form: {
+		isPublic: boolean;
+		product_id: number;
+		product: { status: ProductStatus };
+	};
+}) => {
+	if (form.isPublic && form.product.status !== 'archived') return;
+
+	if (!ctx.session?.user)
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'These statistics are not public'
+		});
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session,
+		product_id: form.product_id,
+		authorizeCarrierUser: true
+	});
+};
+
+export const checkProductVisibility = async ({
+	ctx,
+	product
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	product: { id: number; status: ProductStatus };
+}) => {
+	if (product.status !== 'archived') {
+		const publicForm = await ctx.prisma.form.findFirst({
+			where: { product_id: product.id, isPublic: true },
+			select: { id: true }
+		});
+
+		if (publicForm) return;
+	}
+
+	if (!ctx.session?.user)
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'These statistics are not public'
+		});
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session,
+		product_id: product.id,
+		authorizeCarrierUser: true
+	});
+};
 
 export const checkAndGetProduct = async ({
 	ctx,
@@ -21,40 +78,34 @@ export const checkAndGetProduct = async ({
 
 	if (!product) throw new Error('Product not found');
 
-	// Un service non public n'est lisible que par les personnes qui y ont des
-	// droits : une session quelconque ne suffit pas.
-	if (!product.isPublic) {
-		if (!ctx.session?.user)
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: 'This product is not public'
-			});
-
-		await checkRightToProceed({
-			prisma: ctx.prisma,
-			session: ctx.session,
-			product_id,
-			authorizeCarrierUser: true
-		});
-	}
+	await checkProductVisibility({ ctx, product });
 
 	return product;
 };
 
-export const checkAndGetForm = async ({
+export const checkAndGetFormForProduct = async ({
 	ctx,
+	product_id,
 	form_id
 }: {
 	ctx: { prisma: PrismaClient; session: Session | null };
+	product_id: number;
 	form_id: number;
 }) => {
 	const form = await ctx.prisma.form.findUnique({
 		where: {
 			id: form_id
-		}
+		},
+		include: { product: { select: { status: true } } }
 	});
 
-	if (!form) throw new Error('Form not found');
+	if (!form || form.product_id !== product_id)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Form not found'
+		});
+
+	await checkFormVisibility({ ctx, form });
 
 	return form;
 };
