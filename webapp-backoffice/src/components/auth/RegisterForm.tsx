@@ -12,7 +12,6 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
-import { Prisma } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -234,10 +233,15 @@ export const RegisterForm = (props: Props) => {
 			return;
 		}
 
-		const { inviteToken, ...userInfosWithoutInviteToken } = userInfos;
+		const { inviteToken } = userInfos;
 
 		registerUser.mutate({
-			user: userInfosWithoutInviteToken as Prisma.UserCreateInput,
+			user: {
+				firstName: userInfos.firstName,
+				lastName: userInfos.lastName,
+				email: userInfos.email as string,
+				password: userInfos.password as string
+			},
 			inviteToken,
 			otp
 		});

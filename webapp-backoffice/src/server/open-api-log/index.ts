@@ -33,4 +33,9 @@ export {
 	type EndpointPolicy,
 	type RateLimit
 } from './policy';
-export { resolveRoute, toOpenApiPath } from './routes';
+export {
+	resolveRoute,
+	resolveRoutePath,
+	toOpenApiPath,
+	toRoutedPath
+} from './routes';

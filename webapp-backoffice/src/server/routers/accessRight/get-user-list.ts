@@ -24,7 +24,11 @@ export const getAccessRightUserListQuery = async ({
 		where,
 		take: numberPerPage,
 		skip: (page - 1) * numberPerPage,
-		include: { user: true }
+		include: {
+			user: {
+				select: { id: true, firstName: true, lastName: true, email: true }
+			}
+		}
 	});
 
 	const count = await ctx.prisma.accessRight.count({ where });

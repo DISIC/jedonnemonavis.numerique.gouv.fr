@@ -64,7 +64,6 @@ const PublicDataModal = (props: Props) => {
 							await updateProduct.mutateAsync({
 								id: product.id,
 								product: {
-									...product,
 									isPublic: !isPublic
 								}
 							});

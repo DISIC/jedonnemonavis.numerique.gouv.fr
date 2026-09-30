@@ -52,7 +52,9 @@ export const getUserRequestListQuery = async ({
 		take: numberPerPage,
 		skip: numberPerPage * (page - 1),
 		include: {
-			user: true
+			user: {
+				select: { id: true, firstName: true, lastName: true, email: true }
+			}
 		}
 	});
 

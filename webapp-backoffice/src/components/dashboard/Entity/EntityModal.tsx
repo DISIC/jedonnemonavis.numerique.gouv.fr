@@ -66,7 +66,7 @@ const EntityModal = (props: Props) => {
 	});
 
 	const onSubmit: SubmitHandler<FormValues> = async data => {
-		const tmpEntity = data;
+		const tmpEntity = { name: data.name, acronym: data.acronym };
 		let currentEntity;
 
 		try {
