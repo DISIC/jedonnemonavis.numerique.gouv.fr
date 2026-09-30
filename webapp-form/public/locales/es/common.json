@@ -348,6 +348,12 @@
 			"share_text": "Si lo desea, puede compartir su experiencia públicamente y de forma anónima. La administración responderá y la utilizará para mejorar sus servicios digitales.",
 			"share_link": "Compartir mi experiencia públicamente"
 		},
+		"server_error": {
+			"h1": "Error inesperado",
+			"error_code": "Error {{code}}",
+			"lead": "Lo sentimos, el servicio tiene un problema. Estamos trabajando para resolverlo lo antes posible.",
+			"text": "Intente actualizar la página o vuelva a intentarlo más tarde."
+		},
 		"form_closed": {
 			"h1": "Este formulario está cerrado",
 			"text": "Este formulario se ha cerrado, pero puede compartir su experiencia a través del formulario del sitio Service Public+.",
