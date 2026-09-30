@@ -9,15 +9,13 @@ declare module 'next-auth' {
 		user: {
 			id: string;
 			role: UserRole;
-			proconnect: boolean;
+			// ...other properties
 		} & DefaultSession['user'];
-		legacyLoginUntil: string | null;
 	}
 }
 
 declare module 'next-auth/jwt' {
 	interface JWT {
 		acr?: string;
-		legacy?: boolean;
 	}
 }

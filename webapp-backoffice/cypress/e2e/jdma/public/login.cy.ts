@@ -14,7 +14,8 @@ describe('jdma-login', () => {
 	it('only offers ProConnect, with the security notice and contact', () => {
 		cy.visit(`${appUrl}/login`);
 		cy.get(selectors.proconnectButton).should('be.visible');
-		cy.contains('Une connexion plus sécurisée').should('be.visible');
+		cy.contains('h1', 'Se connecter').should('be.visible');
+		cy.contains('uniquement via le service ProConnect').should('be.visible');
 		cy.contains('a', 'contact.jdma@design.numerique.gouv.fr').should(
 			'have.attr',
 			'href',
@@ -38,15 +39,9 @@ describe('jdma-login', () => {
 			.should('include', encodeURIComponent(selectors.url.entities));
 	});
 
-	it('explains ProConnect rejections', () => {
+	it('explains a ProConnect login without MFA', () => {
 		cy.visit(`${appUrl}/login?error=MFA_REQUIRED`);
 		cy.contains('Double authentification requise').should('be.visible');
-		cy.visit(`${appUrl}/login?error=LINK_CONFLICT`);
-		cy.contains('Association impossible').should('be.visible');
-		cy.visit(`${appUrl}/login?error=INVALID_PROVIDER`);
-		cy.contains(
-			'Nous ne sommes pas en mesure de valider votre accès avec ProConnect'
-		).should('be.visible');
 	});
 
 	it('redirects the removed sign-up and password pages to the login', () => {

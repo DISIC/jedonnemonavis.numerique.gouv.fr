@@ -13,7 +13,6 @@ import { ButtonIntegrationTypes } from '@prisma/client';
 const SESSION_COOKIE = `${
 	appUrl.startsWith('https://') ? '__Secure-' : ''
 }next-auth.session-token`;
-const MIGRATION_MODAL_SEEN_KEY = 'jdma-proconnect-migration-seen';
 
 type NewProConnectUser = { firstName: string; lastName: string };
 
@@ -43,10 +42,7 @@ export function login(
 		JSON.stringify({ ...userSettings, formHelpModalSeen: customHelpModalSeen }),
 		{ expiry: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 }
 	);
-	cy.visit(`${appUrl}${selectors.url.products}`, {
-		onBeforeLoad: win =>
-			win.sessionStorage.setItem(MIGRATION_MODAL_SEEN_KEY, 'true')
-	});
+	cy.visit(`${appUrl}${selectors.url.products}`);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryFillUserDetailsForm();
 	if (!loginOnly) tryCloseModal();

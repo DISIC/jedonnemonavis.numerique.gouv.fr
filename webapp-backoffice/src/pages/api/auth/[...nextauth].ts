@@ -6,25 +6,10 @@ import {
 	type GetServerSidePropsContext
 } from 'next';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
-import { getToken } from 'next-auth/jwt';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
-import { getSiretInfo } from '@/src/utils/queries';
-import { getClientIp } from '@/src/server/utils/client-ip';
-import { consumeRateLimit } from '@/src/server/utils/rate-limit';
-import {
-	getLegacyLoginUntil,
-	isAuthTokenValid,
-	isLegacyLoginEnabled,
-	isMfaAcr,
-	isSessionTokenAllowed,
-	proconnectMfaClaims
-} from '@/src/utils/proconnect';
+import { isMfaAcr, proconnectMfaClaims } from '@/src/utils/proconnect';
 import {
 	generateUnusablePassword,
-	linkLegacyAccountToProConnect,
 	makeRelationFromUserInvite
 } from '@/src/server/routers/user/utils';
 
@@ -37,7 +22,6 @@ interface ProconnectProfile {
 	email: string;
 	given_name: string;
 	usual_name: string;
-	siret: string;
 	chorusdt?: string;
 	organizational_unit?: string;
 	idp_id?: string;
@@ -49,90 +33,6 @@ const useSecureCookies = (process.env.NEXTAUTH_URL ?? '').startsWith(
 );
 const cookiePrefix = useSecureCookies ? '__Secure-' : '';
 const hostPrefix = useSecureCookies ? '__Host-' : '';
-
-const signInWithProConnect = async (
-	proconnectProfile: ProconnectProfile,
-	req?: NextApiRequest
-) => {
-	if (!isMfaAcr(proconnectProfile.acr)) {
-		throw new Error('MFA_REQUIRED');
-	}
-
-	const email = proconnectProfile.email?.toLowerCase();
-
-	const currentToken = req
-		? await getToken({ req, secret: process.env.JWT_SECRET })
-		: null;
-	const linkedFrom =
-		currentToken?.legacy && currentToken.email && isAuthTokenValid(currentToken)
-			? await linkLegacyAccountToProConnect(prisma, currentToken.email, email)
-			: null;
-
-	let dbUser = await prisma.user.findUnique({
-		where: { email }
-	});
-
-	if (dbUser) {
-		if (!dbUser.proconnect_account || !dbUser.active) {
-			dbUser = await prisma.user.update({
-				where: { id: dbUser.id },
-				data: { proconnect_account: true, active: true }
-			});
-		}
-	} else {
-		try {
-			const data = await getSiretInfo(proconnectProfile.siret);
-
-			const etablissement = data.etablissement;
-			const formeJuridique =
-				etablissement.uniteLegale.categorieJuridiqueUniteLegale;
-
-			if (formeJuridique.startsWith('7') || formeJuridique.startsWith('8')) {
-				dbUser = await prisma.user.create({
-					data: {
-						email,
-						firstName: proconnectProfile.given_name,
-						lastName: proconnectProfile.usual_name,
-						role: 'user',
-						password: generateUnusablePassword(),
-						notifications: true,
-						notifications_frequency: 'weekly',
-						active: true,
-						xwiki_account: false,
-						xwiki_username: null,
-						proconnect_account: true
-					}
-				});
-			} else {
-				throw new Error('INVALID_PROVIDER');
-			}
-		} catch (err) {
-			console.error('❌ Erreur :', err);
-			throw new Error('INVALID_PROVIDER');
-		}
-	}
-
-	await makeRelationFromUserInvite(prisma, email);
-
-	await prisma.userEvent.create({
-		data: {
-			user_id: dbUser.id,
-			action: 'user_signin',
-			created_at: new Date(),
-			metadata: linkedFrom ? { proconnect_linked_from: linkedFrom } : {}
-		}
-	});
-
-	return true;
-};
-
-const createSignInCallback =
-	(req?: NextApiRequest): NonNullable<NextAuthOptions['callbacks']>['signIn'] =>
-	async ({ account, profile }) => {
-		if (account?.provider === 'credentials') return true;
-		if (account?.provider !== 'openid') return false;
-		return signInWithProConnect(profile as ProconnectProfile, req);
-	};
 
 export const authOptions: NextAuthOptions = {
 	debug: process.env.NODE_ENV === 'development',
@@ -184,25 +84,20 @@ export const authOptions: NextAuthOptions = {
 						id: user.id.toString(),
 						role: user.role,
 						name: `${user.firstName} ${user.lastName}`,
-						email: user.email,
-						proconnect: user.proconnect_account === true
+						email: user.email
 					};
 				}
 			}
-			session.legacyLoginUntil = getLegacyLoginUntil();
 			return session;
 		},
-		jwt: ({ token, user, account, profile }) => {
+		jwt: ({ token, account, profile }) => {
 			if (account?.provider === 'openid' && profile) {
 				const proconnectProfile = profile as ProconnectProfile;
 				token.email = proconnectProfile.email?.toLowerCase();
 				token.acr = proconnectProfile.acr;
-			} else if (account?.provider === 'credentials' && user) {
-				token.email = user.email;
-				token.legacy = true;
 			}
-			if (!isSessionTokenAllowed(token)) {
-				throw new Error('SESSION_NOT_ALLOWED');
+			if (!isMfaAcr(token.acr)) {
+				throw new Error('MFA_REQUIRED');
 			}
 			return token;
 		},
@@ -219,91 +114,62 @@ export const authOptions: NextAuthOptions = {
 			} catch {}
 			return baseUrl;
 		},
-		signIn: createSignInCallback()
-	},
-	providers: [
-		CredentialsProvider({
-			credentials: {},
-			async authorize(credentials: Record<string, string> | undefined, req) {
-				if (!isLegacyLoginEnabled()) {
-					throw new Error('LEGACY_LOGIN_DISABLED');
-				}
 
-				if (!credentials) {
-					throw new Error('Missing credentials');
-				}
+		async signIn({ account, profile }) {
+			if (account?.provider !== 'openid') return false;
 
-				const { email, password } = credentials;
+			const proconnectProfile = profile as ProconnectProfile;
 
-				try {
-					consumeRateLimit({
-						key: `login:ip:${getClientIp({ headers: req.headers ?? {} })}`,
-						max: 10,
-						windowMs: 60 * 1000
-					});
-					consumeRateLimit({
-						key: `login:email:${email.toLowerCase()}`,
-						max: 5,
-						windowMs: 15 * 60 * 1000
-					});
-				} catch {
-					throw new Error('TOO_MANY_ATTEMPTS');
-				}
+			if (!isMfaAcr(proconnectProfile.acr)) {
+				throw new Error('MFA_REQUIRED');
+			}
 
-				const user = await prisma.user.findUnique({
-					where: { email: email.toLowerCase() }
-				});
+			const email = proconnectProfile.email?.toLowerCase();
 
-				if (!user || !user.active) {
-					return null;
-				}
+			let dbUser = await prisma.user.findUnique({
+				where: { email }
+			});
 
-				if (user.proconnect_account) {
-					throw new Error('PROCONNECT_ACCOUNT');
-				}
-
-				let isPasswordCorrect = false;
-
-				if (user.password.startsWith('$2b$')) {
-					isPasswordCorrect = bcrypt.compareSync(password, user.password);
-				} else {
-					const hashedPassword = crypto
-						.createHash('sha256')
-						.update(password)
-						.digest('hex');
-					isPasswordCorrect = hashedPassword === user.password;
-				}
-
-				if (!isPasswordCorrect) {
-					return null;
-				}
-
-				if (!user.password.startsWith('$2b$')) {
-					const salt = bcrypt.genSaltSync(10);
-					const newHashedPassword = bcrypt.hashSync(password, salt);
-					await prisma.user.update({
-						where: {
-							id: user.id
-						},
-						data: {
-							password: newHashedPassword
-						}
+			if (dbUser) {
+				if (!dbUser.proconnect_account || !dbUser.active) {
+					dbUser = await prisma.user.update({
+						where: { id: dbUser.id },
+						data: { proconnect_account: true, active: true }
 					});
 				}
-
-				await prisma.userEvent.create({
+			} else {
+				dbUser = await prisma.user.create({
 					data: {
-						user_id: user.id,
-						action: 'user_signin',
-						created_at: new Date(),
-						metadata: {}
+						email,
+						firstName: proconnectProfile.given_name,
+						lastName: proconnectProfile.usual_name,
+						role: 'user',
+						password: generateUnusablePassword(),
+						notifications: true,
+						notifications_frequency: 'weekly',
+						active: true,
+						xwiki_account: false,
+						xwiki_username: null,
+						proconnect_account: true
 					}
 				});
-
-				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}
-		}),
 
+			await makeRelationFromUserInvite(prisma, email);
+
+			await prisma.userEvent.create({
+				data: {
+					user_id: dbUser.id,
+					action: 'user_signin',
+					created_at: new Date(),
+					metadata: {}
+				}
+			});
+
+			return true;
+		}
+	},
+	providers: [
 		// Provider Proconnect (OpenID)
 		{
 			id: 'openid',
@@ -314,7 +180,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name siret',
+					scope: 'openid email given_name usual_name',
 					claims: proconnectMfaClaims
 				}
 			},
@@ -397,10 +263,6 @@ export const getServerAuthSession = (ctx: {
 const authHandler: NextApiHandler = (
 	req: NextApiRequest,
 	res: NextApiResponse
-) =>
-	NextAuth(req, res, {
-		...authOptions,
-		callbacks: { ...authOptions.callbacks, signIn: createSignInCallback(req) }
-	});
+) => NextAuth(req, res, authOptions);
 
 export default authHandler;

@@ -1,4 +1,4 @@
-import type { IncomingHttpHeaders } from 'http';
+import type { NextApiRequest } from 'next';
 
 /**
  * Résout l'IP cliente à partir des en-têtes de proxy.
@@ -8,10 +8,7 @@ import type { IncomingHttpHeaders } from 'http';
  * fourni par le client. Prendre la première entrée revient à faire confiance à
  * une valeur arbitraire.
  */
-export const getClientIp = (req: {
-	headers: IncomingHttpHeaders;
-	socket?: { remoteAddress?: string };
-}): string => {
+export const getClientIp = (req: NextApiRequest): string => {
 	const header = (req.headers['x-client-ip'] ||
 		req.headers['x-forwarded-for']) as string | string[] | undefined;
 
