@@ -81,13 +81,13 @@ Fichier: `public/login.cy.ts`
 - should pass a11y checks
 - only offers ProConnect, with the security notice and contact
 - starts the ProConnect flow with the requested callback
-- explains ProConnect rejections
+- explains a ProConnect login without MFA
 - redirects the removed sign-up and password pages to the login
 - sends anonymous visitors of the back-office to the login
 - rejects sessions without ProConnect MFA
 - accepts a session with ProConnect MFA
 
-Couverture fonctionnelle : Mire ProConnect seule avec encart sécurité et contact, démarrage du flux OIDC (requête interceptée), messages `MFA_REQUIRED` / `LINK_CONFLICT` / `INVALID_PROVIDER`, redirection des anciennes pages d'inscription et de mot de passe, protection du backoffice, rejet des sessions sans `acr` de double authentification.
+Couverture fonctionnelle : Mire ProConnect seule avec encart sécurité et contact, démarrage du flux OIDC (requête interceptée), message `MFA_REQUIRED`, redirection des anciennes pages d'inscription et de mot de passe, protection du backoffice, rejet des sessions sans `acr` de double authentification.
 
 ## Onboarding d'un nouvel agent (jdma-onboarding)
 

@@ -208,9 +208,8 @@ sera ouvert.
   réels.
 
 > **Contrainte compte** : la connexion se fait uniquement via ProConnect avec double
-> authentification ; un compte JDMA n'est créé que si le SIRET ProConnect correspond à une
-> entité publique (forme juridique 7 ou 8). L'email ProConnect doit correspondre à l'email
-> invité.
+> authentification ; le compte JDMA est créé à la première connexion. L'email ProConnect
+> doit correspondre à l'email invité.
 
 ## Journalisation
 

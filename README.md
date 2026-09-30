@@ -82,46 +82,30 @@ yarn dev
 
 #### Connexion en local
 
-La connexion au backoffice se fait avec ProConnect et une double authentification. Pendant la période de transition, les comptes pas encore associés à ProConnect peuvent aussi se connecter par mot de passe.
-
-**Avec ProConnect (environnement d'intégration)**
+La connexion au backoffice se fait uniquement avec ProConnect et une double authentification, sur l'environnement d'intégration ProConnect :
 
 1. Créez un fournisseur de service de test sur l'[espace partenaires ProConnect](https://partenaires.proconnect.gouv.fr) avec :
    - l'URL de redirection `http://localhost:3000/api/auth/callback/openid` ;
    - l'URL de déconnexion `http://localhost:3000/login`.
 2. Renseignez `PROCONNECT_CLIENT_ID` et `PROCONNECT_CLIENT_SECRET` dans `.env`. `PROCONNECT_DOMAIN` pointe déjà sur l'intégration (`fca.integ01.dev-agentconnect.fr`).
-3. Renseignez `INSEE_API_KEY` : la création d'un compte à la première connexion vérifie le SIRET auprès de l'INSEE.
-4. Sur `/login`, cliquez sur « S'identifier avec ProConnect » et choisissez le fournisseur d'identité de test. Ses [identifiants de test](https://partenaires.proconnect.gouv.fr/docs/fournisseur-service/identifiants-fi-test) permettent de choisir librement l'email, le SIRET et le niveau `acr` :
+   L'encart d'information sécurité de `/login` s'affiche jusqu'à la date `PROCONNECT_NOTICE_UNTIL` (dernier jour inclus, au format `AAAA-MM-JJ`). Sans cette variable, il reste affiché.
+3. Sur `/login`, cliquez sur « S'identifier avec ProConnect » et choisissez le fournisseur d'identité de test. Ses [identifiants de test](https://partenaires.proconnect.gouv.fr/docs/fournisseur-service/identifiants-fi-test) permettent de choisir librement l'email, le SIRET et le niveau `acr` :
 
-| Cas à tester                                                                                | Email                        | SIRET                              | `acr`                |
-| ------------------------------------------------------------------------------------------- | ---------------------------- | ---------------------------------- | -------------------- |
-| Connexion à un compte de seed                                                               | `admin@example.com`          | `10000001700010`                   | `eidas2` ou `eidas3` |
-| Création d'un compte                                                                        | une adresse inconnue en base | `10000001700010` (entité publique) | `eidas2` ou `eidas3` |
-| Refus sans double authentification (par ProConnect ou par JDMA, avec `?error=MFA_REQUIRED`) | n'importe laquelle           | n'importe lequel                   | `eidas1`             |
-| Refus hors secteur public                                                                   | une adresse inconnue en base | SIRET d'une entreprise privée      | `eidas2`             |
+| Cas à tester                                                                                | Email                        | `acr`                |
+| ------------------------------------------------------------------------------------------- | ---------------------------- | -------------------- |
+| Connexion à un compte de seed                                                               | `admin@example.com`          | `eidas2` ou `eidas3` |
+| Création d'un compte à la première connexion                                                | une adresse inconnue en base | `eidas2` ou `eidas3` |
+| Refus sans double authentification (par ProConnect ou par JDMA, avec `?error=MFA_REQUIRED`) | n'importe laquelle           | `eidas1`             |
 
-**Par mot de passe (période de transition)**
+Les données de test créent les comptes suivants, utilisables avec le fournisseur d'identité de test :
 
-Ajoutez `LEGACY_LOGIN_UNTIL=AAAA-MM-JJ` dans `.env` (dernier jour autorisé), puis redémarrez le serveur. Le formulaire apparaît alors sous le bouton ProConnect. Sans cette variable, la connexion par mot de passe est désactivée.
-
-Voici les utilisateurs créés par les données de test :
-| Email | Rôle | Compte activé | Mot de passe |
-|---------------------|---------------------|---------------|--------------|
-| user1@example.com | Porteur | Non | jdma |
-| user2@example.com | Porteur | Non | jdma |
-| user3@example.com | Porteur | Oui | jdma |
-| user4@example.com | Porteur | Oui | jdma |
-| admin@example.com | Administrateur | Oui | jdma |
-
-Les comptes non activés sont refusés à la connexion par mot de passe. Ils peuvent se connecter via ProConnect avec la même adresse.
-
-Pour tester l'association d'un compte à ProConnect :
-
-1. Connectez-vous par mot de passe, par exemple avec `admin@example.com`.
-2. Dans la modale, cliquez sur ProConnect et saisissez une autre adresse dans le fournisseur d'identité de test.
-3. L'ancien compte prend alors cette adresse et conserve ses droits.
-
-Si vous saisissez une adresse déjà utilisée par un autre compte (par exemple `user4@example.com`), la page affiche le message d'erreur « Association impossible ».
+| Email             | Rôle           |
+| ----------------- | -------------- |
+| user1@example.com | Porteur        |
+| user2@example.com | Porteur        |
+| user3@example.com | Porteur        |
+| user4@example.com | Porteur        |
+| admin@example.com | Administrateur |
 
 #### Création/Édition des templates d'e-mails
 
