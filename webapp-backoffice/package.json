@@ -19,6 +19,7 @@
 		"db:reset:silent": "npx prisma migrate reset --force --skip-generate --skip-seed | awk '/Applying migration/{c++; next} /The following migration/ { next } /migrations\\// { next } /[└├│]─/ { next } {print} END {print \"Applied \" c \" migrations\"\n\n}'",
 		"test": "npx cypress run --browser chrome --headed",
 		"test:reset": "npm run db:reset:silent && npx prisma db seed && npx cypress run --browser chrome --headed",
+		"dev:login": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/dev-login.ts",
 		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts",
 		"worker:export:dev": "tsx watch src/workers/run-export.ts",
 		"worker:export:start": "tsx src/workers/run-export.ts",

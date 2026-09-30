@@ -97,15 +97,17 @@ La connexion au backoffice se fait uniquement avec ProConnect et une double auth
 | Création d'un compte à la première connexion                                                | une adresse inconnue en base | `eidas2` ou `eidas3` |
 | Refus sans double authentification (par ProConnect ou par JDMA, avec `?error=MFA_REQUIRED`) | n'importe laquelle           | `eidas1`             |
 
-Les données de test créent les comptes suivants, utilisables avec le fournisseur d'identité de test :
+Sans client ProConnect d'intégration, `yarn dev:login <email>` (depuis `webapp-backoffice`) copie dans le presse-papier une ligne à coller dans la console du navigateur sur `http://localhost:3000`. Elle ferme la session en cours et connecte au compte demandé, ce qui permet aussi de changer de compte. Le script refuse de tourner si `NEXTAUTH_URL` ne pointe pas sur localhost.
 
-| Email             | Rôle           |
-| ----------------- | -------------- |
-| user1@example.com | Porteur        |
-| user2@example.com | Porteur        |
-| user3@example.com | Porteur        |
-| user4@example.com | Porteur        |
-| admin@example.com | Administrateur |
+Les données de test créent les comptes suivants, utilisables avec le fournisseur d'identité de test ou `yarn dev:login` :
+
+| Email             | Rôle                                      |
+| ----------------- | ----------------------------------------- |
+| admin@example.com | Superadmin (rôle `admin`)                 |
+| user3@example.com | Porteur, avec des droits sur des services |
+| user4@example.com | Porteur, avec des droits sur des services |
+| user1@example.com | Porteur, compte non activé, sans droits   |
+| user2@example.com | Porteur, compte non activé, sans droits   |
 
 #### Création/Édition des templates d'e-mails
 
