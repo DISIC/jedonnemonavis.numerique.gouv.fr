@@ -217,6 +217,10 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
+				if (!user.active) {
+					return null;
+				}
+
 				if (!user.password.startsWith('$2b$')) {
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);

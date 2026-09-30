@@ -5,7 +5,9 @@ import {
 	generateRandomString
 } from '@/src/utils/tools';
 import { Prisma, PrismaClient, User } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
+import { Session } from 'next-auth';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -39,7 +41,12 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 
 export async function registerUserFromOTP(
 	prisma: PrismaClient,
-	user: Prisma.UserCreateInput,
+	user: {
+		firstName?: string;
+		lastName?: string;
+		email: string;
+		password: string;
+	},
 	otp: string
 ) {
 	const userOTP = await prisma.userOTP.findUnique({
@@ -69,8 +76,12 @@ export async function registerUserFromOTP(
 			id: userOTP.user.id
 		},
 		data: {
-			...user,
-			email: user.email.toLowerCase()
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email.toLowerCase(),
+			password: user.password,
+			active: true,
+			xwiki_account: true
 		}
 	});
 
@@ -141,6 +152,19 @@ export async function makeRelationFromUserInvite(
 			data: { user_email: normalizedEmail }
 		});
 	}
+}
+
+/** Contrôle « admin ou soi-même » sur l'input parsé de la procédure. */
+export function assertAdminOrOwn(session: Session | null, id: number) {
+	const isAdmin = !!session?.user?.role?.includes('admin');
+	const isOwn =
+		session?.user?.id !== undefined && Number(session.user.id) === id;
+
+	if (!isAdmin && !isOwn)
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not authorized to perform this action'
+		});
 }
 
 export function omitPassword<T extends { password?: string | null }>(

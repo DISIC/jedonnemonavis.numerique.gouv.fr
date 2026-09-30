@@ -123,14 +123,15 @@ const ProductModal = (props: Props) => {
 			await updateProduct.mutateAsync({
 				id: product.id,
 				product: {
-					...tmpProduct,
-					forms: undefined,
+					title: tmpProduct.title,
+					entity_id: tmpProduct.entity_id,
 					urls: filteredUrls
 				}
 			});
 		} else {
 			const savedProductResponse = await saveProductTmp.mutateAsync({
-				...tmpProduct,
+				title: tmpProduct.title,
+				entity_id: tmpProduct.entity_id,
 				urls: filteredUrls
 			});
 			productId = savedProductResponse.data.id;

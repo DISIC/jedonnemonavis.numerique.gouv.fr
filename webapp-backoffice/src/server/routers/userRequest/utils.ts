@@ -4,26 +4,45 @@ import {
 } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import { Prisma, PrismaClient, RequestMode } from '@prisma/client';
-import crypto from 'crypto';
+import { TRPCError } from '@trpc/server';
+import bcrypt from 'bcrypt';
 import { generateValidationToken, makeRelationFromUserInvite } from '../user';
+import type { CreateUserRequestUserInput } from './create';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
-	user: Prisma.UserCreateInput,
+	user: CreateUserRequestUserInput,
 	userRequest: { reason: string; mode: RequestMode; inviteToken?: string }
 ) {
-	const hashedPassword = crypto
-		.createHash('sha256')
-		.update(user.password)
-		.digest('hex');
+	const email = user.email.toLowerCase();
 
-	user.password = hashedPassword;
+	if (userRequest.inviteToken) {
+		const userInviteToken = await prisma.userInviteToken.findUnique({
+			where: {
+				token: userRequest.inviteToken,
+				user_email: email
+			}
+		});
+
+		if (!userInviteToken)
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Invite token not found for this user'
+			});
+	}
+
+	const salt = bcrypt.genSaltSync(10);
+	const hashedPassword = bcrypt.hashSync(user.password, salt);
 
 	const createdUser = await prisma.user.create({
 		data: {
-			...user,
-			email: user.email.toLowerCase(),
+			email,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			password: hashedPassword,
+			role: 'user',
 			active: false,
+			xwiki_account: false,
 			notifications: true,
 			notifications_frequency: 'weekly'
 		}

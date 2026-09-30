@@ -112,7 +112,10 @@ const NewProduct = () => {
 	};
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		const { ...tmpProductFormData } = data;
+		const tmpProductFormData = {
+			title: data.title,
+			entity_id: data.entity_id
+		};
 		let tmpProduct: Product;
 
 		if (isEditingStep && createdProduct) {

@@ -41,7 +41,7 @@ export const templateToRegex = (template: string): RegExp => {
 		.map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 		.join('[^/]+');
 
-	return new RegExp(`^${pattern}$`);
+	return new RegExp(`^${pattern}$`, 'i');
 };
 
 const buildMatchers = (): RouteMatcher[] => {
@@ -98,9 +98,11 @@ export const toOpenApiPath = (url: string): string => {
 	return normalised || '/';
 };
 
-/** Gabarit correspondant, ou `null` si la route est inconnue (404). */
-export const resolveRoute = (method: string, url: string): string | null => {
-	const path = toOpenApiPath(url);
+/** Gabarit correspondant à un chemin déjà relatif à l'open API (`/avis`). */
+export const resolveRoutePath = (
+	method: string,
+	path: string
+): string | null => {
 	const verb = method.toUpperCase();
 
 	const match = getMatchers().find(
@@ -108,4 +110,19 @@ export const resolveRoute = (method: string, url: string): string | null => {
 	);
 
 	return match?.template ?? null;
+};
+
+/** Gabarit correspondant, ou `null` si la route est inconnue (404). */
+export const resolveRoute = (method: string, url: string): string | null =>
+	resolveRoutePath(method, toOpenApiPath(url));
+
+/** Chemin tel que trpc-openapi le route (segments du catch-all `[...trpc]`). */
+export const toRoutedPath = (
+	segments: string | string[] | undefined
+): string | null => {
+	if (segments === undefined) return null;
+
+	const joined = Array.isArray(segments) ? segments.join('/') : segments;
+
+	return `/${joined.replace(/^\/|\/$/g, '')}`;
 };

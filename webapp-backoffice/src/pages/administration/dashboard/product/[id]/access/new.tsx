@@ -94,7 +94,7 @@ const NewAccess = ({ product }: Props) => {
 
 			updateCreatedUserAccesses([
 				...(createdUserAccesses || []),
-				{ ...createdValue.data }
+				createdValue.data
 			]);
 
 			window._mtm?.push({
