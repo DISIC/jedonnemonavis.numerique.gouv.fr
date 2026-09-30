@@ -3,9 +3,14 @@ import { AnswerIntention, AnswerKind, Prisma, User } from '@prisma/client';
 /** Utilisateur tel qu'exposé par l'API : le hash de mot de passe n'en fait jamais partie. */
 export type UserWithoutPassword = Omit<User, 'password'>;
 
+/** Sous-ensemble minimal d'un utilisateur renvoyé dans les relations (droits, demandes). */
+const publicUserSelect = {
+	select: { firstName: true, lastName: true, email: true }
+} as const;
+
 const AccessRightWithUsers = Prisma.validator<Prisma.AccessRightDefaultArgs>()({
 	include: {
-		user: true
+		user: publicUserSelect
 	}
 });
 
@@ -16,7 +21,7 @@ export type AccessRightWithUsers = Prisma.AccessRightGetPayload<
 const AdminEntityRightWithUsers =
 	Prisma.validator<Prisma.AdminEntityRightDefaultArgs>()({
 		include: {
-			user: true
+			user: publicUserSelect
 		}
 	});
 
@@ -95,7 +100,7 @@ export type UserWithEntities = Prisma.UserGetPayload<typeof UserWithEntities>;
 
 const UserRequestWithUser = Prisma.validator<Prisma.UserRequestDefaultArgs>()({
 	include: {
-		user: true
+		user: publicUserSelect
 	}
 });
 

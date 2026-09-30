@@ -1,4 +1,4 @@
-import { User, UserSchema } from '@/prisma/generated/zod';
+import { User } from '@/prisma/generated/zod';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -79,11 +79,10 @@ const CredentialsCard = (props: Props) => {
 	});
 
 	const onLocalSubmit = async (data: FormValues): Promise<boolean> => {
-		const dataParsed = UserSchema.parse(data);
 		try {
 			await editUser.mutateAsync({
 				id: user.id,
-				user: { ...dataParsed }
+				user: { email: data.email }
 			});
 			return true;
 		} catch (error) {

@@ -1,9 +1,16 @@
-import { ProductUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { actionMapping, normalizeString } from '@/src/utils/tools';
 import { z } from 'zod';
 
-export const createProductInputSchema = ProductUncheckedCreateInputSchema;
+export const productEditableFieldsSchema = z.object({
+	title: z.string().min(1),
+	entity_id: z.number(),
+	urls: z.array(z.string()).optional(),
+	volume: z.number().int().nullable().optional(),
+	isPublic: z.boolean().nullable().optional()
+});
+
+export const createProductInputSchema = productEditableFieldsSchema;
 
 export const createProductMutation = async ({
 	ctx,
@@ -14,11 +21,14 @@ export const createProductMutation = async ({
 }) => {
 	const userEmail = ctx.session?.user?.email;
 
-	productPayload.title_formatted = normalizeString(productPayload.title);
-
 	const product = await ctx.prisma.product.create({
 		data: {
-			...productPayload,
+			title: productPayload.title,
+			title_formatted: normalizeString(productPayload.title),
+			entity_id: productPayload.entity_id,
+			urls: productPayload.urls,
+			volume: productPayload.volume,
+			isPublic: productPayload.isPublic,
 			accessRights: {
 				create: [
 					{

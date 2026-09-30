@@ -1,4 +1,8 @@
-import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import {
+	protectedProcedure,
+	rateLimitedProcedure,
+	router
+} from '@/src/server/trpc';
 import {
 	getUserRequestListInputSchema,
 	getUserRequestListQuery
@@ -24,7 +28,7 @@ export const userRequestRouter = router({
 		.input(getUserRequestListInputSchema)
 		.query(getUserRequestListQuery),
 
-	create: publicProcedure
+	create: rateLimitedProcedure
 		.input(createUserRequestInputSchema)
 		.mutation(createUserRequestMutation),
 

@@ -4,6 +4,7 @@ import { renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { generateInviteToken } from '../helpers';
+import { checkRightToProceed } from '../product/utils';
 
 export const resendAccessRightEmailInputSchema = z.object({
 	product_id: z.number(),
@@ -20,12 +21,25 @@ export const resendAccessRightEmailMutation = async ({
 	const { user_email, product_id } = input;
 	const contextUser = ctx.session!.user;
 
-	const product = await ctx.prisma.product.findUnique({
-		where: { id: product_id }
+	const pendingInvite = await ctx.prisma.accessRight.findFirst({
+		where: {
+			product_id,
+			user_email_invite: user_email.toLowerCase(),
+			status: { not: 'removed' }
+		}
 	});
 
-	if (!product)
-		throw new TRPCError({ code: 'NOT_FOUND', message: 'Product not found' });
+	if (!pendingInvite)
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Pending invite not found'
+		});
+
+	const { product } = await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id: pendingInvite.product_id
+	});
 
 	const token = await generateInviteToken(ctx.prisma, user_email);
 

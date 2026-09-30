@@ -1,6 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import { omitPassword } from './utils';
+import { assertAdminOrOwn, omitPassword } from './utils';
 
 export const getUserByIdInputSchema = z.object({ id: z.number() });
 
@@ -12,6 +12,8 @@ export const getUserByIdQuery = async ({
 	input: z.infer<typeof getUserByIdInputSchema>;
 }) => {
 	const { id } = input;
+
+	assertAdminOrOwn(ctx.session, id);
 
 	const user = await ctx.prisma.user.findUnique({
 		where: { id }

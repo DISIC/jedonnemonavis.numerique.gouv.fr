@@ -158,10 +158,8 @@ export const reviewsListQuery = async ({
 		});
 
 	// Le `enabled` du .meta retire déjà la route REST et l'entrée du document
-	// OpenAPI. Ce contrôle-ci ferme l'autre porte : le routeur openAPI étant monté
-	// dans appRouter, la procédure resterait joignable par
-	// /api/trpc/openAPI.reviewsList avec une clé valide. Même message que pour un
-	// formulaire inconnu, pour ne pas révéler que l'endpoint existe.
+	// OpenAPI. Même message que pour un formulaire inconnu, pour ne pas révéler
+	// que l'endpoint existe.
 	if (!isAvisApiEnabled()) {
 		throw notFound();
 	}

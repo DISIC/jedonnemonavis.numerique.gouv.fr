@@ -13,9 +13,7 @@ export const LEGACY_FORM_IDS: readonly number[] = [1, 2];
  * Le drapeau est lu à trois endroits, qui se recouvrent :
  *   - le `enabled` du `.meta` openapi, qui retire à la fois la route REST et son
  *     entrée dans le document OpenAPI publié ;
- *   - le resolver lui-même, parce que le routeur `openAPI` est monté dans
- *     `appRouter` et que la procédure resterait sinon joignable par
- *     `/api/trpc/openAPI.reviewsList` avec une clé valide ;
+ *   - le resolver lui-même, en défense en profondeur ;
  *   - la page de documentation publique, qui n'affiche l'endpoint que s'il est
  *     présent dans le document.
  *
