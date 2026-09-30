@@ -1,22 +1,27 @@
 # Couverture des tests Cypress E2E
 
-Dernière mise à jour : 2025-08-27
+Dernière mise à jour : 2026-09-30
 
 Ce document dresse l'inventaire des suites de tests end-to-end Cypress actuelles (`webapp-backoffice/cypress/e2e/jdma/**`).
+
+## Authentification dans les tests
+
+La connexion au backoffice se fait uniquement via ProConnect, qui ne peut pas tourner en CI. Les tests ne passent donc pas par l'écran de login. Le helper `login(email)` (`cypress/utils/helpers/common.ts`) appelle la tâche `auth:signIn` (`cypress/plugins/auth-tasks.ts`), qui :
+
+- reproduit ce que fait une connexion ProConnect : compte marqué `proconnect_account`, invitations rattachées par email, création du compte si `firstName` et `lastName` sont fournis ;
+- fabrique un cookie de session NextAuth avec un `acr` de double authentification. Le jeton est chiffré avec `JWT_SECRET`, lu dans le `.env` du backoffice.
+
+La session est mise en cache par utilisateur via `cy.session`. L'écran de login lui-même est couvert par `public/login.cy.ts`.
 
 ## Gestion du compte
 
 Fichier: `bo/account.cy.ts`
 
 - change identity parameters
-- change email : bad emails patterns should not work
-- change email : different emails should not work
-- change email : not whitelisted emails should not work
-- change email : allready existing emails should not work
-- change email : should work if everything OK
+- shows the ProConnect email as read-only credentials
 - delete account
 
-Couverture fonctionnelle : Mise à jour du profil (nom), validation email (format, non correspondance, liste blanche, doublon, succès), suppression de compte et impossibilité de se connecter après suppression.
+Couverture fonctionnelle : Mise à jour du profil (nom), email ProConnect en lecture seule (pas de modification d'email ni de mot de passe), suppression de compte.
 
 ## Partie administration avancée (jdma-admin)
 
@@ -26,10 +31,9 @@ Fichier: `bo/admin.cy.ts`
 - create organisation
 - invite admin on organisation
 - create service
-- register guest admin
-- login guest admin
+- guest admin first ProConnect login gets the invited rights
 
-Couverture fonctionnelle : CRUD utilisateurs (création/suppression en lot), création d'organisation, flux d'invitation, création de service, inscription admin invité + vérification d'accès.
+Couverture fonctionnelle : CRUD utilisateurs (création/suppression en lot), création d'organisation, flux d'invitation (email avec lien `/login`), création de service, première connexion ProConnect de l'admin invité + vérification d'accès.
 
 ## Partie gestion des formulaires (jdma-forms)
 
@@ -70,23 +74,28 @@ Fichier: `bo/logs.cy.ts`
 
 Couverture fonctionnelle : Accessibilité de la page d'historique et état vide.
 
-## Scénarios d'inscription (jdma-register)
+## Écran de connexion (jdma-login)
 
-Fichier: `bo/register.cy.ts`
+Fichier: `public/login.cy.ts`
 
-- should display the agent public question first
-- should show message for non-agent public users
-  Contexte : Inscription agent public
-  - should display the signup form for agent public
-  - Password validation
-    - should not submit the form if the password is too short
-    - should not submit the form if the password lacks a special character
-    - should not submit the form if the password lacks a digit
-  - should submit the form WITH NOT whitelisted email
-  - should allow toggling password visibility
-  - should submit the form WITH whitelisted email (branching flow: existing vs new)
+- should pass a11y checks
+- only offers ProConnect, with the security notice and contact
+- starts the ProConnect flow with the requested callback
+- explains ProConnect rejections
+- redirects the removed sign-up and password pages to the login
+- sends anonymous visitors of the back-office to the login
+- rejects sessions without ProConnect MFA
+- accepts a session with ProConnect MFA
 
-Couverture fonctionnelle : Filtrage d'inscription (agent vs non-agent), respect de la politique de mot de passe, gestion liste blanche / doublon email, bascule visibilité mot de passe, branchements post-inscription.
+Couverture fonctionnelle : Mire ProConnect seule avec encart sécurité et contact, démarrage du flux OIDC (requête interceptée), messages `MFA_REQUIRED` / `LINK_CONFLICT` / `INVALID_PROVIDER`, redirection des anciennes pages d'inscription et de mot de passe, protection du backoffice, rejet des sessions sans `acr` de double authentification.
+
+## Onboarding d'un nouvel agent (jdma-onboarding)
+
+Fichier: `bo/onboarding.cy.ts`
+
+- lets a new agent onboard after a first ProConnect login
+
+Couverture fonctionnelle : Création du compte à la première connexion ProConnect, puis parcours d'onboarding complet (service, accès, formulaire, lien d'intégration).
 
 ## Vérification des réponses (jdma-answer-check)
 
@@ -125,16 +134,17 @@ Couverture fonctionnelle : Complétion du formulaire utilisateur final sur toute
 
 | Suite             | Fichier              | Tests | Thèmes clés                                       |
 | ----------------- | -------------------- | ----- | ------------------------------------------------- |
-| jdma-account      | bo/account.cy.ts     | 7     | Profil, validation email, suppression             |
-| jdma-admin        | bo/admin.cy.ts       | 6     | Gestion utilisateurs, org, service, invit         |
+| jdma-account      | bo/account.cy.ts     | 3     | Profil, email ProConnect, suppression             |
+| jdma-admin        | bo/admin.cy.ts       | 5     | Gestion utilisateurs, org, service, invit         |
 | jdma-forms        | bo/forms.cy.ts       | 5     | CRUD formulaires, lien d'intégration, publication |
 | jdma-home         | bo/home.cy.ts        | 11    | Page publique & navigation                        |
 | jdma-logs         | bo/logs.cy.ts        | 1     | État vide historique                              |
-| jdma-register     | bo/register.cy.ts    | 11    | Inscription, politique mot de passe               |
+| jdma-login        | public/login.cy.ts   | 8     | Mire ProConnect, erreurs, sessions sans 2FA       |
+| jdma-onboarding   | bo/onboarding.cy.ts  | 1     | Première connexion ProConnect + onboarding        |
 | jdma-answer-check | bo/reviewCheck.cy.ts | 1     | Présence avis                                     |
 | jdma-users        | bo/users.cy.ts       | 8     | Cycle gestion des accès                           |
 | jdma-form-review  | form/review.cy.ts    | 1     | Soumission complète formulaire                    |
 
-Nombre total de tests actifs : 51
+Nombre total de tests actifs : 44
 
 ---
