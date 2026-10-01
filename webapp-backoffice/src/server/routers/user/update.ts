@@ -1,4 +1,5 @@
 import type { Context } from '@/src/server/trpc';
+import { Prisma } from '@prisma/client';
 import { NotificationFrequency, UserRole } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';

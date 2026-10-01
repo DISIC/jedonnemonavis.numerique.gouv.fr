@@ -10,25 +10,48 @@ import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 import { ButtonIntegrationTypes } from '@prisma/client';
 
+const SESSION_COOKIE = `${
+	appUrl.startsWith('https://') ? '__Secure-' : ''
+}next-auth.session-token`;
+
+type NewProConnectUser = { firstName: string; lastName: string };
+
 export function login(
 	email: string,
-	password: string,
 	loginOnly = false,
-	customHelpModalSeen = true
+	customHelpModalSeen = true,
+	newUser?: NewProConnectUser
 ) {
+	cy.session(
+		['proconnect', email.toLowerCase()],
+		() => {
+			cy.task<string>('auth:signIn', { email, ...newUser }).then(token =>
+				cy.setCookie(SESSION_COOKIE, token)
+			);
+		},
+		{
+			validate: () => {
+				cy.request(`${appUrl}/api/auth/session`)
+					.its('body.user.email')
+					.should('eq', email.toLowerCase());
+			}
+		}
+	);
 	cy.setCookie(
 		'jdma-user-settings',
 		JSON.stringify({ ...userSettings, formHelpModalSeen: customHelpModalSeen }),
 		{ expiry: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 }
 	);
-	cy.visit(`${appUrl}/login`);
-	cy.get(selectors.loginForm.email).should('be.visible').type(email);
-	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).should('be.visible').type(password);
-	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
+	cy.visit(`${appUrl}${selectors.url.products}`);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryFillUserDetailsForm();
 	if (!loginOnly) tryCloseModal();
+}
+
+export function setSessionCookie(email: string, acr: string | null) {
+	cy.task<string>('auth:encodeSession', { email, acr }).then(token =>
+		cy.setCookie(SESSION_COOKIE, token)
+	);
 }
 
 export function logout() {
@@ -78,19 +101,16 @@ export function addUrls(urls: string[]) {
 export function fillSignupForm({
 	firstName = 'John',
 	lastName = 'Doe',
-	email = '',
-	password = ''
+	email = ''
 }) {
 	const {
 		firstName: firstNameSelector,
 		lastName: lastNameSelector,
-		email: emailSelector,
-		password: passwordSelector
+		email: emailSelector
 	} = selectors.signupForm;
 	cy.get(firstNameSelector).type(firstName);
 	cy.get(lastNameSelector).type(lastName);
 	if (email !== '') cy.get(emailSelector).type(email);
-	if (password !== '') cy.get(passwordSelector).type(password);
 }
 
 export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
@@ -269,22 +289,18 @@ export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
 }
 
-export function checkMail(click = false, topic = '') {
+export function checkMail(topic: string, expectedLinkPath?: string) {
 	cy.visit(mailerUrl);
 	cy.get('button[ng-click="refresh()"]').click();
 	cy.wait(2000);
 	cy.get('.msglist-message').contains('span', topic).should('be.visible');
-	if (click) {
+	if (expectedLinkPath) {
 		cy.get('.msglist-message').contains('span', topic).click();
 		cy.get('ul.nav-tabs').contains('Plain text').click();
-		cy.get('#preview-plain')
-			.find('a')
-			.each($link => {
-				const href = $link.attr('href');
-				if (href && href.includes('/register')) {
-					cy.wrap($link).invoke('removeAttr', 'target').click();
-				}
-			});
+		cy.get('#preview-plain').should(
+			'contain.text',
+			`${appUrl}${expectedLinkPath}`
+		);
 	}
 }
 

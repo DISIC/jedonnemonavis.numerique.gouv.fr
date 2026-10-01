@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import prisma from '@/src/utils/db';
 
 const REVIEWS_ROOT = '/mnt/jdma/reviews';
@@ -56,7 +57,7 @@ export default async function handler(
 		req,
 		secret: process.env.JWT_SECRET
 	});
-	if (!token || (token.exp as number) * 1000 < Date.now())
+	if (!isAuthTokenValid(token))
 		return res.status(401).json({ msg: 'You shall not pass.' });
 
 	if (req.method !== 'GET') {

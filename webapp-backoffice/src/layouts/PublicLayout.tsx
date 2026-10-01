@@ -1,7 +1,6 @@
 import { closeHeaderMenuModal, stripQueryAndHash } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
@@ -76,23 +75,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		return () => router.events.off('routeChangeStart', close);
 	}, []);
 
-	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
-		{
-			page: 1,
-			numberPerPage: 0,
-			displayProcessed: false
-		},
-		{
-			enabled: session?.user?.role?.includes('admin') ?? false,
-			initialData: {
-				data: [],
-				metadata: {
-					count: 0
-				}
-			}
-		}
-	);
-
 	const {
 		data: userAdminEntityRights,
 		isLoading: isUserAdminEntityRightsLoading
@@ -141,9 +123,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		return !!userDetails?.data;
 	}, [userDetails?.data]);
 
-	const { classes, cx } = useStyles({
-		countUserRequests: userRequestsResult.metadata.count
-	});
+	const { classes, cx } = useStyles();
 
 	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		!session?.user
@@ -154,7 +134,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							href: '/login',
 							target: '_self'
 						},
-						text: 'Connexion / Inscription'
+						text: 'Connexion'
 					}
 			  ]
 			: [
@@ -415,38 +395,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					target: '_self'
 				},
 				isActive: pathname == '/administration/dashboard/domains'
-			},
-			{
-				text: (
-					<div>
-						Demandes d'accès
-						{userRequestsResult.metadata.count > 0 && (
-							<Badge
-								severity="warning"
-								noIcon
-								small
-								className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-							>
-								<i
-									className={fr.cx('fr-icon-notification-3-line', 'fr-mr-1v')}
-								/>
-								{` ${userRequestsResult.metadata.count}`}
-							</Badge>
-						)}
-					</div>
-				),
-				linkProps: {
-					href: '/administration/dashboard/user-requests',
-					target: '_self',
-					id: 'fr-header-public-header-main-navigation-link-badge',
-					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${
-						userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'
-					})`,
-					'aria-label': `Demandes d'accès (${
-						userRequestsResult.metadata.count
-					} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
-				},
-				isActive: pathname == '/administration/dashboard/user-requests'
 			}
 		];
 		navigationItems.push(...adminNavigationItems);
@@ -594,120 +542,109 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	);
 }
 
-const useStyles = tss
-	.withName({ PublicLayout })
-	.withParams<{ countUserRequests: number }>()
-	.create(({ countUserRequests }) => ({
-		logo: {
-			maxHeight: fr.spacing('11v')
-		},
-		firstItem: {
-			display: 'flex',
-			flexDirection: 'column',
-			justifyContent: 'flex-start',
-			WebkitAlignItems: 'flex-start'
-		},
-		lastItem: {
-			display: 'flex',
-			flexDirection: 'column'
-		},
-		item: {
-			borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
-		},
-		badgeAccess: {
-			i: {
-				['&::before']: {
-					'--icon-size': '0.75rem'
-				}
-			}
-		},
-		inMenu: {
-			display: 'block',
-			'&:nth-of-type(2)': {
-				fontSize: '0.8rem',
-				color: fr.colors.decisions.text.disabled.grey.default
-			}
-		},
-		hiddenMobileQuickAccess: {
-			[fr.breakpoints.down('lg')]: {
-				'.fr-header__menu-links': {
-					display: 'none'
-				}
-			}
-		},
-		menuList: {
-			paddingTop: 0,
-			paddingBottom: 0,
-			minWidth: '16rem'
-		},
-		helpItem: {
-			color: fr.colors.decisions.text.label.grey.default,
-			fontWeight: 500,
-			textDecoration: 'none',
-			backgroundImage: 'none',
-			'--hover-tint': fr.colors.decisions.background.default.grey.hover,
-			'--active-tint': fr.colors.decisions.background.default.grey.active,
-			'&:first-of-type': {
-				borderTop: 'none'
-			},
-			'&::after': {
-				marginLeft: fr.spacing('2v')
-			}
-		},
-		accountButton: {
-			[fr.breakpoints.down('lg')]: {
-				display: 'none'
-			},
-			'&[aria-expanded="true"]': {
-				backgroundColor: fr.colors.decisions.background.open.blueFrance.default,
-				boxShadow: 'none'
-			}
-		},
-		navigation: {
-			[fr.breakpoints.down('lg')]: {
-				'&.fr-header .fr-modal > .fr-container': {
-					display: 'flex',
-					flexDirection: 'column',
-					paddingBottom: fr.spacing('6v')
-				},
-				'&.fr-header .fr-header__menu-links::after': {
-					margin: 0,
-					width: '100%'
-				},
-				'.fr-header__menu-links .fr-btns-group > li': {
-					paddingLeft: fr.spacing('4v')
-				}
-			},
-			span: {
-				color: fr.colors.decisions.background.default.grey.default,
-				backgroundColor:
-					fr.colors.decisions.background.flat.redMarianne.default,
-				borderRadius: '50%',
-				width: fr.spacing('4v'),
-				height: fr.spacing('4v'),
-				display: 'inline-block',
-				textAlign: 'center',
-				lineHeight: fr.spacing('4v'),
-				marginLeft: '8px',
-				position: 'relative',
-				bottom: '2px',
-				fontSize: '10px',
-				fontWeight: 'bold'
-			}
-		},
-		notice: {
-			'.fr-notice__body': {
-				alignItems: 'center'
-			}
-		},
-		externalLink: {
-			'&::after': {
-				display: 'none!important'
-			}
-		},
-		widgetAnchor: {
-			position: 'absolute',
-			top: 0,
-			right: 0
+const useStyles = tss.withName({ PublicLayout }).create(() => ({
+	logo: {
+		maxHeight: fr.spacing('11v')
+	},
+	firstItem: {
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'flex-start',
+		WebkitAlignItems: 'flex-start'
+	},
+	lastItem: {
+		display: 'flex',
+		flexDirection: 'column'
+	},
+	item: {
+		borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
+	},
+	inMenu: {
+		display: 'block',
+		'&:nth-of-type(2)': {
+			fontSize: '0.8rem',
+			color: fr.colors.decisions.text.disabled.grey.default
 		}
-	}));
+	},
+	hiddenMobileQuickAccess: {
+		[fr.breakpoints.down('lg')]: {
+			'.fr-header__menu-links': {
+				display: 'none'
+			}
+		}
+	},
+	menuList: {
+		paddingTop: 0,
+		paddingBottom: 0,
+		minWidth: '16rem'
+	},
+	helpItem: {
+		color: fr.colors.decisions.text.label.grey.default,
+		fontWeight: 500,
+		textDecoration: 'none',
+		backgroundImage: 'none',
+		'--hover-tint': fr.colors.decisions.background.default.grey.hover,
+		'--active-tint': fr.colors.decisions.background.default.grey.active,
+		'&:first-of-type': {
+			borderTop: 'none'
+		},
+		'&::after': {
+			marginLeft: fr.spacing('2v')
+		}
+	},
+	accountButton: {
+		[fr.breakpoints.down('lg')]: {
+			display: 'none'
+		},
+		'&[aria-expanded="true"]': {
+			backgroundColor: fr.colors.decisions.background.open.blueFrance.default,
+			boxShadow: 'none'
+		}
+	},
+	navigation: {
+		[fr.breakpoints.down('lg')]: {
+			'&.fr-header .fr-modal > .fr-container': {
+				display: 'flex',
+				flexDirection: 'column',
+				paddingBottom: fr.spacing('6v')
+			},
+			'&.fr-header .fr-header__menu-links::after': {
+				margin: 0,
+				width: '100%'
+			},
+			'.fr-header__menu-links .fr-btns-group > li': {
+				paddingLeft: fr.spacing('4v')
+			}
+		},
+		span: {
+			color: fr.colors.decisions.background.default.grey.default,
+			backgroundColor: fr.colors.decisions.background.flat.redMarianne.default,
+			borderRadius: '50%',
+			width: fr.spacing('4v'),
+			height: fr.spacing('4v'),
+			display: 'inline-block',
+			textAlign: 'center',
+			lineHeight: fr.spacing('4v'),
+			marginLeft: '8px',
+			position: 'relative',
+			bottom: '2px',
+			fontSize: '10px',
+			fontWeight: 'bold'
+		}
+	},
+	notice: {
+		'.fr-notice__body': {
+			alignItems: 'center'
+		}
+	},
+	externalLink: {
+		'&::after': {
+			display: 'none!important'
+		}
+	},
+	widgetAnchor: {
+		position: 'absolute',
+		top: 0,
+		right: 0
+	}
+}));

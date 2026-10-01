@@ -1,7 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import type { Context } from '@/src/server/trpc';
-import { generateRandomString } from '@/src/utils/tools';
 import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import { DN_SOURCE } from '@/src/utils/demarches-numeriques';
@@ -14,13 +13,6 @@ import { assertPartnerKey } from '../helpers';
  */
 
 const DN_INVITER_NAME = 'Démarches Numériques';
-
-function buildRegisterUrl(email: string, token: string): string {
-	return `${process.env.NODEMAILER_BASEURL}/register?${new URLSearchParams({
-		email,
-		inviteToken: token
-	})}`;
-}
 
 export const addAdminInputSchema = z.object({
 	external_id: z.string().min(1),
@@ -101,14 +93,6 @@ export const addAdminMutation = async ({
 				}
 			});
 
-			let token: string | null = null;
-			if (!user) {
-				token = generateRandomString(32);
-				await ctx.prisma.userInviteToken.create({
-					data: { user_email: email, token }
-				});
-			}
-
 			await ctx.prisma.userEvent.create({
 				data: {
 					user_id: ctx.user_api?.id,
@@ -146,8 +130,6 @@ export const addAdminMutation = async ({
 				} else {
 					const html = await renderUserInviteEmail({
 						inviterName: DN_INVITER_NAME,
-						recipientEmail: email,
-						inviteToken: token as string,
 						productTitle: product.title,
 						baseUrl: process.env.NODEMAILER_BASEURL
 					});
@@ -155,7 +137,7 @@ export const addAdminMutation = async ({
 						'Invitation à rejoindre « Je donne mon avis »',
 						email,
 						html,
-						`Créez votre compte : ${buildRegisterUrl(email, token as string)}`
+						`Connectez-vous avec ProConnect pour y accéder : ${process.env.NODEMAILER_BASEURL}/login`
 					);
 				}
 			} catch (mailErr) {
