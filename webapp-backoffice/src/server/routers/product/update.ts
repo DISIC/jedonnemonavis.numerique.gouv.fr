@@ -34,8 +34,7 @@ export const updateProductMutation = async ({
 					: undefined,
 			entity_id: product.entity_id,
 			urls: product.urls,
-			volume: product.volume,
-			isPublic: product.isPublic
+			volume: product.volume
 		}
 	});
 
