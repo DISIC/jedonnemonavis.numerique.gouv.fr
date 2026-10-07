@@ -1,8 +1,15 @@
 import type { Context } from '@/src/server/trpc';
+import { renderRegisterEmail } from '@/src/utils/emails';
+import { sendMail } from '@/src/utils/mailer';
 import { NotificationFrequency, UserRole } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { assertAdminOrOwn, checkUserDomain, omitPassword } from './utils';
+import {
+	assertAdminOrOwn,
+	checkUserDomain,
+	generateValidationToken,
+	omitPassword
+} from './utils';
 
 export const updateUserInputSchema = z.object({
 	id: z.number(),
@@ -71,10 +78,58 @@ export const updateUserMutation = async ({
 			});
 	}
 
-	const updatedUser = await ctx.prisma.user.update({
-		where: { id },
-		data: dataToUpdate
+	// Hors administrateur, une nouvelle adresse doit être confirmée par e-mail.
+	const requiresEmailValidation = !isAdmin && !!dataToUpdate.email;
+
+	if (!requiresEmailValidation) {
+		const updatedUser = await ctx.prisma.user.update({
+			where: { id },
+			data: dataToUpdate
+		});
+
+		return { data: omitPassword(updatedUser) };
+	}
+
+	const newEmail = dataToUpdate.email as string;
+	const token = await generateValidationToken(ctx.prisma, id);
+	const discardToken = () =>
+		ctx.prisma.userValidationToken.deleteMany({
+			where: { user_id: id, token }
+		});
+
+	const emailHtml = await renderRegisterEmail({
+		token,
+		baseUrl: process.env.NODEMAILER_BASEURL
 	});
+
+	const sent = await sendMail(
+		'Confirmez votre email',
+		newEmail,
+		emailHtml,
+		`Cliquez sur ce lien pour valider votre compte : ${
+			process.env.NODEMAILER_BASEURL
+		}/register/validate?${new URLSearchParams({ token })}`
+	);
+
+	if (!sent) {
+		await discardToken();
+
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Unable to send validation email'
+		});
+	}
+
+	let updatedUser;
+	try {
+		updatedUser = await ctx.prisma.user.update({
+			where: { id },
+			data: { ...dataToUpdate, active: false }
+		});
+	} catch (error) {
+		await discardToken();
+		throw error;
+	}
 
 	return { data: omitPassword(updatedUser) };
 };
