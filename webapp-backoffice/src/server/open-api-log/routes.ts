@@ -116,7 +116,14 @@ export const resolveRoutePath = (
 export const resolveRoute = (method: string, url: string): string | null =>
 	resolveRoutePath(method, toOpenApiPath(url));
 
-/** Chemin tel que trpc-openapi le route (segments du catch-all `[...trpc]`). */
+const normalizePath = (path: string): string =>
+	`/${path.replace(/^\/|\/$/g, '')}`;
+
+/**
+ * Chemin tel que trpc-openapi le route : segments du catch-all `[...trpc]`,
+ * `normalizePath`, analyse par `URL`, puis `normalizePath` à nouveau
+ * (adapters/next et adapters/node-http/core).
+ */
 export const toRoutedPath = (
 	segments: string | string[] | undefined
 ): string | null => {
@@ -124,5 +131,10 @@ export const toRoutedPath = (
 
 	const joined = Array.isArray(segments) ? segments.join('/') : segments;
 
-	return `/${joined.replace(/^\/|\/$/g, '')}`;
+	try {
+		const url = new URL(`http://127.0.0.1${normalizePath(joined)}`);
+		return normalizePath(url.pathname);
+	} catch {
+		return null;
+	}
 };
