@@ -133,34 +133,22 @@ const ButtonModal = (props: Props) => {
 			return;
 		}
 
-		currentButton.form_id = props.form_id;
-
-		const {
-			form,
-			closedButtonLog,
-			form_template_button,
-			...buttonWithoutForm
-		} = currentButton;
-		updateButton.mutate(buttonWithoutForm);
+		updateButton.mutate({
+			id: currentButton.id,
+			form_id: props.form_id,
+			title: currentButton.title,
+			form_template_button_id: currentButton.form_template_button_id
+		});
 	};
 
 	const handleButtonDelete = () => {
 		if (currentButton && 'id' in currentButton) {
-			const {
-				form,
-				closedButtonLog,
-				form_template_button,
-				...buttonWithoutForm
-			} = currentButton;
-
 			deleteButton.mutate({
-				product_id: form.product_id,
-				title: buttonWithoutForm.title,
+				product_id: currentButton.form.product_id,
+				title: currentButton.title,
 				buttonPayload: {
-					...buttonWithoutForm,
-					deleted_at: new Date(),
-					delete_reason: currentButton.delete_reason || null,
-					isDeleted: true
+					id: currentButton.id,
+					delete_reason: currentButton.delete_reason || null
 				}
 			});
 		}

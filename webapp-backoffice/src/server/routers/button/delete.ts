@@ -1,14 +1,18 @@
-import { ButtonUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { renderClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 
 export const deleteButtonInputSchema = z.object({
-	buttonPayload: ButtonUncheckedUpdateInputSchema,
+	buttonPayload: z.object({
+		id: z.number(),
+		delete_reason: z.string().nullish()
+	}),
 	shouldLogEvent: z.boolean().optional(),
+	// Produit attendu par l'appelant, comparé au produit réel du bouton.
 	product_id: z.number(),
 	title: z.string()
 });
@@ -20,24 +24,39 @@ export const deleteButtonMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof deleteButtonInputSchema>;
 }) => {
-	const { buttonPayload } = initialInput;
+	const { buttonPayload, product_id } = initialInput;
+
+	const currentButton = await ctx.prisma.button.findUnique({
+		where: { id: buttonPayload.id },
+		select: { isDeleted: true, form_id: true }
+	});
+
+	if (!currentButton) {
+		throw new TRPCError({ code: 'NOT_FOUND', message: 'Button not found' });
+	}
 
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
-		form_id: buttonPayload.form_id as number
+		form_id: currentButton.form_id
 	});
 
-	const currentButton = await ctx.prisma.button.findUnique({
-		where: { id: buttonPayload.id as number },
-		select: { isDeleted: true }
-	});
+	if (product_id !== product.id) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Button does not belong to this product'
+		});
+	}
 
 	const deletedButton = await ctx.prisma.button.update({
 		where: {
-			id: buttonPayload.id as number
+			id: buttonPayload.id
 		},
-		data: buttonPayload,
+		data: {
+			isDeleted: true,
+			deleted_at: new Date(),
+			delete_reason: buttonPayload.delete_reason
+		},
 		include: {
 			form: { include: { form_template: true } },
 			form_template_button: {
@@ -50,7 +69,7 @@ export const deleteButtonMutation = async ({
 
 	if (
 		shouldSendEmailsAboutDeletion(
-			currentButton?.isDeleted,
+			currentButton.isDeleted,
 			deletedButton.isDeleted,
 			deletedButton.form.isDeleted
 		)
@@ -63,7 +82,7 @@ export const deleteButtonMutation = async ({
 
 		const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
 			where: {
-				entity_id: product?.entity_id
+				entity_id: product.entity_id
 			}
 		});
 
@@ -82,18 +101,18 @@ export const deleteButtonMutation = async ({
 						deletedButton.form.title ?? deletedButton.form.form_template.title
 				},
 				product: {
-					id: product?.id as number,
-					title: product?.title as string,
-					entityName: product?.entity.name as string
+					id: product.id,
+					title: product.title,
+					entityName: product.entity.name
 				},
 				baseUrl: process.env.NODEMAILER_BASEURL
 			});
 
 			await sendMail(
-				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product?.title}»`,
+				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product.title}»`,
 				email,
 				emailHtml,
-				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product?.title}»`
+				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product.title}»`
 			);
 		}
 	}

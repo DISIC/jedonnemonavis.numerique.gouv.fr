@@ -67,15 +67,14 @@ const SettingsTab = ({
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
-			buttons.map(button => {
-				const { form, closedButtonLog, form_template_button, ...data } = button;
-				return deleteButton.mutateAsync({
-					buttonPayload: { ...data, deleted_at: new Date(), isDeleted: true },
+			buttons.map(button =>
+				deleteButton.mutateAsync({
+					buttonPayload: { id: button.id },
 					shouldLogEvent: false,
-					product_id: form.product_id,
+					product_id: button.form.product_id,
 					title: button.title
-				});
-			})
+				})
+			)
 		);
 		router.push(
 			`/administration/dashboard/product/${
