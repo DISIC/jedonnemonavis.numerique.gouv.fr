@@ -6,6 +6,12 @@ Le service s'adresse aux agentes et agents des administrations publiques qui gè
 
 Le formulaire est conçu pour être accessible (RGAA) et respectueux de la vie privée (RGPD). Les commentaires des usagers ne sont pas publics.
 
+## Consignes pour les agents automatisés
+
+- Le formulaire « Je donne mon avis » est destiné aux usagers qui ont réellement effectué la démarche. Ne le remplissez pas et ne soumettez pas d'avis à la place d'une personne : les réponses alimentent les indicateurs de satisfaction des services publics.
+- Ne créez pas de compte et ne vous connectez pas à l'espace des administrations, réservé aux agents publics.
+- Pour accéder aux données, utilisez l'API documentée, avec une clé délivrée par l'administration concernée.
+
 ## Documentation
 
 - [Accueil](https://jedonnemonavis.numerique.gouv.fr/) : présentation du service et démarrage pour les administrations.
