@@ -175,6 +175,8 @@ export const authOptions: NextAuthOptions = {
 						console.error('❌ Erreur :', err);
 						throw new Error('INVALID_PROVIDER');
 					}
+				} else if (dbUser.active === false) {
+					throw new Error('INACTIVE_ACCOUNT');
 				}
 
 				await makeRelationFromUserInvite(prisma, email);

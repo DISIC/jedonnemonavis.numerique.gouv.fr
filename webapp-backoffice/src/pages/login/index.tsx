@@ -1,6 +1,7 @@
 import { LoginForm } from '@/src/components/auth/LoginForm';
 import { ProconnectError } from '@/src/components/auth/ProConnectError';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -49,7 +50,19 @@ export default function Login() {
 							{error === 'INVALID_PROVIDER' ? (
 								<ProconnectError />
 							) : (
-								<LoginForm />
+								<>
+									{error === 'INACTIVE_ACCOUNT' && (
+										<div role="alert">
+											<Alert
+												small
+												severity="error"
+												className={fr.cx('fr-mb-6v')}
+												description="Votre compte n'est pas activé. Cliquez sur le lien de confirmation reçu par e-mail, ou saisissez votre adresse e-mail ci-dessous pour poursuivre."
+											/>
+										</div>
+									)}
+									<LoginForm />
+								</>
 							)}
 						</div>
 					</div>

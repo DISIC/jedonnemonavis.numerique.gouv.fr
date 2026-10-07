@@ -139,6 +139,13 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
+	if (user && user.active === false) {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'You are not authorized to perform this action'
+		});
+	}
+
 	if (meta?.isAdmin && !ctx.session?.user?.role.includes('admin')) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
