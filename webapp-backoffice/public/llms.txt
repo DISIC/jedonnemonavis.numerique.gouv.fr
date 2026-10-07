@@ -17,7 +17,7 @@ Le formulaire est conçu pour être accessible (RGAA) et respectueux de la vie p
 - [Contact](https://jedonnemonavis.numerique.gouv.fr/public/contact)
 - [Mentions légales](https://jedonnemonavis.numerique.gouv.fr/public/legalNotice)
 - [Conditions générales d'utilisation](https://jedonnemonavis.numerique.gouv.fr/public/cgu)
-- [Accessibilité](https://jedonnemonavis.numerique.gouv.fr/public/accessibility)
+- [Déclaration d'accessibilité](https://jedonnemonavis.numerique.gouv.fr/public/accessibility)
 - [Politique de sécurité](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/blob/main/SECURITY.md) : signalement des vulnérabilités à contact.jdma@design.numerique.gouv.fr.
 
 ## Optional
