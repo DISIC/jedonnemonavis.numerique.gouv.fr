@@ -3,6 +3,7 @@ import FormEditModal from '@/src/components/dashboard/Form/FormEditModal';
 import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
+import type { CreateFormConfigInput } from '@/src/server/routers/formConfig/create';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
 import {
@@ -17,7 +18,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
-import { $Enums, Prisma } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
@@ -89,11 +90,10 @@ const ProductFormPage = (props: Props) => {
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
-	const [createConfig, setCreateConfig] =
-		useState<Prisma.FormConfigUncheckedCreateInput>({
-			form_id: form.id,
-			status: 'published'
-		});
+	const [createConfig, setCreateConfig] = useState<CreateFormConfigInput>({
+		form_id: form.id,
+		status: 'published'
+	});
 	const [shouldModalOpen, setShouldModalOpen] = useState(false);
 
 	useEffect(() => {

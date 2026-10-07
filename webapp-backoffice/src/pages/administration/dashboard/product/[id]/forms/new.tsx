@@ -2,6 +2,7 @@ import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import FormGenerationAnimationPanel from '@/src/components/dashboard/Form/FormGenerationAnimationPanel';
 import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
+import type { CreateFormConfigInput } from '@/src/server/routers/formConfig/create';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
 	FormConfigWithChildren,
@@ -17,7 +18,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { Form, FormTemplate, Prisma, RightAccessStatus } from '@prisma/client';
+import { Form, FormTemplate, RightAccessStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -54,11 +55,10 @@ const NewForm = (props: Props) => {
 	const [formTitle, setFormTitle] = useState<string>('');
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
-	const [createConfig, setCreateConfig] =
-		useState<Prisma.FormConfigUncheckedCreateInput>({
-			form_id: createdForm?.id || 0,
-			status: 'published'
-		});
+	const [createConfig, setCreateConfig] = useState<CreateFormConfigInput>({
+		form_id: createdForm?.id || 0,
+		status: 'published'
+	});
 	const [selectedFormTemplate, setSelectedFormTemplate] =
 		useState<FormTemplate>();
 
