@@ -16,25 +16,43 @@ export const checkRightToProceed = async ({
 	form_id?: number;
 	authorizeCarrierUser?: boolean;
 }) => {
-	const orFilters: Prisma.ProductWhereInput[] = [];
-	if (typeof product_id === 'number') {
-		orFilters.push({ id: product_id });
-	}
-	if (typeof form_id === 'number') {
-		orFilters.push({ forms: { some: { id: form_id } } });
-	}
-
-	if (orFilters.length === 0) {
+	if (typeof product_id !== 'number' && typeof form_id !== 'number') {
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'Either product_id or form_id must be provided'
 		});
 	}
 
-	const product = await prisma.product.findFirst({
-		where: {
-			OR: orFilters
-		},
+	let resolvedProductId = product_id;
+
+	if (typeof form_id === 'number') {
+		const form = await prisma.form.findUnique({
+			where: { id: form_id },
+			select: { product_id: true }
+		});
+
+		if (!form) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Form not found'
+			});
+		}
+
+		if (
+			typeof resolvedProductId === 'number' &&
+			form.product_id !== resolvedProductId
+		) {
+			throw new TRPCError({
+				code: 'BAD_REQUEST',
+				message: 'form_id does not belong to product_id'
+			});
+		}
+
+		resolvedProductId = form.product_id;
+	}
+
+	const product = await prisma.product.findUnique({
+		where: { id: resolvedProductId },
 		include: { entity: { select: { name: true } } }
 	});
 
@@ -45,8 +63,6 @@ export const checkRightToProceed = async ({
 		});
 	}
 
-	// product.id (et non product_id) : quand seul form_id est fourni, un
-	// product_id à undefined ferait matcher n'importe quel droit de l'utilisateur.
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product.id,
