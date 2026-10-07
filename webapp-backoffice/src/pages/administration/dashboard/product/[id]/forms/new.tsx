@@ -217,7 +217,7 @@ const NewForm = (props: Props) => {
 		} else {
 			tmpForm = await createForm
 				.mutateAsync({
-					...data,
+					title: data.title,
 					product_id: product.id,
 					form_template_id: selectedFormTemplate?.id
 				})
