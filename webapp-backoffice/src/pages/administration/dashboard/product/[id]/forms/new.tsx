@@ -207,7 +207,7 @@ const NewForm = (props: Props) => {
 				.mutateAsync({
 					id: createdForm.id,
 					form: {
-						...data,
+						title: data.title,
 						product_id: product.id
 					}
 				})

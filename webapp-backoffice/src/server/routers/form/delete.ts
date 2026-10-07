@@ -1,15 +1,18 @@
-import { FormUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { renderClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 
 export const deleteFormInputSchema = z.object({
 	id: z.number(),
+	// Produit attendu par l'appelant, comparé au produit réel du formulaire.
 	product_id: z.number(),
-	form: FormUncheckedUpdateInputSchema
+	form: z.object({
+		delete_reason: z.string().nullish()
+	})
 });
 
 export const deleteFormMutation = async ({
@@ -21,27 +24,40 @@ export const deleteFormMutation = async ({
 }) => {
 	const { id, form, product_id } = input;
 
+	const currentForm = await ctx.prisma.form.findUnique({
+		where: { id },
+		select: { isDeleted: true, product_id: true }
+	});
+
+	if (!currentForm) {
+		throw new TRPCError({ code: 'NOT_FOUND', message: 'Form not found' });
+	}
+
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
-		product_id: product_id
+		form_id: id
 	});
 
-	const currentForm = await ctx.prisma.form.findUnique({
-		where: { id: input.id as number },
-		select: { isDeleted: true }
-	});
+	if (product_id !== currentForm.product_id) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Form does not belong to this product'
+		});
+	}
 
 	const deletedForm = await ctx.prisma.form.update({
 		where: { id },
 		data: {
-			...form
+			isDeleted: true,
+			deleted_at: new Date(),
+			delete_reason: form.delete_reason ?? null
 		},
 		include: { form_template: true }
 	});
 
 	if (
-		shouldSendEmailsAboutDeletion(currentForm?.isDeleted, deletedForm.isDeleted)
+		shouldSendEmailsAboutDeletion(currentForm.isDeleted, deletedForm.isDeleted)
 	) {
 		const accessRights = await ctx.prisma.accessRight.findMany({
 			where: {
@@ -51,7 +67,7 @@ export const deleteFormMutation = async ({
 
 		const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
 			where: {
-				entity_id: product?.entity_id
+				entity_id: product.entity_id
 			}
 		});
 
@@ -69,9 +85,9 @@ export const deleteFormMutation = async ({
 					title: deletedForm.title ?? deletedForm.form_template.title
 				},
 				product: {
-					id: product?.id as number,
-					title: product?.title as string,
-					entityName: product?.entity.name as string
+					id: product.id,
+					title: product.title,
+					entityName: product.entity.name
 				},
 				baseUrl: process.env.NODEMAILER_BASEURL
 			});
@@ -79,12 +95,12 @@ export const deleteFormMutation = async ({
 			await sendMail(
 				`Fermeture du formulaire «${
 					deletedForm.title ?? deletedForm.form_template.title
-				}» du service numérique «${product?.title}»`,
+				}» du service numérique «${product.title}»`,
 				email,
 				emailHtml,
 				`Fermeture du formulaire «${
 					deletedForm.title || deletedForm.form_template.title
-				}» du service numérique «${product?.title}»`
+				}» du service numérique «${product.title}»`
 			);
 		}
 	}
