@@ -10,7 +10,7 @@ Seule la version en production, construite à partir de la branche `main`, est m
 
 **Ne créez pas d'issue publique, de pull request ni de discussion** pour une vulnérabilité : ce dépôt est public.
 
-Écrivez à **contact.jdma@design.numerique.gouv.fr** en commençant l'objet par `[SÉCURITÉ]`, en indiquant autant que possible :
+Utilisez le [signalement privé de GitHub](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/security/advisories/new) (onglet « Security » du dépôt), ou écrivez à **contact.jdma@design.numerique.gouv.fr** en commençant l'objet par `[SÉCURITÉ]`, en indiquant autant que possible :
 
 - le composant concerné (backoffice, formulaire public, API partenaires, script d'intégration) et l'URL ou l'endpoint ;
 - une description de la vulnérabilité et de son impact ;
@@ -60,4 +60,4 @@ Pour un test mené de bonne foi :
 
 ## English summary
 
-Please do not report security issues through public GitHub issues or pull requests. Email **contact.jdma@design.numerique.gouv.fr** with a subject starting with `[SECURITY]`, describing the affected component, impact and reproduction steps. We aim to acknowledge reports within 5 business days and ask that you keep them confidential until fixed, or for 90 days. Only the production version built from `main` is supported. There is no bug bounty.
+Please do not report security issues through public GitHub issues or pull requests. Use [GitHub private vulnerability reporting](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/security/advisories/new) or email **contact.jdma@design.numerique.gouv.fr** with a subject starting with `[SECURITY]`, describing the affected component, impact and reproduction steps. We aim to acknowledge reports within 5 business days and ask that you keep them confidential until fixed, or for 90 days. Only the production version built from `main` is supported. There is no bug bounty.
