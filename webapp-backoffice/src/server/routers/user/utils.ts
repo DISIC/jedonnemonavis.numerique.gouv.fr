@@ -138,7 +138,7 @@ export async function makeRelationFromUserInvite(
 	if (userInvites.length > 0) {
 		await prisma.accessRight.updateMany({
 			where: { id: { in: userInvites.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
+			data: { user_email: normalizedEmail, user_email_invite: null }
 		});
 	}
 
@@ -149,7 +149,7 @@ export async function makeRelationFromUserInvite(
 	if (userInvitesEntity.length > 0) {
 		await prisma.adminEntityRight.updateMany({
 			where: { id: { in: userInvitesEntity.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
+			data: { user_email: normalizedEmail, user_email_invite: null }
 		});
 	}
 }
