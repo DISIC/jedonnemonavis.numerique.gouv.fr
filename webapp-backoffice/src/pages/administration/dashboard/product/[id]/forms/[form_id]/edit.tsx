@@ -441,6 +441,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
+	if (form.product_id !== parseInt(id as string)) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
+				permanent: false
+			}
+		};
+	}
+
 	if (form.isDeleted || form.isTop250) {
 		return {
 			redirect: {

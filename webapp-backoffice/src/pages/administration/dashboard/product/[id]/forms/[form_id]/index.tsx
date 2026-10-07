@@ -520,6 +520,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
+	if (form.product_id !== parseInt(id as string)) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
+				permanent: false
+			}
+		};
+	}
+
 	const currentUserToken = await getToken({
 		req: context.req,
 		secret: process.env.JWT_SECRET
