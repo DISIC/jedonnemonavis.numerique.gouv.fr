@@ -6,6 +6,7 @@ import {
 import { FormField, Opinion, Product } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 import { useTranslation } from 'next-i18next';
 import { SetStateAction, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -189,10 +190,16 @@ export const Field = (props: Props) => {
 						{opinion[field.name]?.length || 0} / 15000
 					</div>
 					{/*
-					  Pas de Notice permanente ici : sur ce rendu historique, le
-					  `downLabel` du gabarit porte déjà le rappel (« Ne partagez
-					  aucune information personnelle »), juste au-dessus.
+					  Rappel permanent, affiché même sur un champ vide, et sans
+					  condition : c'est lui qui évite la saisie, alors que l'alerte
+					  ne fait que la rattraper. Il ne peut pas venir du `downLabel`
+					  du gabarit — celui-ci est optionnel, et le gabarit `root` n'en
+					  porte plus pour le verbatim.
 					*/}
+					<Notice
+						className={cx(classes.notice)}
+						title="Pour votre sécurité, ne partagez pas de données personnelles. Ce formulaire ne permet pas à l’administration de vous répondre."
+					/>
 					<PersonalDataAlert value={opinion[field.name] || ''} />
 				</div>
 			);
@@ -339,6 +346,24 @@ const useStyles = tss
 			fontSize: '0.8rem',
 			'.fr-icon-info-fill::before': {
 				'--icon-size': '1rem'
+			}
+		},
+		// Même allègement que sur le rendu dynamique : le Notice DSFR est fait
+		// pour un bandeau pleine largeur, ici c'est une mention sous un champ.
+		notice: {
+			background: 'none',
+			padding: 0,
+			marginTop: fr.spacing('1v'),
+			'.fr-container': {
+				padding: 0,
+				'.fr-notice__title': {
+					fontWeight: 'normal',
+					fontSize: '0.75rem',
+					'&::before': {
+						'--icon-size': '1rem',
+						marginRight: fr.spacing('1v')
+					}
+				}
 			}
 		}
 	}));
