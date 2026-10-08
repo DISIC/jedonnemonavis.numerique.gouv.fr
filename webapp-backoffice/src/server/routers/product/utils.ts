@@ -16,15 +16,15 @@ export const checkRightToProceed = async ({
 	form_id?: number;
 	authorizeCarrierUser?: boolean;
 }) => {
-	const orFilters: Prisma.ProductWhereInput[] = [];
+	const filters: Prisma.ProductWhereInput[] = [];
 	if (typeof product_id === 'number') {
-		orFilters.push({ id: product_id });
+		filters.push({ id: product_id });
 	}
 	if (typeof form_id === 'number') {
-		orFilters.push({ forms: { some: { id: form_id } } });
+		filters.push({ forms: { some: { id: form_id } } });
 	}
 
-	if (orFilters.length === 0) {
+	if (filters.length === 0) {
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'Either product_id or form_id must be provided'
@@ -33,7 +33,7 @@ export const checkRightToProceed = async ({
 
 	const product = await prisma.product.findFirst({
 		where: {
-			OR: orFilters
+			AND: filters
 		},
 		include: { entity: { select: { name: true } } }
 	});
@@ -45,8 +45,6 @@ export const checkRightToProceed = async ({
 		});
 	}
 
-	// product.id (et non product_id) : quand seul form_id est fourni, un
-	// product_id à undefined ferait matcher n'importe quel droit de l'utilisateur.
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product.id,

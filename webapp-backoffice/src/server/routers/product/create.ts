@@ -6,8 +6,7 @@ export const productEditableFieldsSchema = z.object({
 	title: z.string().min(1),
 	entity_id: z.number(),
 	urls: z.array(z.string()).optional(),
-	volume: z.number().int().nullable().optional(),
-	isPublic: z.boolean().nullable().optional()
+	volume: z.number().int().nullable().optional()
 });
 
 export const createProductInputSchema = productEditableFieldsSchema;
@@ -28,7 +27,6 @@ export const createProductMutation = async ({
 			entity_id: productPayload.entity_id,
 			urls: productPayload.urls,
 			volume: productPayload.volume,
-			isPublic: productPayload.isPublic,
 			accessRights: {
 				create: [
 					{

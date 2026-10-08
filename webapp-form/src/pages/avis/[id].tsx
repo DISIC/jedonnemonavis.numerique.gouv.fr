@@ -18,7 +18,8 @@ import {
 	getVisibleBlocks,
 	hasBlockAnswer,
 	hasAllRequiredBlockAnswers,
-	getInvalidEmailBlocks
+	getInvalidEmailBlocks,
+	getPersonalDataBlocks
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -130,6 +131,23 @@ export default function AvisPage({
 			setShowValidationErrors(true);
 			formRef.current
 				?.querySelector<HTMLInputElement>(`#input-${invalidEmailBlocks[0].id}`)
+				?.focus();
+			return;
+		}
+
+		// Le bouton est déjà désactivé dans ce cas, mais un formulaire reste
+		// soumettable à la touche Entrée depuis un champ texte : sans ce garde-fou,
+		// la donnée personnelle partirait en base malgré le blocage affiché.
+		const personalDataBlocks = getPersonalDataBlocks(
+			currentStep.form_template_blocks,
+			answers,
+			formConfig
+		);
+		if (personalDataBlocks.length > 0) {
+			setShowValidationErrors(true);
+			const firstId = personalDataBlocks[0].id;
+			formRef.current
+				?.querySelector<HTMLElement>(`#input-${firstId}, #textarea-${firstId}`)
 				?.focus();
 			return;
 		}
@@ -317,6 +335,13 @@ export default function AvisPage({
 		formConfig
 	);
 
+	// Variante bloquante : tant qu'une donnée personnelle est présente dans un
+	// champ libre de l'étape, on ne laisse ni continuer ni envoyer. L'alerte qui
+	// nomme la donnée est rendue sous le champ concerné, par `PersonalDataAlert`.
+	const hasPersonalDataInStep =
+		getPersonalDataBlocks(currentStep.form_template_blocks, answers, formConfig)
+			.length > 0;
+
 	return (
 		<div ref={contentRef}>
 			{isPreview && !isWidget && <PreviewAlert />}
@@ -367,6 +392,7 @@ export default function AvisPage({
 											disabled={
 												isFirstAnswerEmpty ||
 												!hasAllRequiredAnswers ||
+												hasPersonalDataInStep ||
 												isRateLimitReached
 											}
 											type="submit"
@@ -377,7 +403,11 @@ export default function AvisPage({
 										<Button
 											priority="primary"
 											type="submit"
-											disabled={!hasAllRequiredAnswers || isRateLimitReached}
+											disabled={
+												!hasAllRequiredAnswers ||
+												hasPersonalDataInStep ||
+												isRateLimitReached
+											}
 										>
 											Envoyer mon avis
 										</Button>
@@ -424,7 +454,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const buttonId = parseInt(query.button as string);
 	const formConfigParam = query.formConfig as string | undefined;
 
-	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
+	if (!isPreview && (!buttonId || isNaN(buttonId) || !!formConfigParam)) {
 		return {
 			notFound: true
 		};
@@ -432,7 +462,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$connect();
 
-	if (!isPreview && !isWidget) {
+	if (!isPreview) {
 		const button = await prisma.button.findUnique({
 			where: { id: buttonId },
 			select: { id: true, form_id: true }
@@ -475,7 +505,8 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			product: {
 				select: {
 					id: true,
-					title: true
+					title: true,
+					status: true
 				}
 			}
 		}
@@ -483,7 +514,12 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$disconnect();
 
-	if (!form) {
+	if (
+		!form ||
+		form.isDeleted ||
+		form.product.status === 'archived' ||
+		(!isPreview && form.form_template.slug === 'root')
+	) {
 		return {
 			notFound: true
 		};

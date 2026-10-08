@@ -23,6 +23,12 @@ export function checkAccountHeader(name: string, invitedEmail: string) {
 		});
 }
 
+export function openAccountInfos() {
+	cy.get('#option-menu')
+		.contains('li', selectors.menu.account)
+		.click({ force: true });
+}
+
 export function clickModifyCard(nameCard: string) {
 	cy.auditA11y();
 	cy.contains('h3', nameCard)
@@ -66,7 +72,7 @@ export function testEmail({
 }) {
 	login(invitedEmailBis, userPassword);
 	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
-	cy.contains('li', selectors.menu.account).click({ force: true });
+	openAccountInfos();
 	cy.injectAxe();
 	cy.wait(500);
 	clickModifyCard(selectors.card.credentials);
