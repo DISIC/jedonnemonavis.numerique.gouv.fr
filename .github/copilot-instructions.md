@@ -5,8 +5,8 @@ Use these project-specific notes to work effectively in this monorepo.
 ## Architecture
 
 - Two Next.js apps:
-  - `webapp-backoffice/` (Next 13, TRPC, NextAuth, Prisma, ELK) — Admin/back-office and public pages; serves TRPC and a TRPC-OpenAPI surface.
-  - `webapp-form/` (Next 13, TRPC, Prisma) — Public-facing review form with rate limiting.
+  - `webapp-backoffice/` (Next 15, TRPC, NextAuth, Prisma, ELK) — Admin/back-office and public pages; serves TRPC and a TRPC-OpenAPI surface.
+  - `webapp-form/` (Next 15, TRPC, Prisma) — Public-facing review form with rate limiting.
 - Shared infra via Docker Compose: `elasticsearch`, `kibana`, `postgres`, optional `mailhog` in tests. See `docker-compose*.yaml`.
 - Data layer: Prisma against PostgreSQL (`POSTGRESQL_ADDON_URI`), with seeds under `webapp-backoffice/prisma/seed.ts`. Zod types generated via `zod-prisma-types`.
 - Search/analytics: Elasticsearch 8. TLS CA expected at `certs/ca/ca.crt`. Clients instantiated in TRPC context.
@@ -40,11 +40,11 @@ Use these project-specific notes to work effectively in this monorepo.
 - Auth:
   - NextAuth credentials + optional ProConnect OpenID in `webapp-backoffice/src/pages/api/auth/[...nextauth].ts`.
   - JWT backed sessions; route gate in `src/middleware.ts` redirects `/administration/*` to `/login` if no token.
-- OpenAPI endpoints (used by partners): defined in `webapp-backoffice/src/server/routers/openapi.ts`; require `Authorization: Bearer <apiKey>` for `protectedApiProcedure`. Health route is public procedure but marked protect=true for OpenAPI exposure.
+- OpenAPI endpoints (used by partners): defined in `webapp-backoffice/src/server/routers/open-api/` and mounted by `routers/open-api-root.ts`; require `Authorization: Bearer <apiKey>` for `protectedApiProcedure`. Health route is public procedure but marked protect=true for OpenAPI exposure.
 - Emails: SMTP via env `NODEMAILER_*`; dev/test uses Mailhog (`http://localhost:8025`).
 - Prisma:
   - Client singleton at `src/utils/db.ts` in both apps.
-  - Schemas at `prisma/schema.prisma` (duplicated across apps). Seeds at `webapp-backoffice/prisma/seed.ts`.
+  - Schema at `webapp-backoffice/prisma/schema.prisma` (`webapp-form/prisma/schema.prisma` is a symlink to it). Seeds at `webapp-backoffice/prisma/seed.ts`.
 - Cypress:
   - Config in `webapp-backoffice/cypress.config.ts` with `baseUrl` bound to `NEXTAUTH_URL`.
   - Suites live under `webapp-backoffice/cypress/e2e/jdma/**`; coverage documented in `docs/cypress-test-coverage.md`.
@@ -64,8 +64,8 @@ Use these project-specific notes to work effectively in this monorepo.
 ## Integration Notes
 
 - Elasticsearch TLS: If `certs/ca/ca.crt` exists the clients enable TLS (`rejectUnauthorized: false`); ensure `ES_ADDON_URI`, `ES_ADDON_USER`, `ES_ADDON_PASSWORD` are set. The CA is also mounted into Kibana via Docker volumes.
-- Exports pipeline: `python_exporter/main.py` connects to Postgres, builds CSV/XLS(X) reports, uploads to S3-compatible storage (CELLAR), and emails links via SMTP. Requires envs listed at top of the script; exposes a simple HTTP trigger on `:8080`.
-- Notifications & stats helpers: see `webapp-backoffice/src/utils/{stats,notifs,emails,mailer}.ts` used by `openapi.ts`.
+- Exports pipeline: `export.create` queues a BullMQ job; `webapp-backoffice/src/workers/export-worker.ts` builds CSV/XLS reports, uploads to S3-compatible storage (CELLAR), and emails links via SMTP.
+- Notifications & stats helpers: see `webapp-backoffice/src/utils/{stats,notifs.ts,emails.tsx,mailer.ts}` used by the `open-api` routers.
 
 ## How to Add/Modify Endpoints
 
@@ -73,9 +73,9 @@ Use these project-specific notes to work effectively in this monorepo.
   - Create/extend routers in `webapp-backoffice/src/server/routers/*`.
   - Use `protectedProcedure` for session-based auth (admin via `meta: { isAdmin: true }`).
   - For partner APIs, use `protectedApiProcedure` and add OpenAPI metadata under `.meta.openapi`.
-  - Register in `routers/root.ts` and, if OpenAPI, the schema auto-exposes under `/api/open-api`.
+  - Register in `routers/root.ts`; partner (OpenAPI) procedures go in `routers/open-api/`, which only `routers/open-api-root.ts` mounts under `/api/open-api`.
 - Database changes:
-  - Edit `webapp-backoffice/prisma/schema.prisma` (and mirror to `webapp-form` if shared), then: `npx prisma migrate dev` and update seeds/types.
+  - Edit `webapp-backoffice/prisma/schema.prisma` (the form app's schema is a symlink to it), then: `npx prisma migrate dev`, `npx prisma generate` in both apps, and update seeds.
 
 ## Env Vars (common highlights)
 
@@ -98,8 +98,8 @@ Use these project-specific notes to work effectively in this monorepo.
 - **"Document is not focused" in Cypress**: Stub clipboard with `cy.stub(win.navigator.clipboard, 'writeText').resolves()` before clicking copy buttons.
 - **DB migrations fail**: Run `npm run db:reset` to wipe and reseed; check `prisma/migrations/` for naming conflicts if custom migrations exist.
 - **Elasticsearch TLS errors**: Ensure `certs/ca/ca.crt` exists in both services' Docker mounts; copy from elasticsearch container if missing.
-- **TRPC type errors after schema change**: Run `prisma generate` and `yarn type-check` to sync generated types.
-- **"Form not found" in review page**: Forms must be published; check `form.isPublished` in DB and test with published forms only.
+- **TRPC type errors after schema change**: Run `prisma generate` in both apps, then `npx tsc --noEmit`.
+- **"Form not found" in review page**: Forms must be published; check the form's `FormConfig.status` in DB and test with published forms only.
 
 ## Useful Examples
 
