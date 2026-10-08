@@ -77,15 +77,29 @@ type PersonalDataPattern = {
 };
 
 /**
- * Remplaçant inséré à la place de la donnée.
+ * Libellé inséré à la place de la donnée, entre parenthèses :
+ * « Voici mon numéro : (Numéro de téléphone masqué), merci de me rappeler. »
  *
- * Longueur fixe, volontairement : restituer la longueur d'origine
- * (`06 ** ** ** **`) redonne la forme de la donnée, donc une partie de
- * l'information. Le back-office repère cette chaîne exacte pour l'afficher
- * avec une infobulle ; les exports et l'API la laissent telle quelle, lisible
- * par un humain qui ouvre le CSV.
+ * Nommer la catégorie plutôt qu'un remplaçant unique garde le verbatim
+ * lisible : l'agent comprend ce qui a été retiré, donc ce que l'usager
+ * voulait dire, sans jamais voir la donnée.
+ *
+ * Longueur indépendante de l'original, volontairement : restituer la longueur
+ * (`06 ** ** ** **`) redonnerait la forme de la donnée, donc une partie de
+ * l'information.
+ *
+ * Le back-office repère ces libellés pour les afficher en italique avec une
+ * infobulle ; exports et API les laissent tels quels, lisibles par un humain
+ * qui ouvre le CSV.
  */
-export const PERSONAL_DATA_MASK = '[donnée personnelle masquée]';
+function maskLabel(pattern: Pick<PersonalDataPattern, 'label' | 'feminine'>) {
+	return `(${pattern.label} masqué${pattern.feminine ? 'e' : ''})`;
+}
+
+/** Échappe une chaîne destinée à être injectée dans une regex. */
+function escapeForRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /**
  * Ordre significatif : à chevauchement égal, le premier motif gagne. Les
@@ -332,7 +346,7 @@ export function maskAnswerText(
 }
 
 /**
- * Remplace chaque donnée détectée par {@link PERSONAL_DATA_MASK}.
+ * Remplace chaque donnée détectée par le libellé de sa catégorie.
  *
  * Le reste du verbatim est préservé mot pour mot : c'est tout l'intérêt du
  * masquage par fragment plutôt que par avis entier — l'agent garde un retour
@@ -347,16 +361,60 @@ export function maskPersonalData(text: string | null | undefined): string {
 	let out = '';
 	let cursor = 0;
 	for (const match of matches) {
-		out += text.slice(cursor, match.start) + PERSONAL_DATA_MASK;
+		out += text.slice(cursor, match.start) + maskLabel(match);
 		cursor = match.end;
 	}
 	return out + text.slice(cursor);
 }
 
+/** Tous les libellés de masquage possibles, dédoublonnés. */
+export const MASK_LABELS: readonly string[] = Array.from(
+	new Set(PATTERNS.map(maskLabel))
+);
+
 /**
- * Phrase d'alerte affichée à l'usager, façon maquette :
- * « Numéro de téléphone détecté. Veuillez supprimer cette donnée personnelle
- * afin de pouvoir envoyer l'avis ».
+ * Repère les libellés de masquage dans un texte déjà masqué.
+ *
+ * Construite par `new RegExp` et non par littéral : Babel ne touche pas aux
+ * regex assemblées à l'exécution, et de toute façon la liste des libellés
+ * n'est connue qu'ici.
+ */
+const MASK_PATTERN = new RegExp(
+	`(${MASK_LABELS.map(escapeForRegExp).join('|')})`,
+	'g'
+);
+
+/**
+ * Découpe un texte **déjà masqué** en fragments, en signalant lesquels sont un
+ * libellé de masquage. Permet au back-office de les mettre en forme sans
+ * refaire la détection côté navigateur, où le texte brut n'arrive jamais.
+ */
+export function splitMaskedText(
+	text: string
+): Array<{ text: string; masked: boolean }> {
+	if (!text) return [];
+
+	return text
+		.split(MASK_PATTERN)
+		.filter(part => part !== '')
+		.map(part => ({ text: part, masked: MASK_LABELS.includes(part) }));
+}
+
+/**
+ * Mise en forme d'un libellé au fil d'une phrase.
+ *
+ * Les sigles gardent leurs capitales : sans ça « IBAN » deviendrait « iBAN ».
+ */
+function uncapitalize(label: string): string {
+	const isAcronym = label.slice(0, 2) === label.slice(0, 2).toUpperCase();
+	return isAcronym ? label : label.charAt(0).toLowerCase() + label.slice(1);
+}
+
+/**
+ * Phrase d'alerte affichée à l'usager, reprise mot pour mot de la maquette :
+ * « Un numéro de téléphone a été détecté, supprimez-le pour envoyer l'avis »,
+ * et au pluriel « Un numéro de téléphone et une adresse e-mail ont été
+ * détectés, supprimez-les pour envoyer l'avis ».
  *
  * Les doublons sont fusionnés sur le libellé, pas sur la catégorie : trois
  * numéros dans le même verbatim donnent une seule mention, et `num_long` et
@@ -372,23 +430,23 @@ export function describePersonalData(matches: PersonalDataMatch[]): string {
 		return true;
 	});
 
-	// Seul le premier libellé garde sa majuscule : il ouvre la phrase.
-	const labels = unique.map((m, index) =>
-		index === 0 ? m.label : m.label.charAt(0).toLowerCase() + m.label.slice(1)
+	const parts = unique.map(
+		m => `${m.feminine ? 'une' : 'un'} ${uncapitalize(m.label)}`
 	);
-	const subject =
-		labels.length === 1
-			? labels[0]
-			: `${labels.slice(0, -1).join(', ')} et ${labels[labels.length - 1]}`;
+	const joined =
+		parts.length === 1
+			? parts[0]
+			: `${parts.slice(0, -1).join(', ')} et ${parts[parts.length - 1]}`;
+	const subject = joined.charAt(0).toUpperCase() + joined.slice(1);
 
 	const plural = unique.length > 1;
-	const participle = plural
-		? 'détectés'
-		: unique[0].feminine
-		? 'détectée'
-		: 'détecté';
+	// Accord du participe : au pluriel, le masculin l'emporte dès qu'une seule
+	// des données détectées est masculine.
+	const feminine = plural ? unique.every(m => m.feminine) : unique[0].feminine;
+	const verb = plural
+		? `ont été détecté${feminine ? 'es' : 's'}`
+		: `a été détecté${feminine ? 'e' : ''}`;
+	const pronoun = plural ? 'les' : feminine ? 'la' : 'le';
 
-	const what = plural ? 'ces données personnelles' : 'cette donnée personnelle';
-
-	return `${subject} ${participle}. Veuillez supprimer ${what} afin de pouvoir envoyer l'avis.`;
+	return `${subject} ${verb}, supprimez-${pronoun} pour envoyer l'avis`;
 }
