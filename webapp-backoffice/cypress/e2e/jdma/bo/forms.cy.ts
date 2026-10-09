@@ -24,7 +24,7 @@ import {
 	fillFormStep4
 } from '../../../utils/helpers/review';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, appUrl } from '../../../utils/variables';
 
 const FORM_TITLES = [
 	selectors.dashboard.nameTestForm1,
@@ -35,7 +35,7 @@ describe('jdma-forms', () => {
 	let copiedReviewUrl = '';
 	let helpModalA11yChecked = false;
 	beforeEach(() => {
-		login(adminEmail, adminPassword, false, helpModalA11yChecked);
+		login(adminEmail, false, helpModalA11yChecked);
 		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
 		cy.injectAxe();
@@ -149,7 +149,6 @@ describe('jdma-forms', () => {
 		cy.injectAxe();
 		deleteForm();
 		checkMail(
-			false,
 			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service numérique «${selectors.dashboard.nameTestService}»`
 		);
 		cy.readFile('cypress/fixtures/dynamicTestData.json').then(data => {

@@ -1,6 +1,6 @@
 import { login } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, appUrl } from '../../../utils/variables';
 
 describe('jdma-review-delete', () => {
 	before(() => {
@@ -9,7 +9,7 @@ describe('jdma-review-delete', () => {
 	});
 
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 		cy.visit(`${appUrl}${selectors.url.seededProductReviews}`);
 		cy.contains('h2', 'Réponses').should('be.visible');
 	});

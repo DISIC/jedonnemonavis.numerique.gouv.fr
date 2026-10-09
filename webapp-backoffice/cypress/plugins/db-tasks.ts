@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -198,16 +197,14 @@ export const dbTasks = {
 	// Un utilisateur actif sans aucun droit, plus une entité et un service qui ne
 	// lui appartiennent pas : de quoi vérifier qu'il ne peut pas se forger une clé
 	// d'API sur un périmètre qui n'est pas le sien.
-	'db:setupOutsiderCtx': async (arg: {
-		password: string;
-	}): Promise<OutsiderCtx> => {
+	'db:setupOutsiderCtx': async (): Promise<OutsiderCtx> => {
 		const suffix = crypto.randomBytes(4).toString('hex');
 		const user = await prisma.user.create({
 			data: {
 				email: `outsider-${suffix}@example.org`,
 				firstName: 'Outsider',
 				lastName: 'Test',
-				password: bcrypt.hashSync(arg.password, 10),
+				password: 'unused',
 				role: 'user',
 				active: true
 			}
@@ -299,11 +296,8 @@ export const dbTasks = {
 		return null;
 	},
 
-	'db:setupApiKeyRightsCtx': async (arg: {
-		password: string;
-	}): Promise<ApiKeyRightsCtx> => {
+	'db:setupApiKeyRightsCtx': async (): Promise<ApiKeyRightsCtx> => {
 		const suffix = crypto.randomBytes(4).toString('hex');
-		const hashedPassword = bcrypt.hashSync(arg.password, 10);
 
 		const createUser = (prefix: string) =>
 			prisma.user.create({
@@ -311,7 +305,7 @@ export const dbTasks = {
 					email: `${prefix}-${suffix}@example.org`,
 					firstName: prefix,
 					lastName: 'Test',
-					password: hashedPassword,
+					password: 'unused',
 					role: 'user',
 					active: true
 				}

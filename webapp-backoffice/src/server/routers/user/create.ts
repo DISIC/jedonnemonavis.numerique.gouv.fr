@@ -1,10 +1,15 @@
-import { UserCreateInputSchema } from '@/prisma/generated/zod';
+import { UserRoleSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
-import bcrypt from 'bcrypt';
 import { z } from 'zod';
+import { generateUnusablePassword } from './utils';
 
-export const createUserInputSchema = UserCreateInputSchema;
+export const createUserInputSchema = z.object({
+	email: z.string().email(),
+	firstName: z.string(),
+	lastName: z.string(),
+	role: UserRoleSchema.optional()
+});
 
 export const createUserMutation = async ({
 	ctx,
@@ -25,15 +30,11 @@ export const createUserMutation = async ({
 			message: 'User with email already exists'
 		});
 
-	const salt = bcrypt.genSaltSync(10);
-	const hashedPassword = bcrypt.hashSync(newUser.password, salt);
-
-	newUser.password = hashedPassword;
-
 	const createdUser = await ctx.prisma.user.create({
 		data: {
 			...newUser,
 			email: newUser.email.toLowerCase(),
+			password: generateUnusablePassword(),
 			active: true,
 			notifications: true,
 			notifications_frequency: 'weekly'
