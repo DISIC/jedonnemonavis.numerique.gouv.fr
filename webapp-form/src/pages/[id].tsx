@@ -651,7 +651,10 @@ export const getServerSideProps: GetServerSideProps<{
 					? { id: buttonFormId }
 					: {
 							NOT: { isDeleted: true },
-							...(!isNaN(previewFormId) && { id: previewFormId })
+							...(!isNaN(previewFormId) && {
+								id: previewFormId,
+								form_template: { slug: 'root' }
+							})
 					  },
 				include: {
 					product: {
