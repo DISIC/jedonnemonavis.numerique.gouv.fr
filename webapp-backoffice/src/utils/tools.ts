@@ -1,3 +1,4 @@
+import { JdmaInvalidButtonsEmailProps } from '@/emails/interface';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
@@ -14,7 +15,6 @@ import {
 	ButtonWithElements,
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
-import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -226,11 +226,57 @@ export const getSeverity = (intention: string) => {
 	}
 };
 
-export const retrieveButtonName = (buttonId: number) => {
-	const { data: button } = trpc.button.getById.useQuery({
-		id: buttonId
+export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
+	requestedButtonId
+		? `Lien invalide (identifiant ${requestedButtonId})`
+		: "Aucun lien d'intégration";
+
+export const groupInvalidButtonReviewsByProduct = (
+	reviewCounts: {
+		form_id: number;
+		requested_button_id: number | null;
+		_count: { _all: number };
+	}[],
+	forms: {
+		id: number;
+		title: string | null;
+		form_template: { title: string };
+		product: { id: number; title: string; entity: { name: string } };
+	}[]
+): Pick<JdmaInvalidButtonsEmailProps, 'product' | 'forms'>[] => {
+	const products = new Map<
+		number,
+		Pick<JdmaInvalidButtonsEmailProps, 'product' | 'forms'>
+	>();
+
+	forms.forEach(form => {
+		const links = reviewCounts
+			.filter(rc => rc.form_id === form.id)
+			.map(rc => ({
+				label: getInvalidButtonLabel(rc.requested_button_id),
+				reviewCount: rc._count._all
+			}))
+			.sort((a, b) => b.reviewCount - a.reviewCount);
+
+		if (!links.length) return;
+
+		const group = products.get(form.product.id) ?? {
+			product: {
+				id: form.product.id,
+				title: form.product.title,
+				entityName: form.product.entity.name
+			},
+			forms: []
+		};
+		group.forms.push({
+			id: form.id,
+			title: form.title ?? form.form_template.title,
+			links
+		});
+		products.set(form.product.id, group);
 	});
-	if (button?.data) return button.data?.title || '';
+
+	return [...products.values()];
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {
@@ -898,6 +944,7 @@ type ArchivedReviewSnapshot = {
 	product_id: number;
 	form_id: number;
 	button_id: number | null;
+	requested_button_id: number | null;
 	user_id: string | null;
 	has_verbatim: boolean;
 	answers: JsonValue;
@@ -916,7 +963,8 @@ export const mapArchivedReviewToReview = (
 		created_at: createdAt,
 		product_id: archived.product_id,
 		form_id: archived.form_id,
-		button_id: archived.button_id ?? undefined,
+		button_id: archived.button_id,
+		requested_button_id: archived.requested_button_id,
 		user_id: archived.user_id ?? undefined,
 		has_verbatim: archived.has_verbatim,
 		answers: answers.map(a => ({

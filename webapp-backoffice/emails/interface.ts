@@ -31,6 +31,18 @@ export interface JdmaClosedButtonOrFormEmailProps {
 	baseUrl?: string;
 }
 
+export interface JdmaInvalidButtonsEmailProps {
+	product: { id: number; title: string; entityName: string };
+	forms: {
+		id: number;
+		title: string;
+		links: { label: string; reviewCount: number }[];
+	}[];
+	startDate: Date;
+	endDate: Date;
+	baseUrl?: string;
+}
+
 export interface JdmaInviteEmailProps {
 	inviterName: string;
 	productTitle?: string;
