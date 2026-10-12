@@ -168,8 +168,8 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
 	product_name: string;
 	product_id: number;
 	form_id: number;
-	button_name: string;
-	button_id: number;
+	button_name: string | null;
+	button_id: number | null;
 	parent_field_code?: string;
 	parent_answer_item_id?: number;
 	created_at: Date;

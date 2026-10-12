@@ -24,7 +24,7 @@ import {
 
 type AvisPageProps = {
 	form: FormWithElements;
-	buttonId: number;
+	buttonId: number | null;
 	productId: number;
 	isPreview: boolean;
 	isWidget: boolean;
@@ -451,30 +451,16 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
 	const widgetNonce = isWidget ? (query.nonce as string) || null : null;
-	const buttonId = parseInt(query.button as string);
+	const buttonId = parseInt(query.button as string) || null;
 	const formConfigParam = query.formConfig as string | undefined;
 
-	if (!isPreview && (!buttonId || isNaN(buttonId) || !!formConfigParam)) {
+	if (!isPreview && !!formConfigParam) {
 		return {
 			notFound: true
 		};
 	}
 
 	await prisma.$connect();
-
-	if (!isPreview) {
-		const button = await prisma.button.findUnique({
-			where: { id: buttonId },
-			select: { id: true, form_id: true }
-		});
-
-		if (!button || button.form_id !== formId) {
-			await prisma.$disconnect();
-			return {
-				notFound: true
-			};
-		}
-	}
 
 	const form = await prisma.form.findUnique({
 		where: { id: formId },
@@ -546,7 +532,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	return {
 		props: {
 			form: formWithConfig,
-			buttonId: buttonId || 0,
+			buttonId,
 			productId: form.product.id,
 			isPreview,
 			isWidget,

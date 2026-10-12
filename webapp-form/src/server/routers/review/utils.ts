@@ -1,5 +1,5 @@
 import { ReviewWithButtonAndProduct } from '@/prisma/augmented';
-import { Answer, Prisma, PrismaClient } from '@prisma/client';
+import { Answer, Prisma, PrismaClient, Review } from '@prisma/client';
 import { Client } from '@elastic/elasticsearch';
 import { ElkAnswer } from '@/src/utils/types';
 import { TRPCError } from '@trpc/server';
@@ -181,7 +181,7 @@ export async function createOrUpdateAnswers(
 					review_id: review.id,
 					review_user_id: review.user_id,
 					button_id: review.button_id,
-					button_name: review.button.title,
+					button_name: review.button?.title ?? null,
 					product_id: review.product_id,
 					product_name: review.product.title,
 					form_id: review.form_id,
@@ -222,7 +222,7 @@ export async function createOrUpdateAnswers(
 									parent_answer_item_id: newAnswer.answer_item_id,
 									review_id: review.id,
 									button_id: review.button_id,
-									button_name: review.button.title,
+									button_name: review.button?.title ?? null,
 									product_id: review.product_id,
 									form_id: review.form_id,
 									product_name: review.product.title,
@@ -235,6 +235,23 @@ export async function createOrUpdateAnswers(
 				.flat()
 		);
 	});
+}
+
+export async function resolveReviewButton(
+	prisma: PrismaClient,
+	formId: number,
+	requestedButtonId?: number | null
+): Promise<Pick<Review, 'button_id' | 'requested_button_id'>> {
+	if (!requestedButtonId) return { button_id: null, requested_button_id: null };
+
+	const button = await prisma.button.findFirst({
+		where: { id: requestedButtonId, form_id: formId },
+		select: { id: true }
+	});
+
+	return button
+		? { button_id: button.id, requested_button_id: null }
+		: { button_id: null, requested_button_id: requestedButtonId };
 }
 
 export async function createReview(
