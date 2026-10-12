@@ -591,6 +591,7 @@ export const getServerSideProps: GetServerSideProps<{
 	const xwikiButtonName = query.nd_source as string;
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
+	const previewFormId = isPreview ? parseInt(query.form as string) : NaN;
 
 	const isXWikiLink = !buttonId && !isPreview;
 
@@ -648,7 +649,10 @@ export const getServerSideProps: GetServerSideProps<{
 			forms: {
 				where: buttonFormId
 					? { id: buttonFormId }
-					: { NOT: { isDeleted: true } },
+					: {
+							NOT: { isDeleted: true },
+							...(!isNaN(previewFormId) && { id: previewFormId })
+					  },
 				include: {
 					product: {
 						select: {
