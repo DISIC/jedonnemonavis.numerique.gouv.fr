@@ -9,6 +9,7 @@ import JdmaInviteEmail from '@/emails/jdma-invite-email';
 import JdmaUserInviteEmail from '@/emails/jdma-user-invite-email';
 import JdmaDnCreatorInviteEmail from '@/emails/jdma-dn-creator-invite-email';
 import JdmaClosedButtonOrFormEmail from '@/emails/jdma-closed-button-or-form-email';
+import JdmaInvalidButtonsEmail from '@/emails/jdma-invalid-buttons-email';
 import JdmaProductArchivedEmail from '@/emails/jdma-product-archived-email';
 import JdmaProductRestoredEmail from '@/emails/jdma-product-restored-email';
 import JdmaNotificationsEmail from '@/emails/jdma-notifications-email';
@@ -21,6 +22,7 @@ import {
 	JdmaTokenEmailProps,
 	JdmaUserRequestRefusedEmailProps,
 	JdmaClosedButtonOrFormEmailProps,
+	JdmaInvalidButtonsEmailProps,
 	JdmaInviteEmailProps,
 	JdmaOtpEmailProps,
 	JdmaProductArchivedEmailProps,
@@ -83,6 +85,12 @@ export async function renderClosedButtonOrFormEmail(
 	props: JdmaClosedButtonOrFormEmailProps
 ): Promise<string> {
 	return await render(<JdmaClosedButtonOrFormEmail {...props} />);
+}
+
+export async function renderInvalidButtonsEmail(
+	props: JdmaInvalidButtonsEmailProps
+): Promise<string> {
+	return await render(<JdmaInvalidButtonsEmail {...props} />);
 }
 
 export async function renderProductArchivedEmail(

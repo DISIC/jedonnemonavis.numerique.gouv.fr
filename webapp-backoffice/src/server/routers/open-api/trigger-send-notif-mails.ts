@@ -16,6 +16,7 @@ import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { sendMail } from '@/src/utils/mailer';
 import type { Context } from '@/src/server/trpc';
 import { renderNotificationsEmail } from '@/src/utils/emails';
+import { sendInvalidButtonsDigest } from '@/src/server/services/invalid-buttons/send-digest';
 
 export const triggerSendNotifMailsMutation = async ({
 	ctx,
@@ -235,6 +236,15 @@ export const triggerSendNotifMailsMutation = async ({
 		}
 
 		scopeResult.users = userProductAssociations;
+	}
+
+	const weeklyScope = scopes.find(({ scope }) => scope === 'weekly');
+	if (weeklyScope) {
+		await sendInvalidButtonsDigest(
+			ctx.prisma,
+			weeklyScope.startDate,
+			weeklyScope.endDate
+		);
 	}
 
 	return {
