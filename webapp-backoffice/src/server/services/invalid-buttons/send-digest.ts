@@ -40,7 +40,6 @@ export async function sendInvalidButtonsDigest(
 	});
 
 	const digests = groupInvalidButtonReviewsByProduct(reviewCounts, forms);
-	let sentCount = 0;
 
 	for (const { product, forms: productForms } of digests) {
 		const recipients = await prisma.user.findMany({
@@ -74,24 +73,12 @@ export async function sendInvalidButtonsDigest(
 		const subject = `Des avis ont été déposés sur des liens d'intégration inexistants du service numérique «${product.title}»`;
 
 		for (const { email } of recipients) {
-			try {
-				await sendMail(
-					subject,
-					email,
-					html,
-					`${subject}. Pensez à revoir les liens d'intégration de votre site.`
-				);
-			} catch (err) {
-				console.error(
-					`[invalid-buttons] Failed to send digest to ${email} for product ${product.id}:`,
-					err
-				);
-			}
-
-			sentCount++;
-			if (sentCount % 10 === 0) {
-				await new Promise(resolve => setTimeout(resolve, 5000));
-			}
+			await sendMail(
+				subject,
+				email,
+				html,
+				`${subject}. Pensez à revoir les liens d'intégration de votre site.`
+			);
 		}
 	}
 }
