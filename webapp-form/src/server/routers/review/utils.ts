@@ -3,6 +3,7 @@ import { Answer, Prisma, PrismaClient, Review } from '@prisma/client';
 import { Client } from '@elastic/elasticsearch';
 import { ElkAnswer } from '@/src/utils/types';
 import { TRPCError } from '@trpc/server';
+import { isValidButtonId } from '@/src/utils/tools';
 import { FormStepNames } from '@/src/pages/[id]';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 
@@ -242,7 +243,8 @@ export async function resolveReviewButton(
 	formId: number,
 	requestedButtonId?: number | null
 ): Promise<Pick<Review, 'button_id' | 'requested_button_id'>> {
-	if (!requestedButtonId) return { button_id: null, requested_button_id: null };
+	if (!isValidButtonId(requestedButtonId))
+		return { button_id: null, requested_button_id: null };
 
 	const button = await prisma.button.findFirst({
 		where: { id: requestedButtonId, form_id: formId },

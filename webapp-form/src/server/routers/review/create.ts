@@ -7,7 +7,12 @@ import { z } from 'zod';
 import { createReview } from './utils';
 
 export const createReviewInputSchema = z.object({
-	review: ReviewUncheckedCreateInputSchema,
+	review: ReviewUncheckedCreateInputSchema.and(
+		z.object({
+			button_id: z.number().int(),
+			requested_button_id: z.undefined()
+		})
+	),
 	answers: z.array(AnswerCreateInputSchema)
 });
 
