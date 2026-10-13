@@ -40,26 +40,29 @@ export async function sendInvalidButtonsDigest(
 	});
 
 	const digests = groupInvalidButtonReviewsByProduct(reviewCounts, forms);
+	let sentCount = 0;
 
 	for (const { product, forms: productForms } of digests) {
-		const [accessRights, adminEntityRights] = await Promise.all([
-			prisma.accessRight.findMany({
-				where: { product_id: product.id, status: { not: 'removed' } },
-				select: { user_email: true }
-			}),
-			prisma.adminEntityRight.findMany({
-				where: { entity: { products: { some: { id: product.id } } } },
-				select: { user_email: true }
-			})
-		]);
+		const recipients = await prisma.user.findMany({
+			where: {
+				notifications: true,
+				OR: [
+					{
+						accessRights: {
+							some: { product_id: product.id, status: { not: 'removed' } }
+						}
+					},
+					{
+						adminEntityRights: {
+							some: { entity: { products: { some: { id: product.id } } } }
+						}
+					}
+				]
+			},
+			select: { email: true }
+		});
 
-		const emails = new Set(
-			[...accessRights, ...adminEntityRights]
-				.map(right => right.user_email)
-				.filter((email): email is string => !!email)
-		);
-
-		if (!emails.size) continue;
+		if (!recipients.length) continue;
 
 		const html = await renderInvalidButtonsEmail({
 			product,
@@ -70,7 +73,7 @@ export async function sendInvalidButtonsDigest(
 		});
 		const subject = `Des avis ont été déposés sur des liens d'intégration inexistants du service numérique «${product.title}»`;
 
-		for (const email of emails) {
+		for (const { email } of recipients) {
 			try {
 				await sendMail(
 					subject,
@@ -83,6 +86,11 @@ export async function sendInvalidButtonsDigest(
 					`[invalid-buttons] Failed to send digest to ${email} for product ${product.id}:`,
 					err
 				);
+			}
+
+			sentCount++;
+			if (sentCount % 10 === 0) {
+				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 		}
 	}

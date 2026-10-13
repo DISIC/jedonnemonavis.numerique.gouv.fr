@@ -249,9 +249,15 @@ export const groupInvalidButtonReviewsByProduct = (
 		Pick<JdmaInvalidButtonsEmailProps, 'product' | 'forms'>
 	>();
 
+	const reviewCountsByFormId = new Map<number, typeof reviewCounts>();
+	reviewCounts.forEach(rc => {
+		const formReviewCounts = reviewCountsByFormId.get(rc.form_id) ?? [];
+		formReviewCounts.push(rc);
+		reviewCountsByFormId.set(rc.form_id, formReviewCounts);
+	});
+
 	forms.forEach(form => {
-		const links = reviewCounts
-			.filter(rc => rc.form_id === form.id)
+		const links = (reviewCountsByFormId.get(form.id) ?? [])
 			.map(rc => ({
 				label: getInvalidButtonLabel(rc.requested_button_id),
 				reviewCount: rc._count._all

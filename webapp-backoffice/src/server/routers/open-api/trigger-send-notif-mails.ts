@@ -240,11 +240,15 @@ export const triggerSendNotifMailsMutation = async ({
 
 	const weeklyScope = scopes.find(({ scope }) => scope === 'weekly');
 	if (weeklyScope) {
-		await sendInvalidButtonsDigest(
-			ctx.prisma,
-			weeklyScope.startDate,
-			weeklyScope.endDate
-		);
+		try {
+			await sendInvalidButtonsDigest(
+				ctx.prisma,
+				weeklyScope.startDate,
+				weeklyScope.endDate
+			);
+		} catch (err) {
+			console.error('[invalid-buttons] Failed to send weekly digest:', err);
+		}
 	}
 
 	return {
