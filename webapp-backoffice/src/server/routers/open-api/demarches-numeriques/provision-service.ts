@@ -84,7 +84,11 @@ export const provisionServiceOutputSchema = z.object({
 			email: z.string(),
 			role: z.string(),
 			account_existed: z.boolean(),
-			register_url: z.string().nullable()
+			login_url: z.string().nullable(),
+			register_url: z
+				.string()
+				.nullable()
+				.describe('Deprecated: same value as login_url')
 		})
 	),
 	already_existed: z.boolean()
@@ -189,7 +193,7 @@ export const provisionServiceMutation = async ({
 		email: string;
 		isCreator: boolean;
 		account_existed: boolean;
-		register_url: string | null;
+		login_url: string | null;
 	}[] = [];
 
 	const result = await ctx.prisma.$transaction(async tx => {
@@ -249,7 +253,7 @@ export const provisionServiceMutation = async ({
 				email,
 				isCreator: email === creatorEmail,
 				account_existed: !!user,
-				register_url: user ? null : `${process.env.NODEMAILER_BASEURL}/login`
+				login_url: user ? null : `${process.env.NODEMAILER_BASEURL}/login`
 			});
 		}
 
@@ -303,7 +307,7 @@ export const provisionServiceMutation = async ({
 					'Votre formulaire « Je donne mon avis » est prêt',
 					r.email,
 					html,
-					`Connectez-vous avec ProConnect pour suivre les résultats : ${r.register_url}`
+					`Connectez-vous avec ProConnect pour suivre les résultats : ${r.login_url}`
 				);
 			} else {
 				const html = await renderUserInviteEmail({
@@ -315,7 +319,7 @@ export const provisionServiceMutation = async ({
 					'Invitation à rejoindre « Je donne mon avis »',
 					r.email,
 					html,
-					`Connectez-vous avec ProConnect pour y accéder : ${r.register_url}`
+					`Connectez-vous avec ProConnect pour y accéder : ${r.login_url}`
 				);
 			}
 		} catch (err) {
@@ -338,7 +342,8 @@ export const provisionServiceMutation = async ({
 			email: r.email,
 			role: 'carrier_admin',
 			account_existed: r.account_existed,
-			register_url: r.register_url
+			login_url: r.login_url,
+			register_url: r.login_url
 		})),
 		already_existed: false
 	};
