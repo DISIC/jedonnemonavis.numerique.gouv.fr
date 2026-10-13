@@ -384,7 +384,6 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
-										buttons={buttonResults.data}
 										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}
