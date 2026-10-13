@@ -338,6 +338,7 @@ export default function JDMAForm({
 	}, [router.events]);
 
 	React.useEffect(() => {
+		if (isButtonDeleted) return;
 		resetForm();
 	}, [router.isReady]);
 
@@ -628,7 +629,6 @@ export const getServerSideProps: GetServerSideProps<{
 		if (
 			!button ||
 			button.form.product_id !== parseInt(productId) ||
-			button.form.isDeleted ||
 			button.form.form_template.slug !== 'root'
 		) {
 			await prisma.$disconnect();
@@ -638,7 +638,7 @@ export const getServerSideProps: GetServerSideProps<{
 		}
 
 		buttonFormId = button.form_id;
-		isButtonDeleted = !!button.isDeleted;
+		isButtonDeleted = !!button.isDeleted || !!button.form.isDeleted;
 	}
 
 	const product = await prisma.product.findUnique({
