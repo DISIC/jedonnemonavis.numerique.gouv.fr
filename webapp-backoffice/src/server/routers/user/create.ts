@@ -2,7 +2,7 @@ import { UserRoleSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { generateUnusablePassword } from './utils';
+import { generateUnusablePassword } from '@/src/server/utils/proconnect-account';
 
 export const createUserInputSchema = z.object({
 	email: z.string().email(),

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { encode } from 'next-auth/jwt';
+import { signInProConnectUser } from '../../src/server/utils/proconnect-account';
 
 const prisma = new PrismaClient();
 
@@ -38,30 +39,12 @@ export const authTasks = {
 			);
 		}
 
-		await prisma.user.upsert({
-			where: { email: normalizedEmail },
-			update: { proconnect_account: true, active: true },
-			create: {
-				email: normalizedEmail,
-				firstName,
-				lastName,
-				password: 'unused',
-				role: 'user',
-				active: true,
-				proconnect_account: true,
-				notifications: true,
-				notifications_frequency: 'weekly'
-			}
+		const user = await signInProConnectUser(prisma, {
+			email: normalizedEmail,
+			firstName,
+			lastName
 		});
-
-		await prisma.accessRight.updateMany({
-			where: { user_email_invite: normalizedEmail },
-			data: { user_email: normalizedEmail }
-		});
-		await prisma.adminEntityRight.updateMany({
-			where: { user_email_invite: normalizedEmail },
-			data: { user_email: normalizedEmail }
-		});
+		if (!user) throw new Error(`User ${normalizedEmail} is deactivated`);
 
 		return encodeSession(normalizedEmail, 'eidas2');
 	},

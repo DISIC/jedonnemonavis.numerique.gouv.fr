@@ -18,8 +18,6 @@ import {
 	getNotificationsEmailPreviewQuery
 } from './get-notifications-email-preview';
 
-export { makeRelationFromUserInvite } from './utils';
-
 export const userRouter = router({
 	getList: protectedProcedure
 		.meta({ isAdmin: true })

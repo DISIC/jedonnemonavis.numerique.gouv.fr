@@ -83,7 +83,7 @@ export default async function handler(
 		where: { email: userEmail }
 	});
 
-	if (!user) {
+	if (!user?.active) {
 		return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 

@@ -8,10 +8,7 @@ import {
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 import { isMfaAcr, proconnectMfaClaims } from '@/src/utils/proconnect';
-import {
-	generateUnusablePassword,
-	makeRelationFromUserInvite
-} from '@/src/server/routers/user/utils';
+import { signInProConnectUser } from '@/src/server/utils/proconnect-account';
 
 const JWKS = createRemoteJWKSet(
 	new URL(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/jwks`)
@@ -73,21 +70,19 @@ export const authOptions: NextAuthOptions = {
 	},
 	callbacks: {
 		async session({ session, token }) {
-			if (token.email) {
-				const user = await prisma.user.findUnique({
-					where: { email: token.email }
-				});
+			const user = token.email
+				? await prisma.user.findUnique({ where: { email: token.email } })
+				: null;
 
-				if (user) {
-					session.user = {
-						...session.user,
-						id: user.id.toString(),
-						role: user.role,
-						name: `${user.firstName} ${user.lastName}`,
-						email: user.email
-					};
-				}
-			}
+			if (!user?.active) throw new Error('ACCOUNT_DISABLED');
+
+			session.user = {
+				...session.user,
+				id: user.id.toString(),
+				role: user.role,
+				name: `${user.firstName} ${user.lastName}`,
+				email: user.email
+			};
 			return session;
 		},
 		jwt: ({ token, account, profile }) => {
@@ -124,47 +119,15 @@ export const authOptions: NextAuthOptions = {
 				throw new Error('MFA_REQUIRED');
 			}
 
-			const email = proconnectProfile.email?.toLowerCase();
+			if (!proconnectProfile.email) throw new Error('EMAIL_MISSING');
 
-			let dbUser = await prisma.user.findUnique({
-				where: { email }
+			const user = await signInProConnectUser(prisma, {
+				email: proconnectProfile.email,
+				firstName: proconnectProfile.given_name,
+				lastName: proconnectProfile.usual_name
 			});
 
-			if (dbUser) {
-				if (!dbUser.proconnect_account || !dbUser.active) {
-					dbUser = await prisma.user.update({
-						where: { id: dbUser.id },
-						data: { proconnect_account: true, active: true }
-					});
-				}
-			} else {
-				dbUser = await prisma.user.create({
-					data: {
-						email,
-						firstName: proconnectProfile.given_name,
-						lastName: proconnectProfile.usual_name,
-						role: 'user',
-						password: generateUnusablePassword(),
-						notifications: true,
-						notifications_frequency: 'weekly',
-						active: true,
-						xwiki_account: false,
-						xwiki_username: null,
-						proconnect_account: true
-					}
-				});
-			}
-
-			await makeRelationFromUserInvite(prisma, email);
-
-			await prisma.userEvent.create({
-				data: {
-					user_id: dbUser.id,
-					action: 'user_signin',
-					created_at: new Date(),
-					metadata: {}
-				}
-			});
+			if (!user) throw new Error('ACCOUNT_DISABLED');
 
 			return true;
 		}

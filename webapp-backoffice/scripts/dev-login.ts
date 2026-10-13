@@ -2,6 +2,7 @@ import { loadEnvConfig } from '@next/env';
 import { PrismaClient } from '@prisma/client';
 import { encode } from 'next-auth/jwt';
 import { spawnSync } from 'child_process';
+import { signInProConnectUser } from '../src/server/utils/proconnect-account';
 
 loadEnvConfig(process.cwd());
 
@@ -21,8 +22,11 @@ async function main() {
 	const secret = process.env.JWT_SECRET;
 	if (!secret) throw new Error('JWT_SECRET is missing from .env');
 
-	const user = await prisma.user.findUnique({ where: { email } });
-	if (!user) throw new Error(`No user ${email} in the local database`);
+	if (!(await prisma.user.findUnique({ where: { email } })))
+		throw new Error(`No user ${email} in the local database`);
+
+	const user = await signInProConnectUser(prisma, { email });
+	if (!user) throw new Error(`User ${email} is deactivated`);
 
 	const token = await encode({
 		token: { email, acr: 'eidas2' },
