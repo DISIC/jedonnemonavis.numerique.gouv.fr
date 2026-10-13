@@ -8,6 +8,7 @@ import {
 	type TemplateColumn
 } from '@/src/utils/export-worker/generate-csv';
 import { generateXlsStream } from '@/src/utils/export-worker/generate-xls';
+import { getInvalidButtonLabel } from '@/src/utils/tools';
 import {
 	generateDownloadLink,
 	uploadStreamToS3,
@@ -117,6 +118,7 @@ function buildArchivedReviewRow(
 		original_review_id: number;
 		review_created_at: Date;
 		button_id: number | null;
+		requested_button_id: number | null;
 		answers: Prisma.JsonValue;
 	},
 	formName: string,
@@ -126,7 +128,9 @@ function buildArchivedReviewRow(
 		{ id: archived.original_review_id, created_at: archived.review_created_at },
 		parseArchivedAnswers(archived.answers),
 		formName,
-		archived.button_id ? buttonTitles.get(archived.button_id) ?? '' : ''
+		archived.button_id
+			? buttonTitles.get(archived.button_id) ?? ''
+			: getInvalidButtonLabel(archived.requested_button_id)
 	);
 }
 
@@ -358,6 +362,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 				select: {
 					id: true,
 					created_at: true,
+					requested_button_id: true,
 					button: { select: { title: true } }
 				}
 			});
@@ -394,7 +399,8 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 					review,
 					answers,
 					formName,
-					review.button?.title ?? ''
+					review.button?.title ??
+						getInvalidButtonLabel(review.requested_button_id)
 				);
 			}
 
@@ -438,6 +444,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 					original_review_id: true,
 					review_created_at: true,
 					button_id: true,
+					requested_button_id: true,
 					answers: true
 				}
 			});

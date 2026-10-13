@@ -332,7 +332,11 @@ const ReviewDrawerContent = ({
 					: "Aucun lien d'intégration"}
 			</Badge>
 			{review.requested_button_id && (
-				<span className={cx(fr.cx('fr-ml-1w', 'fr-hint-text'),classes.invalidLinkInfo)}>
+				<span
+					className={cx(
+						fr.cx('fr-ml-1w', 'fr-hint-text'),classes.invalidLinkInfo
+					)}
+				>
 					identifiant : {review.requested_button_id}
 				</span>
 			)}
@@ -695,7 +699,7 @@ const useStyles = tss.create({
 		border: 0
 	},
 	invalidLinkInfo: {
-		display: 'inline-block',
+		display: 'inline-block'
 	}
 });
 
