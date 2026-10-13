@@ -159,8 +159,7 @@ Un unique appel, atomique, qui crée l'ensemble.
     {
       "email": "createur@culture.gouv.fr",
       "account_existed": false,
-      "login_url": "https://…/login",
-      "register_url": "https://…/login" // déprécié, même valeur que login_url
+      "login_url": "https://…/login"
     }
   ],
   "already_existed": false

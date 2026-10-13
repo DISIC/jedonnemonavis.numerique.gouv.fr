@@ -84,11 +84,7 @@ export const provisionServiceOutputSchema = z.object({
 			email: z.string(),
 			role: z.string(),
 			account_existed: z.boolean(),
-			login_url: z.string().nullable(),
-			register_url: z
-				.string()
-				.nullable()
-				.describe('Deprecated: same value as login_url')
+			login_url: z.string().nullable()
 		})
 	),
 	already_existed: z.boolean()
@@ -342,8 +338,7 @@ export const provisionServiceMutation = async ({
 			email: r.email,
 			role: 'carrier_admin',
 			account_existed: r.account_existed,
-			login_url: r.login_url,
-			register_url: r.login_url
+			login_url: r.login_url
 		})),
 		already_existed: false
 	};
