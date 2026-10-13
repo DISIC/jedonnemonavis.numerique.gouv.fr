@@ -1,5 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
+import { deleteUserRelations } from './utils';
 
 export const deleteManyUsersInputSchema = z.object({
 	ids: z.array(z.number())
@@ -20,8 +21,9 @@ export const deleteManyUsersMutation = async ({
 		  })
 		: null;
 
-	const deletedUser = await ctx.prisma.user.deleteMany({
-		where: { id: { in: ids } }
+	const deletedUser = await ctx.prisma.$transaction(async tx => {
+		await deleteUserRelations(tx, ids);
+		return tx.user.deleteMany({ where: { id: { in: ids } } });
 	});
 
 	if (actor) {
