@@ -1,3 +1,4 @@
+import { getProConnectLoginError } from '@/src/utils/proconnect';
 import { getSafeCallbackUrl } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -17,6 +18,7 @@ export const ProConnectLogin = ({ showSecurityNotice }: Props) => {
 	const router = useRouter();
 	const { error, callbackUrl } = router.query;
 	const { classes, cx } = useStyles();
+	const loginError = getProConnectLoginError(error);
 
 	return (
 		<>
@@ -45,12 +47,12 @@ export const ProConnectLogin = ({ showSecurityNotice }: Props) => {
 					fr.cx('fr-p-6v', 'fr-p-md-14v', 'fr-mb-16v')
 				)}
 			>
-				{error === 'MFA_REQUIRED' && (
+				{loginError && (
 					<Alert
 						severity="error"
 						className={fr.cx('fr-mb-6v')}
-						title="Double authentification requise"
-						description="Vous ne pouvez pas accéder au service sans avoir une double authentification installée. Veuillez installer une application d'authentification et vous connecter à nouveau."
+						title={loginError.title}
+						description={loginError.description}
 					/>
 				)}
 				<h2 className={fr.cx('fr-h5', 'fr-mb-6v')}>Avec ProConnect</h2>
