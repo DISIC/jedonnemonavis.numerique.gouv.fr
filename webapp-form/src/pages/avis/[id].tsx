@@ -524,7 +524,6 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	if (
 		!form ||
-		(form.isDeleted && isPreview) ||
 		form.product.status === 'archived' ||
 		(!isPreview && form.form_template.slug === 'root')
 	) {
@@ -533,7 +532,9 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 		};
 	}
 
-	if (form.isDeleted) {
+	const isClosed = !!form.isDeleted && !isPreview;
+
+	if (isClosed) {
 		res.statusCode = 404;
 	}
 
@@ -563,7 +564,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			isPreview,
 			isWidget,
 			widgetNonce,
-			isClosed: !!form.isDeleted,
+			isClosed,
 			...(await serverSideTranslations(locale ?? 'fr', ['common']))
 		}
 	};
