@@ -12,7 +12,7 @@ import {
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
-import { getValidTabSlug } from '@/src/utils/tools';
+import { getFormPreviewUrl, getValidTabSlug } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -210,11 +210,7 @@ const ProductFormPage = (props: Props) => {
 							<Button
 								priority="tertiary"
 								linkProps={{
-									href: `${process.env.NEXT_PUBLIC_FORM_APP_URL}/${
-										form.form_template.slug === 'root'
-											? `Demarches/${form.product_id}`
-											: `Demarches/avis/${form.id}`
-									}?preview=true`,
+									href: getFormPreviewUrl(form),
 									target: '_blank'
 								}}
 							>
@@ -389,7 +385,6 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
-										buttons={buttonResults.data}
 										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}

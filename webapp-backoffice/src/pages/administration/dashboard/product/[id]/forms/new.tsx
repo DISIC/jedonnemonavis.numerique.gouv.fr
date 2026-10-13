@@ -9,6 +9,7 @@ import {
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import {
+	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
@@ -448,16 +449,10 @@ const NewForm = (props: Props) => {
 							si nécessaire
 						</p>
 					),
-					headerActions: (
+					headerActions: createdForm && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								createdForm?.form_template.slug === 'root'
-									? `/Demarches/${product.id}`
-									: `/Demarches/avis/${createdForm?.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(tmpConfigHelper)
-							)}`}
+							href={getFormPreviewUrl(createdForm, tmpConfigHelper)}
 							target="_blank"
 							rel="noopener noreferrer"
 						>

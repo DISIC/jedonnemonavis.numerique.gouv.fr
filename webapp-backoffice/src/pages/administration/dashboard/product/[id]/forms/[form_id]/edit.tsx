@@ -6,6 +6,7 @@ import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
 import {
+	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
@@ -314,13 +315,7 @@ const ProductFormPage = (props: Props) => {
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								form.form_template.slug === 'root'
-									? `/Demarches/${form.product_id}`
-									: `/Demarches/avis/${form.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(tmpConfigHelper)
-							)}`}
+							href={getFormPreviewUrl(form, tmpConfigHelper)}
 							target="_blank"
 						>
 							Prévisualiser

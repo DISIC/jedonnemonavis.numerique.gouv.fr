@@ -55,19 +55,14 @@ export const TextInputBlock = ({
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
-				{block.content && (
+				{(block.content || isEmail) && (
 					<span className={fr.cx('fr-hint-text', 'fr-my-1v')}>
-						{block.content}
+						{[block.content, isEmail && 'Exemple : nom@domaine.fr']
+							.filter(Boolean)
+							.join(' ')}
 					</span>
 				)}
 			</label>
-			{(block.content || isEmail) && (
-				<p className={fr.cx('fr-hint-text', 'fr-my-1v')}>
-					{[block.content, isEmail && 'Exemple : nom@domaine.fr']
-						.filter(Boolean)
-						.join(' ')}
-				</p>
-			)}
 			<Input
 				label=""
 				className={fr.cx('fr-mb-2v')}

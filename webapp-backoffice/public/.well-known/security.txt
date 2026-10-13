@@ -1,0 +1,10 @@
+# Signalement de vulnérabilités — « Je donne mon avis »
+# Service de la Direction interministérielle du numérique (DINUM).
+# Merci de commencer l'objet de votre message par [SÉCURITÉ].
+# Ne publiez pas de vulnérabilité dans une issue publique.
+
+Contact: mailto:contact.jdma@design.numerique.gouv.fr
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://jedonnemonavis.numerique.gouv.fr/.well-known/security.txt
+Policy: https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/blob/main/SECURITY.md

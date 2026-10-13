@@ -34,13 +34,27 @@ export const deleteFormMutation = async ({
 		select: { isDeleted: true }
 	});
 
-	const deletedForm = await ctx.prisma.form.update({
-		where: { id },
-		data: {
-			...withoutVisibilityFlags(form),
-			...(form.isDeleted === true && { isPublic: false })
-		},
-		include: { form_template: true }
+	const deletedForm = await ctx.prisma.$transaction(async tx => {
+		const updatedForm = await tx.form.update({
+			where: { id },
+			data: {
+				...withoutVisibilityFlags(form),
+				...(form.isDeleted === true && { isPublic: false })
+			},
+			include: { form_template: true }
+		});
+
+		if (updatedForm.isDeleted) {
+			await tx.button.updateMany({
+				where: { form_id: id, OR: [{ isDeleted: false }, { isDeleted: null }] },
+				data: {
+					isDeleted: true,
+					deleted_at: updatedForm.deleted_at ?? new Date()
+				}
+			});
+		}
+
+		return updatedForm;
 	});
 
 	if (

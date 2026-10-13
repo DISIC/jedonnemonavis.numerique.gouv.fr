@@ -12,6 +12,7 @@ import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import FormClosed from '../form-closed';
 import {
 	DynamicAnswerData,
 	FormAnswers,
@@ -29,6 +30,7 @@ type AvisPageProps = {
 	isPreview: boolean;
 	isWidget: boolean;
 	widgetNonce: string | null;
+	isClosed: boolean;
 };
 
 export default function AvisPage({
@@ -37,7 +39,8 @@ export default function AvisPage({
 	productId,
 	isPreview,
 	isWidget,
-	widgetNonce
+	widgetNonce,
+	isClosed
 }: AvisPageProps) {
 	const { classes, cx } = useStyles({ isWidget });
 
@@ -288,6 +291,10 @@ export default function AvisPage({
 		/>
 	);
 
+	if (isClosed) {
+		return <FormClosed buttonId={buttonId} />;
+	}
+
 	if (isSubmitted) {
 		return (
 			<div ref={contentRef}>
@@ -439,7 +446,8 @@ export default function AvisPage({
 export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	params,
 	query,
-	locale
+	locale,
+	res
 }) => {
 	if (!params?.id || isNaN(parseInt(params?.id as string))) {
 		return {
@@ -516,13 +524,17 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	if (
 		!form ||
-		form.isDeleted ||
+		(form.isDeleted && isPreview) ||
 		form.product.status === 'archived' ||
 		(!isPreview && form.form_template.slug === 'root')
 	) {
 		return {
 			notFound: true
 		};
+	}
+
+	if (form.isDeleted) {
+		res.statusCode = 404;
 	}
 
 	let formWithConfig = JSON.parse(JSON.stringify(form));
@@ -551,6 +563,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			isPreview,
 			isWidget,
 			widgetNonce,
+			isClosed: !!form.isDeleted,
 			...(await serverSideTranslations(locale ?? 'fr', ['common']))
 		}
 	};

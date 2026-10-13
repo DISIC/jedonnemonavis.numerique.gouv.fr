@@ -835,6 +835,21 @@ export const getButtonUrl = (button?: ButtonWithElements) => {
 	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
 };
 
+export const getFormPreviewUrl = (
+	form: { id: number; product_id: number; form_template: { slug: string } },
+	formConfig?: object
+) => {
+	const path =
+		form.form_template.slug === 'root'
+			? `/${form.product_id}?preview=true&form=${form.id}`
+			: `/avis/${form.id}?preview=true`;
+	const configParam = formConfig
+		? `&formConfig=${encodeURIComponent(JSON.stringify(formConfig))}`
+		: '';
+
+	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${path}${configParam}`;
+};
+
 export const getModalCode = ({
 	buttonStyle,
 	button,

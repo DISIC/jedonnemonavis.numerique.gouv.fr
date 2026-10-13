@@ -338,6 +338,7 @@ export default function JDMAForm({
 	}, [router.events]);
 
 	React.useEffect(() => {
+		if (isButtonDeleted) return;
 		resetForm();
 	}, [router.isReady]);
 
@@ -591,6 +592,7 @@ export const getServerSideProps: GetServerSideProps<{
 	const xwikiButtonName = query.nd_source as string;
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
+	const previewFormId = isPreview ? parseInt(query.form as string) : NaN;
 
 	const isXWikiLink = !buttonId && !isPreview;
 
@@ -627,7 +629,6 @@ export const getServerSideProps: GetServerSideProps<{
 		if (
 			!button ||
 			button.form.product_id !== parseInt(productId) ||
-			button.form.isDeleted ||
 			button.form.form_template.slug !== 'root'
 		) {
 			await prisma.$disconnect();
@@ -637,7 +638,7 @@ export const getServerSideProps: GetServerSideProps<{
 		}
 
 		buttonFormId = button.form_id;
-		isButtonDeleted = !!button.isDeleted;
+		isButtonDeleted = !!button.isDeleted || !!button.form.isDeleted;
 	}
 
 	const product = await prisma.product.findUnique({
@@ -648,7 +649,13 @@ export const getServerSideProps: GetServerSideProps<{
 			forms: {
 				where: buttonFormId
 					? { id: buttonFormId }
-					: { NOT: { isDeleted: true } },
+					: {
+							NOT: { isDeleted: true },
+							...(!isNaN(previewFormId) && {
+								id: previewFormId,
+								form_template: { slug: 'root' }
+							})
+					  },
 				include: {
 					product: {
 						select: {

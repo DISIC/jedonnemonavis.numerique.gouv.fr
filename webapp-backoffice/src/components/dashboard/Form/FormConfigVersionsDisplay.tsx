@@ -2,7 +2,7 @@ import {
 	FormWithElements,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import { formatDateToFrenchString, getFormPreviewUrl } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 
@@ -40,13 +40,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 				<li>
 					<a
 						className={fr.cx('fr-link')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
-							form.form_template.slug !== 'root'
-								? `avis/${form.id}`
-								: form.product_id
-						}?preview=true&formConfig=${encodeURIComponent(
-							JSON.stringify(zeroVersionFormConfig)
-						)}`}
+						href={getFormPreviewUrl(form, zeroVersionFormConfig)}
 						target="_blank"
 						title="Accéder à la version 0 du formulaire, nouvelle fenêtre"
 					>
@@ -59,17 +53,11 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 					<li key={formConfig.id}>
 						<a
 							className={fr.cx('fr-link')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
-								form.form_template.slug !== 'root'
-									? `avis/${form.id}`
-									: form.product_id
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify({
-									...formConfig,
-									displays: formConfig.form_config_displays,
-									labels: formConfig.form_config_labels
-								})
-							)}`}
+							href={getFormPreviewUrl(form, {
+								...formConfig,
+								displays: formConfig.form_config_displays,
+								labels: formConfig.form_config_labels
+							})}
 							target="_blank"
 							title={`Accéder à la version ${
 								index + 1
