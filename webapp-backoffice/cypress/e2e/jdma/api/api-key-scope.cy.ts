@@ -18,9 +18,6 @@ type ApiKeyRightsCtx = {
 	user_ids: number[];
 };
 
-const OUTSIDER_PASSWORD = 'OutsiderPass2026@!';
-const RIGHTS_PASSWORD = 'RightsPass2026@!';
-
 // Le client tRPC de l'application passe par httpBatchLink + SuperJSON : on
 // reproduit le même format pour attaquer la procédure directement, sans passer
 // par l'interface.
@@ -45,9 +42,7 @@ describe("Périmètre des clés d'API", () => {
 	let ctx: OutsiderCtx;
 
 	before(() => {
-		cy.task<OutsiderCtx>('db:setupOutsiderCtx', {
-			password: OUTSIDER_PASSWORD
-		}).then(c => {
+		cy.task<OutsiderCtx>('db:setupOutsiderCtx').then(c => {
 			ctx = c;
 		});
 	});
@@ -55,7 +50,7 @@ describe("Périmètre des clés d'API", () => {
 	// L'isolation des tests remet les cookies à zéro entre chaque `it`, donc la
 	// connexion se refait à chaque fois — comme dans tous les autres specs.
 	beforeEach(() => {
-		login(ctx.user_email, OUTSIDER_PASSWORD);
+		login(ctx.user_email);
 	});
 
 	after(() => cy.task('db:cleanupOutsiderCtx', ctx));
@@ -126,9 +121,7 @@ describe("Qui a droit aux clés d'API d'un service", () => {
 		`${appUrl}/administration/dashboard/product/${ctx.product_id}/forms`;
 
 	before(() => {
-		cy.task<ApiKeyRightsCtx>('db:setupApiKeyRightsCtx', {
-			password: RIGHTS_PASSWORD
-		}).then(c => {
+		cy.task<ApiKeyRightsCtx>('db:setupApiKeyRightsCtx').then(c => {
 			ctx = c;
 		});
 	});
@@ -136,7 +129,7 @@ describe("Qui a droit aux clés d'API d'un service", () => {
 	after(() => cy.task('db:cleanupApiKeyRightsCtx', ctx));
 
 	describe('Utilisateur du service numérique', () => {
-		beforeEach(() => login(ctx.carrier_user_email, RIGHTS_PASSWORD));
+		beforeEach(() => login(ctx.carrier_user_email));
 
 		it('ne peut pas lister les clés', () => {
 			trpcQuery('apiKey.getList', { product_id: ctx.product_id })
@@ -170,7 +163,7 @@ describe("Qui a droit aux clés d'API d'un service", () => {
 	});
 
 	describe('Administrateur du service numérique', () => {
-		beforeEach(() => login(ctx.carrier_admin_email, RIGHTS_PASSWORD));
+		beforeEach(() => login(ctx.carrier_admin_email));
 
 		it('peut lister et créer une clé', () => {
 			trpcQuery('apiKey.getList', { product_id: ctx.product_id })
@@ -196,7 +189,7 @@ describe("Qui a droit aux clés d'API d'un service", () => {
 	});
 
 	describe("Administrateur d'organisation", () => {
-		beforeEach(() => login(ctx.entity_admin_email, RIGHTS_PASSWORD));
+		beforeEach(() => login(ctx.entity_admin_email));
 
 		it('peut créer une clé puis la voir dans le listing', () => {
 			trpcMutation('apiKey.create', { product_id: ctx.product_id })

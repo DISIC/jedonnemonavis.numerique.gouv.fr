@@ -29,7 +29,7 @@ describe('jdma-home', () => {
 
 		it('should redirect to the login page', () => {
 			checkUrlRedirection(
-				`${selectors.loginLink} a:contains("Connexion / Inscription")`,
+				`${selectors.loginLink} a:contains("Connexion")`,
 				'/login'
 			);
 		});

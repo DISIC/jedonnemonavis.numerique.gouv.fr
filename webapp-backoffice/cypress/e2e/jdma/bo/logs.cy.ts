@@ -1,10 +1,10 @@
 import { login } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, appUrl } from '../../../utils/variables';
 
 describe('jdma-logs', () => {
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 	});
 
 	it('should display the logs page with events', () => {

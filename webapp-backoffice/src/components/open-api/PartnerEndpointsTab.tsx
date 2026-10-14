@@ -33,7 +33,7 @@ const PartnerEndpointsTab = ({ filterDoc }: PartnerEndpointsTabProps) => {
 				<p>
 					Crée en un appel le service, le formulaire (observatoire), le lien
 					d'intégration et les droits admin, puis renvoie le code d'intégration
-					et les liens d'inscription. Un même <code>external_id</code> ne crée
+					et les liens de connexion. Un même <code>external_id</code> ne crée
 					pas de doublon : un nouvel appel renvoie le service déjà créé.
 				</p>
 

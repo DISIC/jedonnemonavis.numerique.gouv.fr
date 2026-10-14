@@ -21,6 +21,7 @@ import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
 import { $Enums, Prisma } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -450,10 +451,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		secret: process.env.JWT_SECRET
 	});
 
-	if (
-		!currentUserToken ||
-		(currentUserToken.exp as number) > new Date().getTime()
-	) {
+	if (!isAuthTokenValid(currentUserToken)) {
 		prisma.$disconnect();
 		return {
 			redirect: {

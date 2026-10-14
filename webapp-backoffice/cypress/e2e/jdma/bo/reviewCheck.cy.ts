@@ -1,9 +1,9 @@
 import { login } from '../../../utils/helpers/common';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, appUrl } from '../../../utils/variables';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 	});
 
 	it('should the test answer exist', () => {

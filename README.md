@@ -80,14 +80,34 @@ Lancez l'application, qui sera accessible sur le port 3000 :
 yarn dev
 ```
 
-Voici les informations des utilisateurs prêts à être utilisés en développement grâce aux données de test :
-| Email | Rôle | Compte activé | Ancien compte observatoire | Mot de passe |
-|---------------------|---------------------|---------------|---------------------------|--------------|
-| user1@example.com | Porteur | Non | Non | jdma |
-| user2@example.com | Porteur | Non | Oui | jdma |
-| user3@example.com | Porteur | Oui | Oui | jdma |
-| user4@example.com | Porteur | Oui | Non | jdma |
-| admin@example.com | Administrateur | Oui | Non | jdma |
+#### Connexion en local
+
+La connexion au backoffice se fait uniquement avec ProConnect et une double authentification, sur l'environnement d'intégration ProConnect :
+
+1. Créez un fournisseur de service de test sur l'[espace partenaires ProConnect](https://partenaires.proconnect.gouv.fr) avec :
+   - l'URL de redirection `http://localhost:3000/api/auth/callback/openid` ;
+   - l'URL de déconnexion `http://localhost:3000/login`.
+2. Renseignez `PROCONNECT_CLIENT_ID` et `PROCONNECT_CLIENT_SECRET` dans `.env`. `PROCONNECT_DOMAIN` pointe déjà sur l'intégration (`fca.integ01.dev-agentconnect.fr`).
+   L'encart d'information sécurité de `/login` s'affiche jusqu'à la date `PROCONNECT_NOTICE_UNTIL` (dernier jour inclus, au format `AAAA-MM-JJ`). Sans cette variable, il reste affiché.
+3. Sur `/login`, cliquez sur « S'identifier avec ProConnect » et choisissez le fournisseur d'identité de test. Ses [identifiants de test](https://partenaires.proconnect.gouv.fr/docs/fournisseur-service/identifiants-fi-test) permettent de choisir librement l'email, le SIRET et le niveau `acr` :
+
+| Cas à tester                                                                                | Email                        | `acr`                |
+| ------------------------------------------------------------------------------------------- | ---------------------------- | -------------------- |
+| Connexion à un compte de seed                                                               | `admin@example.com`          | `eidas2` ou `eidas3` |
+| Création d'un compte à la première connexion                                                | une adresse inconnue en base | `eidas2` ou `eidas3` |
+| Refus sans double authentification (par ProConnect ou par JDMA, avec `?error=MFA_REQUIRED`) | n'importe laquelle           | `eidas1`             |
+
+Sans client ProConnect d'intégration, `yarn dev:login <email>` (depuis `webapp-backoffice`) copie dans le presse-papier une ligne à coller dans la console du navigateur sur `http://localhost:3000`. Elle ferme la session en cours et connecte au compte demandé, ce qui permet aussi de changer de compte. Le script refuse de tourner si `NEXTAUTH_URL` ne pointe pas sur localhost.
+
+Les données de test créent les comptes suivants, utilisables avec le fournisseur d'identité de test ou `yarn dev:login` :
+
+| Email             | Rôle                                      |
+| ----------------- | ----------------------------------------- |
+| admin@example.com | Superadmin (rôle `admin`)                 |
+| user3@example.com | Porteur, avec des droits sur des services |
+| user4@example.com | Porteur, avec des droits sur des services |
+| user1@example.com | Porteur, compte non activé, sans droits   |
+| user2@example.com | Porteur, compte non activé, sans droits   |
 
 #### Création/Édition des templates d'e-mails
 

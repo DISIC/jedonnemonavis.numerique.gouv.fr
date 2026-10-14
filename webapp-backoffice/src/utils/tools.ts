@@ -787,19 +787,6 @@ export function computeItemFraction(
 	return Math.max(0, Math.min(1, raw));
 }
 
-export const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-export const regexAtLeastOneNumber = /\d/;
-export const getMissingPasswordRequirements = (password: string): string[] => {
-	const missing: string[] = [];
-
-	if (password.length < 12) missing.push('12 caractères');
-	if (!regexAtLeastOneSpecialCharacter.test(password))
-		missing.push('1 caractère spécial');
-	if (!regexAtLeastOneNumber.test(password)) missing.push('1 chiffre');
-
-	return missing;
-};
-
 export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	const defaultUrl = '/administration/dashboard/products';
 	if (typeof rawCallback !== 'string') {

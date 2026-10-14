@@ -1,4 +1,6 @@
+import { loadEnvConfig } from '@next/env';
 import { defineConfig } from 'cypress';
+import { authTasks } from './cypress/plugins/auth-tasks';
 import { dbTasks } from './cypress/plugins/db-tasks';
 
 export default defineConfig({
@@ -20,6 +22,7 @@ export default defineConfig({
 		projectId: process.env.CYPRESS_PROJECT_ID,
 		// La méthode `setupNodeEvents` est utilisée pour définir des événements Node côté serveur
 		setupNodeEvents(on, config) {
+			loadEnvConfig(__dirname);
 			on('task', {
 				log(message) {
 					console.log(message);
@@ -30,7 +33,8 @@ export default defineConfig({
 
 					return null;
 				},
-				...dbTasks
+				...dbTasks,
+				...authTasks
 			});
 		},
 
