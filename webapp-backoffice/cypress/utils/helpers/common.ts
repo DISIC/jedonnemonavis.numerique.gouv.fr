@@ -42,8 +42,10 @@ export function login(
 		JSON.stringify({ ...userSettings, formHelpModalSeen: customHelpModalSeen }),
 		{ expiry: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 }
 	);
+	cy.intercept('GET', '**/api/trpc/*userDetails.getByUser*').as('userDetails');
 	cy.visit(`${appUrl}${selectors.url.products}`);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
+	cy.wait('@userDetails');
 	tryFillUserDetailsForm();
 	if (!loginOnly) tryCloseModal();
 }
