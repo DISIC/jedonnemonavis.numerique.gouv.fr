@@ -11,7 +11,6 @@ Monorepo with two Next.js apps sharing a PostgreSQL database:
 ```
 webapp-backoffice/   Next.js admin + analytics interface (port 3000)
 webapp-form/         Next.js public-facing feedback form (port 3001)
-python_exporter/     Python service for CSV/XLS exports and email notifications
 migration-scripts/   Database migration utilities
 docker/              Elasticsearch + Kibana configuration
 docs/                Project documentation
@@ -21,7 +20,7 @@ docs/                Project documentation
 
 | Layer     | Technology                                       |
 | --------- | ------------------------------------------------ |
-| Framework | Next.js 13.5 (App Router + Pages Router mixed)   |
+| Framework | Next.js 15.5 (Pages Router)                      |
 | Language  | TypeScript, React 18                             |
 | API       | tRPC v10 + tRPC-OpenAPI (REST compatibility)     |
 | ORM       | Prisma v5 + Zod (zod-prisma-types)               |
@@ -31,7 +30,7 @@ docs/                Project documentation
 | UI        | DSFR (`@codegouvfr/react-dsfr`) + Material UI v5 |
 | Testing   | Cypress (E2E + accessibility via cypress-axe)    |
 | Analytics | Matomo                                           |
-| Export    | Python: pandas, XlsxWriter, boto3 (S3/Cellar)    |
+| Export    | BullMQ worker (TypeScript), S3 (Cellar)          |
 
 ## Common commands
 
@@ -40,9 +39,9 @@ All commands run from within each app's directory (`webapp-backoffice/` or `weba
 ```bash
 yarn dev          # Start dev server
 yarn build        # Production build
-yarn lint         # ESLint
+yarn lint         # Prettier check
 yarn format       # Prettier
-yarn type-check   # TypeScript check without emit
+npx tsc --noEmit  # TypeScript check (no type-check script)
 ```
 
 ### Database (from webapp-backoffice/)
@@ -79,8 +78,8 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 ### API (tRPC)
 
 - Routers live in `webapp-backoffice/src/server/routers/` (20+ domain routers: `product`, `entity`, `form`, `review`, `export`, …)
-- All routers must be registered in `routers/root.ts`
-- REST endpoints generated via `tRPC-OpenAPI` for third-party access; add `.meta({ openapi: { method, path, protect, enabled } })` to expose a procedure
+- Routers are registered in `routers/root.ts` and served on `/api/trpc`
+- Partner REST endpoints live in `routers/open-api/` with `.meta({ openapi: { method, path, protect, enabled } })`; they are mounted only in `routers/open-api-root.ts`, which serves `/api/open-api/*` and the OpenAPI document
 - Middleware chain: NextAuth session → JWT validation → API key check → event logging
 - Procedure types:
   - `protectedProcedure` — session-based auth; add `meta: { isAdmin: true }` to restrict to admins
@@ -91,9 +90,20 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 ### Database schema
 
 - 40+ Prisma models in `webapp-backoffice/prisma/schema.prisma`
-- **The schema is duplicated in `webapp-form/prisma/schema.prisma`** — mirror any changes to both, then run `npx prisma generate` in both apps
+- `webapp-form/prisma/schema.prisma` is a symlink to the backoffice schema: edit the backoffice file only, then run `npx prisma generate` in both apps
+
+### Mirrored files
+
+There is no monorepo tooling: each app resolves `@/*` inside its own root, so code needed by both is duplicated byte for byte. Mirror any change to **every** file in this list, in both apps:
+
+| File                         | Purpose                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `src/utils/personal-data.ts` | Personal-data detection in verbatims — blocks submission in `webapp-form`, masks on read in `webapp-backoffice` |
+
+Verify with `diff webapp-form/src/utils/personal-data.ts webapp-backoffice/src/utils/personal-data.ts`.
+
 - Multi-tenant: `Entity` (organisations) with hierarchical access rights
-- Configurable form templates with `FormTemplate`, `FormStep`, `FormBlock`, `FormBlockOption`
+- Configurable form templates with `FormTemplate`, `FormTemplateStep`, `FormTemplateBlock`, `FormTemplateBlockOption`
 - `UserEvent` model for full audit trail (service_create, service_update, …)
 - Prisma client singleton at `src/utils/db.ts` in both apps — never instantiate directly in components
 
@@ -107,6 +117,7 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 ### Form app rendering modes
 
 The public form page (`webapp-form/src/pages/[id].tsx`) reads query parameters:
+
 - `preview=true` → preview mode (disables submission)
 - `mode=widget` → embedded in the floating widget panel (strips chrome)
 
@@ -119,8 +130,8 @@ The public form page (`webapp-form/src/pages/[id].tsx`) reads query parameters:
 
 ### Data export flow
 
-1. Backoffice queues an export (status: `idle → processing → done`)
-2. Python exporter (`python_exporter/main.py`) polls via HTTP trigger on `:8080`, generates CSV/XLS, uploads to S3 (Cellar)
+1. `export.create` queues a job on the BullMQ `exportQueue` (status: `idle → processing → done`)
+2. The worker (`src/workers/export-worker.ts`, run with `yarn worker:export:dev`) generates CSV/XLS and uploads to S3 (Cellar)
 3. Notification email sent via Nodemailer / MailPace
 
 ## Code style
@@ -182,14 +193,14 @@ yarn dev   # port 3001
 ## Notable conventions
 
 - Pre-commit hooks via Husky + lint-staged enforce ESLint + Prettier
-- Lighthouse CI (`lighthouserc.js`) monitors performance in CI
+- Lighthouse CI config in `webapp-backoffice/lighthouserc.js`, run on demand with `yarn lhci:audit`
 - Elasticsearch TLS: the CA cert must be copied from the Docker container before `webapp-form` can connect (`docker cp elasticsearch:/usr/share/elasticsearch/config/certs/ca/ca.crt webapp-form/certs/ca/ca.crt`)
-- Email templates developed with react-email (`webapp-backoffice/react-email/`); preview server via `yarn dev` inside that directory
+- Email templates developed with react-email (`webapp-backoffice/emails/`); preview server via `yarn email:dev` in `webapp-backoffice/`
 
 ## Troubleshooting
 
-- **TRPC type errors after schema change**: run `npx prisma generate` in both apps, then `yarn type-check`
+- **TRPC type errors after schema change**: run `npx prisma generate` in both apps, then `npx tsc --noEmit`
 - **Cypress "Document is not focused"** on clipboard tests: stub with `cy.stub(win.navigator.clipboard, 'writeText').resolves()`
-- **"Form not found" in review page**: forms must be in published status; check `form.isPublished` in DB
+- **"Form not found" in review page**: forms must be in published status; check the form's `FormConfig.status` in DB
 - **DB migrations fail**: run `npm run db:reset` to wipe and reseed; check `prisma/migrations/` for naming conflicts
 - **Elasticsearch TLS errors**: ensure `certs/ca/ca.crt` exists; copy from the elasticsearch container if missing

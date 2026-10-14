@@ -1,5 +1,5 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import { AnswerIntention, AnswerKind, Prisma, TypeAction } from '@prisma/client';
+import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -10,6 +10,7 @@ import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/Produc
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import {
+	ArchivedAnswerSnapshot,
 	ButtonWithElements,
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
@@ -519,7 +520,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'formConfig.create': TypeAction.form_config_create,
 	'form.create': TypeAction.service_form_create,
 	'form.update': TypeAction.service_form_edit,
-	'form.delete': TypeAction.service_form_delete
+	'form.delete': TypeAction.service_form_delete,
+	'form.setVisibility': TypeAction.service_form_stats_visibility_update
 };
 
 const escapeHtmlValue = (value: unknown): string => {
@@ -619,6 +621,14 @@ export const handleActionTypeDisplay = (
 			return `Fermeture du formulaire <strong>${e(
 				metadataTyped.json.form?.title
 			)}</strong>`;
+		case TypeAction.service_form_stats_visibility_update:
+			return metadataTyped.json.isPublic
+				? `Publication des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`
+				: `Passage en privé des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`;
 	}
 };
 
@@ -651,7 +661,11 @@ export const filtersLabel = [
 	{ value: 'form_config_create', label: 'Modification du formulaire' },
 	{ value: 'service_form_create', label: 'Création d’un formulaire' },
 	{ value: 'service_form_edit', label: 'Modification d’un formulaire' },
-	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' }
+	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' },
+	{
+		value: 'service_form_stats_visibility_update',
+		label: 'Modification de la visibilité des statistiques'
+	}
 ];
 
 export const getHelperFromFormConfig = (
@@ -834,6 +848,21 @@ export const getButtonUrl = (button?: ButtonWithElements) => {
 	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
 };
 
+export const getFormPreviewUrl = (
+	form: { id: number; product_id: number; form_template: { slug: string } },
+	formConfig?: object
+) => {
+	const path =
+		form.form_template.slug === 'root'
+			? `/${form.product_id}?preview=true&form=${form.id}`
+			: `/avis/${form.id}?preview=true`;
+	const configParam = formConfig
+		? `&formConfig=${encodeURIComponent(JSON.stringify(formConfig))}`
+		: '';
+
+	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${path}${configParam}`;
+};
+
 export const getModalCode = ({
 	buttonStyle,
 	button,
@@ -861,17 +890,6 @@ export const getModalCode = ({
 	const widgetScriptUrl = `https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`;
 
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
-};
-
-type ArchivedAnswerSnapshot = {
-	id: number;
-	field_code: string;
-	field_label: string;
-	answer_text: string;
-	answer_item_id: number;
-	intention: AnswerIntention | null;
-	kind: AnswerKind;
-	parent_answer_id: number | null;
 };
 
 type ArchivedReviewSnapshot = {
@@ -916,3 +934,14 @@ export const mapArchivedReviewToReview = (
 		}))
 	};
 };
+
+type DsfrApi = (node: HTMLElement) => { modal?: { conceal: () => void } };
+
+export const closeHeaderMenuModal = (headerId: string) => {
+	const modal = document.getElementById(`header-menu-modal-${headerId}`);
+	const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr;
+
+	if (modal && typeof dsfr === 'function') dsfr(modal).modal?.conceal();
+};
+
+export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];

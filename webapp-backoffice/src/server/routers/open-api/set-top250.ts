@@ -20,7 +20,11 @@ export const setTop250Mutation = async ({
 
 	const requestedForms = await ctx.prisma.form.findMany({
 		where: { id: { in: form_ids } },
-		select: { id: true, product_id: true, form_template: { select: { slug: true } } }
+		select: {
+			id: true,
+			isDeleted: true,
+			form_template: { select: { slug: true } }
+		}
 	});
 
 	const missingFormIds = form_ids.filter(
@@ -30,6 +34,16 @@ export const setTop250Mutation = async ({
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: `Les form_ids suivants n'existent pas en base : ${missingFormIds.join(
+				', '
+			)}`
+		});
+	}
+
+	const closedFormIds = requestedForms.filter(f => f.isDeleted).map(f => f.id);
+	if (closedFormIds.length > 0) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: `Les form_ids suivants sont des formulaires fermés : ${closedFormIds.join(
 				', '
 			)}`
 		});
@@ -64,26 +78,14 @@ export const setTop250Mutation = async ({
 		id => !form_ids.includes(id)
 	);
 
-	const newProductIds = [
-		...new Set(
-			requestedForms
-				.filter(f => new_top250_forms.includes(f.id))
-				.map(f => f.product_id)
-		)
-	];
-
 	await ctx.prisma.$transaction([
 		ctx.prisma.form.updateMany({
-			where: { id: { in: new_top250_forms } },
-			data: { isTop250: true }
-		}),
-		ctx.prisma.product.updateMany({
-			where: { id: { in: newProductIds } },
-			data: { isPublic: true, hasBeenTop250: true }
+			where: { id: { in: form_ids } },
+			data: { isTop250: true, isPublic: true }
 		}),
 		ctx.prisma.form.updateMany({
 			where: { id: { in: down_top250_forms } },
-			data: { isTop250: false }
+			data: { isTop250: false, isPublic: false }
 		})
 	]);
 

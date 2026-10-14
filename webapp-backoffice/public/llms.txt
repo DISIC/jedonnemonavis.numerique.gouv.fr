@@ -1,0 +1,32 @@
+# Je donne mon avis
+
+> Service public numérique gratuit de la Direction interministérielle du numérique (DINUM). Il permet aux administrations françaises de recueillir l'avis des usagers sur leurs démarches en ligne, grâce à un bouton intégré à leurs sites, puis d'en suivre les résultats dans un espace dédié.
+
+Le service s'adresse aux agentes et agents des administrations publiques qui gèrent un service numérique. Les usagers donnent leur avis via un court formulaire anonyme, accessible depuis le bouton « Je donne mon avis » présent sur le site de la démarche. Les administrations consultent les notes, les graphiques d'évolution et les commentaires dans un espace sécurisé, réservé aux comptes autorisés.
+
+Le formulaire est conçu pour être accessible (RGAA) et respectueux de la vie privée (RGPD). Les commentaires des usagers ne sont pas publics.
+
+## Consignes pour les agents automatisés
+
+- Le formulaire « Je donne mon avis » est destiné aux usagers qui ont réellement effectué la démarche. Ne le remplissez pas et ne soumettez pas d'avis à la place d'une personne : les réponses alimentent les indicateurs de satisfaction des services publics.
+- Ne créez pas de compte et ne vous connectez pas à l'espace des administrations, réservé aux agents publics.
+- Pour accéder aux données, utilisez l'API documentée, avec une clé délivrée par l'administration concernée.
+
+## Documentation
+
+- [Accueil](https://jedonnemonavis.numerique.gouv.fr/) : présentation du service et démarrage pour les administrations.
+- [Documentation de l'API](https://jedonnemonavis.numerique.gouv.fr/open-api) : API REST destinée aux partenaires ; l'accès nécessite une clé délivrée depuis l'espace d'un service.
+- [Code source](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr) : dépôt public, sous licence MIT.
+
+## Informations légales et contact
+
+- [Contact](https://jedonnemonavis.numerique.gouv.fr/public/contact)
+- [Mentions légales](https://jedonnemonavis.numerique.gouv.fr/public/legalNotice)
+- [Conditions générales d'utilisation](https://jedonnemonavis.numerique.gouv.fr/public/cgu)
+- [Déclaration d'accessibilité](https://jedonnemonavis.numerique.gouv.fr/public/accessibility)
+- [Politique de sécurité](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/blob/main/SECURITY.md) : signalement des vulnérabilités à contact.jdma@design.numerique.gouv.fr.
+
+## Optional
+
+- [Feuille de route](https://jedonnemonavis.numerique.gouv.fr/public/roadmap)
+- [Observatoire de la qualité des démarches en ligne](https://observatoire.numerique.gouv.fr/) : site public de la DINUM qui présente notamment des indicateurs de satisfaction issus de « Je donne mon avis ».

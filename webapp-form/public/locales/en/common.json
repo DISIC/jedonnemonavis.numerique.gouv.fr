@@ -343,7 +343,16 @@
 		},
 		"not_found": {
 			"h1": "Form not found",
-			"text": "The link is invalid or this form no longer exists."
+			"text": "The link is invalid or this form no longer exists.",
+			"error_code": "Error 404",
+			"share_text": "If you wish, you can share your experience publicly and anonymously. The administration will respond to it and use it to improve its digital services.",
+			"share_link": "Share my experience publicly"
+		},
+		"server_error": {
+			"h1": "Unexpected error",
+			"error_code": "Error {{code}}",
+			"lead": "Sorry, the service is experiencing a problem. We are working to fix it as quickly as possible.",
+			"text": "Try refreshing the page, otherwise please try again later."
 		},
 		"form_closed": {
 			"h1": "This form is closed",

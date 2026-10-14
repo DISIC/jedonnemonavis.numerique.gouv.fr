@@ -8,6 +8,7 @@ import { FormWithElements } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { SetStateAction, useState } from 'react';
+import { PersonalDataAlert } from '../elements/PersonalDataAlert';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -54,19 +55,14 @@ export const TextInputBlock = ({
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
-				{block.content && (
+				{(block.content || isEmail) && (
 					<span className={fr.cx('fr-hint-text', 'fr-my-1v')}>
-						{block.content}
+						{[block.content, isEmail && 'Exemple : nom@domaine.fr']
+							.filter(Boolean)
+							.join(' ')}
 					</span>
 				)}
 			</label>
-			{(block.content || isEmail) && (
-				<p className={fr.cx('fr-hint-text', 'fr-my-1v')}>
-					{[block.content, isEmail && 'Exemple : nom@domaine.fr']
-						.filter(Boolean)
-						.join(' ')}
-				</p>
-			)}
 			<Input
 				label=""
 				className={fr.cx('fr-mb-2v')}
@@ -91,6 +87,11 @@ export const TextInputBlock = ({
 				state={hasError ? 'error' : 'default'}
 				stateRelatedMessage={errorMessage}
 			/>
+			{/*
+			  Pas sur un champ e-mail : c'est le bloc « Adresse mail », opt-in,
+			  dont le contenu est une donnée personnelle explicitement demandée.
+			*/}
+			{!isEmail && <PersonalDataAlert value={inputValue} />}
 		</div>
 	);
 };

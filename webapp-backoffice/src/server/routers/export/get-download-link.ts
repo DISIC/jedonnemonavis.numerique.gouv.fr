@@ -20,7 +20,7 @@ export const getExportDownloadLinkMutation = async ({
 }) => {
 	const exportRecord = await ctx.prisma.export.findUnique({
 		where: { id: input.id },
-		select: { link: true, product_id: true }
+		select: { link: true, product_id: true, only_deleted_reviews: true }
 	});
 
 	if (!exportRecord?.link) {
@@ -36,6 +36,16 @@ export const getExportDownloadLinkMutation = async ({
 		product_id: exportRecord.product_id,
 		authorizeCarrierUser: true
 	});
+
+	if (
+		exportRecord.only_deleted_reviews &&
+		!ctx.session!.user.role.includes('admin')
+	) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Only global admins can download deleted reviews exports'
+		});
+	}
 
 	// Le lien historique porte l'objet dans son chemin (client S3 en path-style).
 	const objectName = decodeURIComponent(

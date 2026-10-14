@@ -1,3 +1,4 @@
+import { hasPersonalData } from './personal-data';
 import { FormWithElements } from './types';
 
 export type DynamicAnswerData = {
@@ -87,6 +88,35 @@ export function getInvalidEmailBlocks(
 		if (!answer || Array.isArray(answer)) return false;
 		const text = answer.answer_text?.trim();
 		return !!text && !isValidEmail(text);
+	});
+}
+
+/**
+ * Blocs de saisie libre susceptibles de contenir une donnée personnelle.
+ *
+ * `input_email` en est volontairement absent : c'est le bloc « Adresse mail »,
+ * opt-in, dont le contenu est une donnée personnelle **demandée**. Le bloquer
+ * reviendrait à interdire la seule case du formulaire prévue pour ça.
+ */
+const FREE_TEXT_BLOCK_TYPES = ['input_text', 'input_text_area'];
+
+/**
+ * Blocs dont la réponse contient une donnée personnelle détectée.
+ *
+ * Alimente à la fois l'alerte affichée sous le champ et la désactivation du
+ * bouton d'envoi : les deux doivent reposer sur la même liste, sinon l'usager
+ * se retrouve bloqué sans message, ou averti sans blocage.
+ */
+export function getPersonalDataBlocks(
+	blocks: Block[],
+	answers: FormAnswers,
+	formConfig?: FormConfig
+): Block[] {
+	return getVisibleBlocks(blocks, formConfig).filter(block => {
+		if (!FREE_TEXT_BLOCK_TYPES.includes(block.type_bloc)) return false;
+		const answer = answers[`block_${block.id}`];
+		if (!answer || Array.isArray(answer)) return false;
+		return hasPersonalData(answer.answer_text ?? '');
 	});
 }
 

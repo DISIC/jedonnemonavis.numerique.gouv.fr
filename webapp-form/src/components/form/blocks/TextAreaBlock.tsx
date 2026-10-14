@@ -5,6 +5,7 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 import { SetStateAction } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { PersonalDataAlert } from '../elements/PersonalDataAlert';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -80,6 +81,18 @@ export const TextAreaBlock = ({
 			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
 				{textareaValue.length} / 15000
 			</div>
+			{/*
+			  Rappel permanent, affiché même sur un champ vide : c'est ce qui évite
+			  la saisie, alors que l'alerte ne fait que la rattraper. Le
+			  `downLabel` du gabarit porte déjà ce message, mais il n'est rendu que
+			  par le formulaire historique (`Field.tsx`) — pas par ce rendu
+			  dynamique. Pas de doublon, donc.
+			*/}
+			<Notice
+				className={cx(classes.notice)}
+				title="Pour votre sécurité, ne partagez pas de données personnelles. Ce formulaire ne permet pas à l’administration de vous répondre."
+			/>
+			<PersonalDataAlert value={textareaValue} />
 		</div>
 	);
 };

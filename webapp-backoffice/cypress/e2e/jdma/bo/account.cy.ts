@@ -3,6 +3,7 @@ import {
 	clickModifyCard,
 	deleteAccount,
 	fillAccountForm,
+	openAccountInfos,
 	testEmail
 } from '../../../utils/helpers/account';
 import { login, logout } from '../../../utils/helpers/common';
@@ -22,7 +23,7 @@ describe('jdma-account', () => {
 		cy.injectAxe();
 		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
-		cy.contains('li', selectors.menu.account).click({ force: true });
+		openAccountInfos();
 		clickModifyCard(selectors.card.identity);
 		cy.wait(500);
 		cy.auditA11y();
@@ -73,7 +74,7 @@ describe('jdma-account', () => {
 		login(newEmailTest, userPassword);
 		cy.injectAxe();
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
-		cy.contains('li', selectors.menu.account).click({ force: true });
+		openAccountInfos();
 		cy.injectAxe();
 		deleteAccount();
 		cy.url().should('include', '/login');

@@ -2,7 +2,7 @@ import {
 	FormTemplateWithElements,
 	FormWithConfigAndTemplate
 } from '@/src/types/prismaTypesExtended';
-import { getHelperFromFormConfig } from '@/src/utils/tools';
+import { getFormPreviewUrl, getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Header from '@codegouvfr/react-dsfr/Header';
@@ -114,13 +114,7 @@ const FormLinkIntegrationPreview = ({
 					form && (
 						<iframe
 							title="Aperçu de l'intégration du formulaire"
-							src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								form.form_template?.slug === 'root'
-									? `/Demarches/${form.product_id}`
-									: `/Demarches/avis/${form.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(currentFormConfig)
-							)}`}
+							src={getFormPreviewUrl(form, currentFormConfig)}
 							className={classes.previewEmbedContainer}
 						/>
 					)

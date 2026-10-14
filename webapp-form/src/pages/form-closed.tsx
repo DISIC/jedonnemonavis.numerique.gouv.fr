@@ -14,7 +14,7 @@ const FormClosed = ({ buttonId }: { buttonId: number }) => {
 		trpc.closedButtonLog.createOrUpdate.useMutation();
 
 	useEffect(() => {
-		newVisitOnClosedButton.mutateAsync({ button_id: buttonId });
+		newVisitOnClosedButton.mutate({ button_id: buttonId });
 	}, []);
 
 	return (

@@ -9,8 +9,7 @@ import { z } from 'zod';
 import { Buckets, BucketsInside, ElkAnswer } from '../../../types/custom';
 import { assertAggregatableFieldCode } from './field-codes';
 import {
-	checkAndGetForm,
-	checkAndGetProduct,
+	checkAndGetFormForProduct,
 	getDefaultValues,
 	queryCountByFieldCode
 } from './utils';
@@ -33,8 +32,7 @@ export const getByChildFieldCodeIntervalQuery = async ({
 }) => {
 	const { product_id, form_id, start_date, end_date } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
 	await assertAggregatableFieldCode({
 		prisma: ctx.prisma,
 		form,
