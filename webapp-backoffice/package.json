@@ -84,7 +84,7 @@
 		"match-sorter": "6.3.4",
 		"next": "15.5.24",
 		"next-auth": "4.24.15",
-		"nodemailer": "9.1.1",
+		"nodemailer": "10.0.16",
 		"pg": "8.13.0",
 		"react": "18.2.0",
 		"react-beautiful-dnd": "13.1.1",
@@ -118,18 +118,18 @@
 		},
 		"zod-to-json-schema": "3.22.4",
 		"next-auth": {
-			"nodemailer": "9.1.1"
+			"nodemailer": "10.0.16"
 		}
 	},
 	"resolutions": {
 		"zod-to-json-schema": "3.22.4",
 		"zod-prisma-types/zod": "3.23.8",
-		"axios": "1.18.0",
-		"dompurify": "3.4.13",
+		"axios": "1.20.0",
+		"dompurify": "3.4.17",
 		"form-data": "4.0.6",
 		"@opentelemetry/core": "2.8.0",
-		"**/@elastic/transport/undici": "6.28.0",
-		"**/jsdom/undici": "7.29.0",
+		"**/@elastic/transport/undici": "6.28.1",
+		"**/jsdom/undici": "7.29.1",
 		"tar": "7.5.21",
 		"tar-fs": "3.1.2",
 		"ws": "8.21.0",
@@ -163,7 +163,6 @@
 		"@babel/preset-react": "7.22.15",
 		"@babel/preset-typescript": "7.22.15",
 		"@lhci/cli": "0.12.0",
-		"@react-email/ui": "6.9.5",
 		"@types/escape-html": "1.0.4",
 		"@types/lodash": "4.17.15",
 		"@types/react-beautiful-dnd": "13.1.8",
