@@ -17,6 +17,12 @@ export const reviewInputSchema = z.object({
 
 export type ReviewInput = z.infer<typeof reviewInputSchema>;
 
+export const dynamicReviewInputSchema = reviewInputSchema.extend({
+	button_id: z.number().int().nullable()
+});
+
+export type DynamicReviewInput = z.infer<typeof dynamicReviewInputSchema>;
+
 const answerScalarsSchema = z.object({
 	field_code: z.string().max(255),
 	field_label: z.string().max(2000),

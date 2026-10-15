@@ -8,6 +8,7 @@ import { FormStepNames } from '@/src/pages/[id]';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 import type {
 	DynamicAnswerInput,
+	DynamicReviewInput,
 	ReviewAnswerInput,
 	ReviewChildAnswerInput,
 	ReviewInput
@@ -282,6 +283,33 @@ export async function assertReviewTargetsMatch(
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'Button does not belong to this form and product'
+		});
+}
+
+export async function assertFormAcceptsReviews(
+	prisma: PrismaClient,
+	review: DynamicReviewInput
+) {
+	const form = await prisma.form.findUnique({
+		where: { id: review.form_id },
+		select: {
+			product_id: true,
+			isDeleted: true,
+			product: { select: { status: true } },
+			form_template: { select: { slug: true } }
+		}
+	});
+
+	if (
+		!form ||
+		form.product_id !== review.product_id ||
+		form.isDeleted ||
+		form.product.status === 'archived' ||
+		form.form_template.slug === 'root'
+	)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Form does not accept reviews for this product'
 		});
 }
 
