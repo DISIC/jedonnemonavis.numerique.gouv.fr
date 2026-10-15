@@ -1,4 +1,4 @@
-import { JdmaInvalidButtonsEmailProps } from '@/emails/interface';
+import { JdmaLinkIssueEmailProps } from '@/emails/interface';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
@@ -231,58 +231,59 @@ export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
 		? `Lien invalide (identifiant ${requestedButtonId})`
 		: "Aucun lien d'intégration";
 
-export const groupInvalidButtonReviewsByProduct = (
-	reviewCounts: {
+export const MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT = 3;
+export const MAX_INVALID_LINK_ALERTS_PER_PRODUCT = 3;
+
+type LinkIssueForm = {
+	id: number;
+	title: string | null;
+	form_template: { title: string };
+	product: { id: number; title: string };
+};
+
+export const buildLinkIssues = (
+	invalidLinkCounts: {
 		form_id: number;
 		requested_button_id: number | null;
 		_count: { _all: number };
 	}[],
-	forms: {
-		id: number;
-		title: string | null;
-		form_template: { title: string };
-		product: { id: number; title: string; entity: { name: string } };
-	}[]
-): Pick<JdmaInvalidButtonsEmailProps, 'product' | 'forms'>[] => {
-	const products = new Map<
-		number,
-		Pick<JdmaInvalidButtonsEmailProps, 'product' | 'forms'>
-	>();
-
-	const reviewCountsByFormId = new Map<number, typeof reviewCounts>();
-	reviewCounts.forEach(rc => {
-		const formReviewCounts = reviewCountsByFormId.get(rc.form_id) ?? [];
-		formReviewCounts.push(rc);
-		reviewCountsByFormId.set(rc.form_id, formReviewCounts);
+	invalidLinkForms: LinkIssueForm[],
+	closedLinks: { title: string; form: LinkIssueForm }[]
+): Omit<JdmaLinkIssueEmailProps, 'baseUrl'>[] => {
+	const toEmailForm = (form: LinkIssueForm) => ({
+		product: { id: form.product.id, title: form.product.title },
+		form: { id: form.id, title: form.title ?? form.form_template.title }
 	});
 
-	forms.forEach(form => {
-		const links = (reviewCountsByFormId.get(form.id) ?? [])
-			.map(rc => ({
-				label: getInvalidButtonLabel(rc.requested_button_id),
-				reviewCount: rc._count._all
-			}))
-			.sort((a, b) => b.reviewCount - a.reviewCount);
+	const alertCountByProductId = new Map<number, number>();
 
-		if (!links.length) return;
+	const invalidLinkIssues = invalidLinkCounts
+		.filter(
+			ilc => ilc._count._all >= MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT
+		)
+		.sort((a, b) => b._count._all - a._count._all)
+		.flatMap(ilc => {
+			const form = invalidLinkForms.find(f => f.id === ilc.form_id);
+			if (!form) return [];
 
-		const group = products.get(form.product.id) ?? {
-			product: {
-				id: form.product.id,
-				title: form.product.title,
-				entityName: form.product.entity.name
-			},
-			forms: []
-		};
-		group.forms.push({
-			id: form.id,
-			title: form.title ?? form.form_template.title,
-			links
+			const alertCount = alertCountByProductId.get(form.product.id) ?? 0;
+			if (alertCount >= MAX_INVALID_LINK_ALERTS_PER_PRODUCT) return [];
+			alertCountByProductId.set(form.product.id, alertCount + 1);
+
+			return [
+				{
+					...toEmailForm(form),
+					linkLabel: getInvalidButtonLabel(ilc.requested_button_id)
+				}
+			];
 		});
-		products.set(form.product.id, group);
-	});
 
-	return [...products.values()];
+	const closedLinkIssues = closedLinks.map(closedLink => ({
+		...toEmailForm(closedLink.form),
+		linkLabel: closedLink.title
+	}));
+
+	return [...closedLinkIssues, ...invalidLinkIssues];
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {

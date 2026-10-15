@@ -16,7 +16,7 @@ import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { sendMail } from '@/src/utils/mailer';
 import type { Context } from '@/src/server/trpc';
 import { renderNotificationsEmail } from '@/src/utils/emails';
-import { sendInvalidButtonsDigest } from '@/src/server/services/invalid-buttons/send-digest';
+import { sendLinkIssuesDigest } from '@/src/server/services/link-issues/send-digest';
 
 export const triggerSendNotifMailsMutation = async ({
 	ctx,
@@ -241,13 +241,13 @@ export const triggerSendNotifMailsMutation = async ({
 	const weeklyScope = scopes.find(({ scope }) => scope === 'weekly');
 	if (weeklyScope) {
 		try {
-			await sendInvalidButtonsDigest(
+			await sendLinkIssuesDigest(
 				ctx.prisma,
 				weeklyScope.startDate,
 				weeklyScope.endDate
 			);
 		} catch (err) {
-			console.error('[invalid-buttons] Failed to send weekly digest:', err);
+			console.error('[link-issues] Failed to send weekly digest:', err);
 		}
 	}
 
