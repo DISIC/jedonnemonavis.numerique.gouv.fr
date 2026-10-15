@@ -54,7 +54,7 @@ const t = initTRPC.context<Context>().create({
 	}
 });
 
-const hashIp = (ip: string) => {
+export const hashIp = (ip: string) => {
 	// Hash IP with date until hour, and salt
 	const now = new Date();
 	const year = now.getFullYear();

@@ -384,7 +384,6 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
-										buttons={buttonResults.data}
 										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}
@@ -511,6 +510,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		return {
 			redirect: {
 				destination: `/administration/dashboard/product/${id}/forms`,
+				permanent: false
+			}
+		};
+	}
+
+	if (form.product_id !== parseInt(id as string)) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
 				permanent: false
 			}
 		};

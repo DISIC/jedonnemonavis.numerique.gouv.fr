@@ -8,7 +8,8 @@ import {
 } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
-import { AnswerIntention, Prisma } from '@prisma/client';
+import { AnswerIntention } from '@prisma/client';
+import type { ReviewAnswerInput } from '@/src/server/routers/review/schemas';
 import { push } from '@socialgouv/matomo-next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -153,7 +154,7 @@ export default function JDMAForm({
 
 	const formatAnswers = (
 		opinion: Partial<Opinion>
-	): Prisma.AnswerCreateInput[] => {
+	): ReviewAnswerInput[] => {
 		return Object.entries(opinion).reduce((accumulator, [key, value]) => {
 			if (['contact_reached', 'contact_satisfaction'].includes(key)) {
 				if (Array.isArray(value)) {
@@ -198,7 +199,6 @@ export default function JDMAForm({
 																lng: 'fr'
 															}) as string,
 															kind: 'radio',
-															review_id: -1,
 															answer_text: t(childOption.label, {
 																lng: 'fr'
 															}),
@@ -233,9 +233,8 @@ export default function JDMAForm({
 							  fieldInSection.kind !== 'input-textarea' &&
 							  fieldInSection.kind !== 'input-email'
 							? fieldInSection.kind
-							: 'text',
-					review: {}
-				} as Prisma.AnswerCreateInput;
+							: 'text'
+				} as ReviewAnswerInput;
 
 				if (typeof value == 'number') {
 					const selectedOption = getSelectedOption(fieldInSection, value);
@@ -260,7 +259,7 @@ export default function JDMAForm({
 			}
 
 			return accumulator;
-		}, [] as Prisma.AnswerCreateInput[]);
+		}, [] as ReviewAnswerInput[]);
 	};
 
 	const handleCreateReview = async (opinion: Partial<Opinion>) => {
@@ -338,6 +337,7 @@ export default function JDMAForm({
 	}, [router.events]);
 
 	React.useEffect(() => {
+		if (isButtonDeleted) return;
 		resetForm();
 	}, [router.isReady]);
 
@@ -628,7 +628,6 @@ export const getServerSideProps: GetServerSideProps<{
 		if (
 			!button ||
 			button.form.product_id !== parseInt(productId) ||
-			button.form.isDeleted ||
 			button.form.form_template.slug !== 'root'
 		) {
 			await prisma.$disconnect();
@@ -638,7 +637,7 @@ export const getServerSideProps: GetServerSideProps<{
 		}
 
 		buttonFormId = button.form_id;
-		isButtonDeleted = !!button.isDeleted;
+		isButtonDeleted = !!button.isDeleted || !!button.form.isDeleted;
 	}
 
 	const product = await prisma.product.findUnique({
@@ -649,13 +648,9 @@ export const getServerSideProps: GetServerSideProps<{
 			forms: {
 				where: buttonFormId
 					? { id: buttonFormId }
-					: {
-							NOT: { isDeleted: true },
-							...(!isNaN(previewFormId) && {
-								id: previewFormId,
-								form_template: { slug: 'root' }
-							})
-					  },
+					: !isNaN(previewFormId)
+					? { id: previewFormId, form_template: { slug: 'root' } }
+					: { NOT: { isDeleted: true } },
 				include: {
 					product: {
 						select: {

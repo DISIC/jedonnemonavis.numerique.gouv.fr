@@ -1,20 +1,13 @@
-import {
-	AnswerCreateInputSchema,
-	ReviewUncheckedCreateInputSchema
-} from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { reviewAnswersInputSchema, reviewInputSchema } from './schemas';
 import { createReview } from './utils';
 
 export const createReviewInputSchema = z.object({
-	review: ReviewUncheckedCreateInputSchema.and(
-		z.object({
-			button_id: z.number().int(),
-			requested_button_id: z.undefined()
-		})
-	),
-	answers: z.array(AnswerCreateInputSchema)
+
+	review: reviewInputSchema,
+	answers: reviewAnswersInputSchema
 });
 
 export const createReviewMutation = async ({

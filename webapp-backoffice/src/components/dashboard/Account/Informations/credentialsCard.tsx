@@ -42,6 +42,7 @@ const CredentialsCard = (props: Props) => {
 		'change-mail' | 'change-pwd'
 	>('change-mail');
 	const lastModalTriggerRef = React.useRef<HTMLButtonElement | null>(null);
+	const requiresEmailConfirmation = !session?.user?.role?.includes('admin');
 	const [modifying, setModifying] = React.useState<Boolean>(false);
 
 	const {
@@ -152,10 +153,19 @@ const CredentialsCard = (props: Props) => {
 			>
 				<>
 					{modalType === 'change-mail' ? (
-						<p>
-							Le changement d'adresse email entraînera une déconnexion de la
-							plateforme. Souhaitez-vous continuer?
-						</p>
+						requiresEmailConfirmation ? (
+							<p>
+								Le changement d'adresse email entraînera une déconnexion de la
+								plateforme. Un e-mail de confirmation sera envoyé à la nouvelle
+								adresse : votre compte sera réactivé dès que vous aurez cliqué
+								sur le lien qu'il contient. Souhaitez-vous continuer ?
+							</p>
+						) : (
+							<p>
+								Le changement d'adresse email entraînera une déconnexion de la
+								plateforme. Souhaitez-vous continuer?
+							</p>
+						)
 					) : (
 						<p>
 							Nous enverrons un lien pour réinitialiser votre mot de passe à

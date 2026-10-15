@@ -1,9 +1,6 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import {
-	ButtonWithElements,
-	FormWithElements
-} from '@/src/types/prismaTypesExtended';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -22,7 +19,6 @@ interface Props {
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
-	buttons: ButtonWithElements[];
 	isLoading: boolean;
 }
 
@@ -40,7 +36,6 @@ const SettingsTab = ({
 	alertText,
 	isAlertShown,
 	setIsAlertShown,
-	buttons,
 	isLoading
 }: Props) => {
 	const router = useRouter();
@@ -48,8 +43,6 @@ const SettingsTab = ({
 	const { cx, classes } = useStyles();
 	const [isCopied, setIsCopied] = useState(false);
 	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] = useState(false);
-
-	const deleteButton = trpc.button.delete.useMutation();
 
 	const { data: meData } = trpc.user.me.useQuery({});
 	const currentUser = meData?.data;
@@ -66,18 +59,7 @@ const SettingsTab = ({
 
 	const isLocked = form.isTop250 || !!form.isDeleted;
 
-	const deleteAllButtons = async () => {
-		await Promise.all(
-			buttons.map(button => {
-				const { form, closedButtonLog, form_template_button, ...data } = button;
-				return deleteButton.mutateAsync({
-					buttonPayload: { ...data, deleted_at: new Date(), isDeleted: true },
-					shouldLogEvent: false,
-					product_id: form.product_id,
-					title: button.title
-				});
-			})
-		);
+	const redirectToFormsList = () => {
 		router.push(
 			`/administration/dashboard/product/${
 				form.product_id
@@ -115,7 +97,7 @@ const SettingsTab = ({
 			<FormDeleteModal
 				modal={delete_form_modal}
 				form={form}
-				onDelete={deleteAllButtons}
+				onDelete={redirectToFormsList}
 			/>
 			<AlertEmailPreviewModal
 				modal={alert_email_preview_modal}
