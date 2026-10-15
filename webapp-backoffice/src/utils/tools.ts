@@ -231,6 +231,26 @@ export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
 		? `Lien invalide (identifiant ${requestedButtonId})`
 		: "Aucun lien d'intégration";
 
+export const getClosedButtonLogWording = (form: {
+	isDeleted: boolean | null;
+	form_template: { slug: string };
+}) =>
+	form.isDeleted || form.form_template.slug === 'root'
+		? {
+				title: "Tentative de dépôt d'avis",
+				description:
+					"Une tentative de dépôt d'avis a été effectuée depuis ce lien fermé. Nous vous invitons à supprimer le code HTML correspondant de la page concernée.",
+				lastLabel: 'Dernière tentative',
+				countLabel: 'Nombre total de tentatives'
+		  }
+		: {
+				title: 'Avis déposés sur un lien fermé',
+				description:
+					'Des avis ont été déposés depuis ce lien fermé. Ils sont bien enregistrés, mais nous vous invitons à supprimer le code HTML correspondant de la page concernée.',
+				lastLabel: 'Dernier avis déposé',
+				countLabel: "Nombre total d'avis déposés"
+		  };
+
 export const MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT = 3;
 export const MAX_INVALID_LINK_ALERTS_PER_PRODUCT = 3;
 
