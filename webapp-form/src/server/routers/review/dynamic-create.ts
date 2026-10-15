@@ -37,6 +37,13 @@ export const dynamicCreateReviewMutation = async ({
 		}
 	});
 
+	if (newReview.button?.isDeleted)
+		await prisma.closedButtonLog.upsert({
+			where: { button_id: newReview.button.id },
+			update: { count: { increment: 1 } },
+			create: { button_id: newReview.button.id }
+		});
+
 	const formattedAnswers = await Promise.all(
 		answers.map(answer => formatDynamicAnswer(prisma, answer))
 	);
