@@ -1,7 +1,11 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { dynamicAnswersInputSchema, reviewInputSchema } from './schemas';
-import { createOrUpdateAnswers, formatDynamicAnswer } from './utils';
+import {
+	assertReviewTargetsMatch,
+	createOrUpdateAnswers,
+	formatDynamicAnswer
+} from './utils';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 
 export const dynamicCreateReviewInputSchema = z.object({
@@ -18,6 +22,8 @@ export const dynamicCreateReviewMutation = async ({
 }) => {
 	const { prisma } = ctx;
 	const { review, answers } = input;
+
+	await assertReviewTargetsMatch(prisma, review);
 
 	const newReview = await prisma.review.create({
 		data: {

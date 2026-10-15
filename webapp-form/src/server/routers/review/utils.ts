@@ -246,6 +246,26 @@ export async function createOrUpdateAnswers(
 	});
 }
 
+export async function assertReviewTargetsMatch(
+	prisma: PrismaClient,
+	review: ReviewInput
+) {
+	const button = await prisma.button.findUnique({
+		where: { id: review.button_id },
+		select: { form_id: true, form: { select: { product_id: true } } }
+	});
+
+	if (
+		!button ||
+		button.form_id !== review.form_id ||
+		button.form.product_id !== review.product_id
+	)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Button does not belong to this form and product'
+		});
+}
+
 export async function createReview(
 	ctx: { prisma: PrismaClient; elkClient: Client },
 	input: {
@@ -255,6 +275,8 @@ export async function createReview(
 ) {
 	const { prisma } = ctx;
 	const { review, answers } = input;
+
+	await assertReviewTargetsMatch(prisma, review);
 
 	const newReview = await prisma.review.create({
 		data: {
