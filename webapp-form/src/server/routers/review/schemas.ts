@@ -10,11 +10,18 @@ export const MAX_ANSWERS = 200;
 export const reviewInputSchema = z.object({
 	product_id: z.number().int(),
 	button_id: z.number().int(),
+	requested_button_id: z.undefined(),
 	form_id: z.number().int(),
 	user_id: z.string().uuid()
 });
 
 export type ReviewInput = z.infer<typeof reviewInputSchema>;
+
+export const dynamicReviewInputSchema = reviewInputSchema.extend({
+	button_id: z.number().int().nullable()
+});
+
+export type DynamicReviewInput = z.infer<typeof dynamicReviewInputSchema>;
 
 const answerScalarsSchema = z.object({
 	field_code: z.string().max(255),

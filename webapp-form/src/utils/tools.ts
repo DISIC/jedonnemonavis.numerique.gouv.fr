@@ -1,6 +1,14 @@
 import React, { ReactNode } from 'react';
 import { Product, Step } from './types';
 
+const MAX_INT4 = 2147483647;
+
+export const isValidButtonId = (buttonId?: number | null): buttonId is number =>
+	typeof buttonId === 'number' &&
+	Number.isInteger(buttonId) &&
+	buttonId > 0 &&
+	buttonId <= MAX_INT4;
+
 export const getPageMetaTitleKey = (pathname: string): string | null => {
 	const metaTitleKeysByPathname: Record<string, string> = {
 		'/cgu': 'pages.cgu.meta_title',

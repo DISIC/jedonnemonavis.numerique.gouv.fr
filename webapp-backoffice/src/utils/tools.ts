@@ -1,3 +1,4 @@
+import { JdmaLinkIssueEmailProps } from '@/emails/interface';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
@@ -14,7 +15,6 @@ import {
 	ButtonWithElements,
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
-import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -226,11 +226,84 @@ export const getSeverity = (intention: string) => {
 	}
 };
 
-export const retrieveButtonName = (buttonId: number) => {
-	const { data: button } = trpc.button.getById.useQuery({
-		id: buttonId
+export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
+	requestedButtonId
+		? `Lien invalide (identifiant ${requestedButtonId})`
+		: "Aucun lien d'intégration";
+
+export const getClosedButtonLogWording = (form: {
+	isDeleted: boolean | null;
+	form_template: { slug: string };
+}) =>
+	form.isDeleted || form.form_template.slug === 'root'
+		? {
+				title: "Tentative de dépôt d'avis",
+				description:
+					"Une tentative de dépôt d'avis a été effectuée depuis ce lien fermé. Nous vous invitons à supprimer le code HTML correspondant de la page concernée.",
+				lastLabel: 'Dernière tentative',
+				countLabel: 'Nombre total de tentatives'
+		  }
+		: {
+				title: 'Avis déposés sur un lien fermé',
+				description:
+					'Des avis ont été déposés depuis ce lien fermé. Ils sont bien enregistrés, mais nous vous invitons à supprimer le code HTML correspondant de la page concernée.',
+				lastLabel: 'Dernier avis déposé',
+				countLabel: "Nombre total d'avis déposés"
+		  };
+
+export const MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT = 3;
+export const MAX_INVALID_LINK_ALERTS_PER_PRODUCT = 3;
+
+type LinkIssueForm = {
+	id: number;
+	title: string | null;
+	form_template: { title: string };
+	product: { id: number; title: string };
+};
+
+export const buildLinkIssues = (
+	invalidLinkCounts: {
+		form_id: number;
+		requested_button_id: number | null;
+		_count: { _all: number };
+	}[],
+	invalidLinkForms: LinkIssueForm[],
+	closedLinks: { title: string; form: LinkIssueForm }[]
+): Omit<JdmaLinkIssueEmailProps, 'baseUrl'>[] => {
+	const toEmailForm = (form: LinkIssueForm) => ({
+		product: { id: form.product.id, title: form.product.title },
+		form: { id: form.id, title: form.title ?? form.form_template.title }
 	});
-	if (button?.data) return button.data?.title || '';
+
+	const alertCountByProductId = new Map<number, number>();
+
+	const invalidLinkIssues = invalidLinkCounts
+		.filter(
+			ilc => ilc._count._all >= MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT
+		)
+		.sort((a, b) => b._count._all - a._count._all)
+		.flatMap(ilc => {
+			const form = invalidLinkForms.find(f => f.id === ilc.form_id);
+			if (!form) return [];
+
+			const alertCount = alertCountByProductId.get(form.product.id) ?? 0;
+			if (alertCount >= MAX_INVALID_LINK_ALERTS_PER_PRODUCT) return [];
+			alertCountByProductId.set(form.product.id, alertCount + 1);
+
+			return [
+				{
+					...toEmailForm(form),
+					linkLabel: getInvalidButtonLabel(ilc.requested_button_id)
+				}
+			];
+		});
+
+	const closedLinkIssues = closedLinks.map(closedLink => ({
+		...toEmailForm(closedLink.form),
+		linkLabel: closedLink.title
+	}));
+
+	return [...closedLinkIssues, ...invalidLinkIssues];
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {
@@ -898,6 +971,7 @@ type ArchivedReviewSnapshot = {
 	product_id: number;
 	form_id: number;
 	button_id: number | null;
+	requested_button_id: number | null;
 	user_id: string | null;
 	has_verbatim: boolean;
 	answers: JsonValue;
@@ -916,7 +990,8 @@ export const mapArchivedReviewToReview = (
 		created_at: createdAt,
 		product_id: archived.product_id,
 		form_id: archived.form_id,
-		button_id: archived.button_id ?? undefined,
+		button_id: archived.button_id,
+		requested_button_id: archived.requested_button_id,
 		user_id: archived.user_id ?? undefined,
 		has_verbatim: archived.has_verbatim,
 		answers: answers.map(a => ({
