@@ -47,8 +47,8 @@ export type BucketsInside = Array<{
 export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
 	product_name: string;
 	product_id: number;
-	button_name: string;
-	button_id: number;
+	button_name: string | null;
+	button_id: number | null;
 	created_at: Date;
 }
 

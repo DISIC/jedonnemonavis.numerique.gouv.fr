@@ -15,6 +15,7 @@ import {
 	buttonIntegrationTypesMapping,
 	buttonStylesMapping
 } from '@/src/utils/content';
+import { getClosedButtonLogWording } from '@/src/utils/tools';
 
 interface Props {
 	button: ButtonWithElements;
@@ -27,6 +28,7 @@ interface Props {
 
 const ProductButtonCard = (props: Props) => {
 	const { button, onButtonClick, ownRight } = props;
+	const closedButtonLogWording = getClosedButtonLogWording(button.form);
 	const { data: session } = useSession();
 	const router = useRouter();
 
@@ -229,18 +231,15 @@ const ProductButtonCard = (props: Props) => {
 					<div role="status">
 						<Alert
 							severity="error"
-							title="Tentative de dépôt d'avis"
+							title={closedButtonLogWording.title}
 							description={
 								<>
-									<p>
-										Une tentative de dépôt d'avis a été effectuée sur depuis ce
-										lien fermé. Nous vous invitons à supprimer le code HTML
-										correspondant de la page concernée.
-									</p>
+									<p>{closedButtonLogWording.description}</p>
 									<small>
-										Dernière tentative :{' '}
-										{button.closedButtonLog.updated_at.toLocaleString()} —
-										Nombre total de tentatives : {button.closedButtonLog.count}
+										{closedButtonLogWording.lastLabel} :{' '}
+										{button.closedButtonLog.updated_at.toLocaleString()} —{' '}
+										{closedButtonLogWording.countLabel} :{' '}
+										{button.closedButtonLog.count}
 									</small>
 								</>
 							}

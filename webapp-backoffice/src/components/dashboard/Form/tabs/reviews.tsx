@@ -753,7 +753,7 @@ const ReviewsTab = (props: Props) => {
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
-			) : (nbReviews === 0 && !canBrowseDeleted) || buttons.length === 0 ? (
+			) : nbReviews === 0 && !canBrowseDeleted ? (
 				displayEmptyState()
 			) : (
 				<>
