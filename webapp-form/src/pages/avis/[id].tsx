@@ -7,6 +7,7 @@ import { FormWithElements } from '@/src/utils/types';
 import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
@@ -20,7 +21,10 @@ import {
 	hasBlockAnswer,
 	hasAllRequiredBlockAnswers,
 	getInvalidEmailBlocks,
-	getPersonalDataBlocks
+	getPersonalDataBlocks,
+	getContactStep,
+	isStepHidden,
+	omitStepAnswers
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -46,6 +50,7 @@ export default function AvisPage({
 
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
+	const [acceptsContact, setAcceptsContact] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
 	const [showValidationErrors, setShowValidationErrors] = useState(false);
@@ -92,15 +97,25 @@ export default function AvisPage({
 	}, [isWidget, widgetNonce, currentStepIndex, isSubmitted]);
 
 	const formConfig = form.form_configs[0];
-	const allSteps = form.form_template.form_template_steps;
-	const steps = allSteps.filter(step => {
-		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-		);
-		return !isHidden;
-	});
+	const visibleSteps = form.form_template.form_template_steps.filter(
+		step => !isStepHidden(step, formConfig)
+	);
+	const contactStep = getContactStep(visibleSteps, formConfig);
+	const steps = acceptsContact
+		? visibleSteps
+		: visibleSteps.filter(step => step !== contactStep);
 
 	const currentStep = steps[currentStepIndex];
+	const isContactConsentStep =
+		!!contactStep &&
+		visibleSteps[visibleSteps.indexOf(contactStep) - 1] === currentStep;
+
+	const handleContactConsentChange = (checked: boolean) => {
+		setAcceptsContact(checked);
+		if (!checked && contactStep) {
+			setAnswers(prev => omitStepAnswers(prev, contactStep));
+		}
+	};
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
 		onSuccess: () => {
@@ -373,6 +388,24 @@ export default function AvisPage({
 									isWidget={isWidget}
 									showValidationErrors={showValidationErrors}
 								/>
+
+								{isContactConsentStep && (
+									<Checkbox
+										small={isWidget}
+										className={fr.cx('fr-mt-4v', 'fr-mb-0')}
+										options={[
+											{
+												label:
+													"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+												nativeInputProps: {
+													checked: acceptsContact,
+													onChange: e =>
+														handleContactConsentChange(e.target.checked)
+												}
+											}
+										]}
+									/>
+								)}
 
 								{isRateLimitReached && (
 									<div role="alert">
