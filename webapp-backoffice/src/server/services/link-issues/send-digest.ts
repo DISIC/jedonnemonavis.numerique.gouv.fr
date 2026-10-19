@@ -1,7 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
 import { renderLinkIssueEmail } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
-import { buildLinkIssues } from '@/src/utils/tools';
+import { buildLinkIssues, getLinkIssuesMailText } from '@/src/utils/tools';
+
+const MAIL_BATCH_SIZE = 10;
+const MAIL_BATCH_PAUSE_MS = 5000;
 
 const linkIssueFormSelect = {
 	id: true,
@@ -41,57 +44,50 @@ export async function sendLinkIssuesDigest(
 		select: { title: true, form: { select: linkIssueFormSelect } }
 	});
 
-	const linkIssues = buildLinkIssues(
+	const productLinkIssues = buildLinkIssues(
 		invalidLinkCounts,
 		invalidLinkForms,
 		closedLinks
 	);
 
-	const recipientsByProductId = new Map<number, { email: string }[]>();
+	let sentCount = 0;
 
-	for (const linkIssue of linkIssues) {
-		const productId = linkIssue.product.id;
+	for (const productLinkIssue of productLinkIssues) {
+		const productId = productLinkIssue.product.id;
 
-		if (!recipientsByProductId.has(productId)) {
-			recipientsByProductId.set(
-				productId,
-				await prisma.user.findMany({
-					where: {
-						notifications: true,
-						OR: [
-							{
-								accessRights: {
-									some: { product_id: productId, status: { not: 'removed' } }
-								}
-							},
-							{
-								adminEntityRights: {
-									some: { entity: { products: { some: { id: productId } } } }
-								}
-							}
-						]
+		const recipients = await prisma.user.findMany({
+			where: {
+				notifications: true,
+				OR: [
+					{
+						accessRights: {
+							some: { product_id: productId, status: { not: 'removed' } }
+						}
 					},
-					select: { email: true }
-				})
-			);
-		}
-
-		const recipients = recipientsByProductId.get(productId) ?? [];
+					{
+						adminEntityRights: {
+							some: { entity: { products: { some: { id: productId } } } }
+						}
+					}
+				]
+			},
+			select: { email: true }
+		});
 		if (!recipients.length) continue;
 
 		const html = await renderLinkIssueEmail({
-			...linkIssue,
+			...productLinkIssue,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});
-		const subject = `Avis déposés sur un lien d'intégration fermé ou invalide du service numérique «${linkIssue.product.title}»`;
+		const subject = `Avis déposés sur un lien d'intégration fermé ou invalide du service numérique «${productLinkIssue.product.title}»`;
+		const text = getLinkIssuesMailText(productLinkIssue);
 
 		for (const { email } of recipients) {
-			await sendMail(
-				subject,
-				email,
-				html,
-				`Des utilisateurs ont déposé, ou tenté de déposer, un avis sur le lien d'intégration «${linkIssue.linkLabel}» du formulaire «${linkIssue.form.title}». Supprimez ou modifiez le code de ce lien sur votre site.`
-			);
+			await sendMail(subject, email, html, text);
+
+			sentCount++;
+			if (sentCount % MAIL_BATCH_SIZE === 0)
+				await new Promise(resolve => setTimeout(resolve, MAIL_BATCH_PAUSE_MS));
 		}
 	}
 }

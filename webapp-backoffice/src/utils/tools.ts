@@ -270,11 +270,7 @@ export const buildLinkIssues = (
 	invalidLinkForms: LinkIssueForm[],
 	closedLinks: { title: string; form: LinkIssueForm }[]
 ): Omit<JdmaLinkIssueEmailProps, 'baseUrl'>[] => {
-	const toEmailForm = (form: LinkIssueForm) => ({
-		product: { id: form.product.id, title: form.product.title },
-		form: { id: form.id, title: form.title ?? form.form_template.title }
-	});
-
+	const invalidLinkFormsById = new Map(invalidLinkForms.map(f => [f.id, f]));
 	const alertCountByProductId = new Map<number, number>();
 
 	const invalidLinkIssues = invalidLinkCounts
@@ -283,7 +279,7 @@ export const buildLinkIssues = (
 		)
 		.sort((a, b) => b._count._all - a._count._all)
 		.flatMap(ilc => {
-			const form = invalidLinkForms.find(f => f.id === ilc.form_id);
+			const form = invalidLinkFormsById.get(ilc.form_id);
 			if (!form) return [];
 
 			const alertCount = alertCountByProductId.get(form.product.id) ?? 0;
@@ -291,19 +287,47 @@ export const buildLinkIssues = (
 			alertCountByProductId.set(form.product.id, alertCount + 1);
 
 			return [
-				{
-					...toEmailForm(form),
-					linkLabel: getInvalidButtonLabel(ilc.requested_button_id)
-				}
+				{ form, linkLabel: getInvalidButtonLabel(ilc.requested_button_id) }
 			];
 		});
 
 	const closedLinkIssues = closedLinks.map(closedLink => ({
-		...toEmailForm(closedLink.form),
+		form: closedLink.form,
 		linkLabel: closedLink.title
 	}));
 
-	return [...closedLinkIssues, ...invalidLinkIssues];
+	const linkIssuesByProductId = new Map<
+		number,
+		Omit<JdmaLinkIssueEmailProps, 'baseUrl'>
+	>();
+
+	for (const { form, linkLabel } of [
+		...closedLinkIssues,
+		...invalidLinkIssues
+	]) {
+		const productLinkIssues = linkIssuesByProductId.get(form.product.id) ?? {
+			product: { id: form.product.id, title: form.product.title },
+			issues: []
+		};
+		productLinkIssues.issues.push({
+			form: { id: form.id, title: form.title ?? form.form_template.title },
+			linkLabel
+		});
+		linkIssuesByProductId.set(form.product.id, productLinkIssues);
+	}
+
+	return [...linkIssuesByProductId.values()];
+};
+
+export const getLinkIssuesMailText = ({
+	product,
+	issues
+}: Omit<JdmaLinkIssueEmailProps, 'baseUrl'>) => {
+	const issuesText = issues
+		.map(({ form, linkLabel }) => `«${linkLabel}» (formulaire «${form.title}»)`)
+		.join(', ');
+
+	return `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur des liens d'intégration fermés ou invalides du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ces liens sur votre site.`;
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {

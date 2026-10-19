@@ -334,7 +334,8 @@ const ReviewDrawerContent = ({
 			{review.requested_button_id && (
 				<span
 					className={cx(
-						fr.cx('fr-ml-1w', 'fr-hint-text'),classes.invalidLinkInfo
+						fr.cx('fr-ml-1w', 'fr-hint-text'),
+						classes.invalidLinkInfo
 					)}
 				>
 					identifiant : {review.requested_button_id}

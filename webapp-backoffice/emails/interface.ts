@@ -33,8 +33,7 @@ export interface JdmaClosedButtonOrFormEmailProps {
 
 export interface JdmaLinkIssueEmailProps {
 	product: { id: number; title: string };
-	form: { id: number; title: string };
-	linkLabel: string;
+	issues: { form: { id: number; title: string }; linkLabel: string }[];
 	baseUrl?: string;
 }
 

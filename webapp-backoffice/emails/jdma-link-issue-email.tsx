@@ -1,15 +1,24 @@
-import { Button, Section, Text } from 'react-email';
+import { Button, Link, Section, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaLinkIssueEmailProps } from './interface';
 
 export const JdmaLinkIssueEmail = ({
 	product = { id: 0, title: 'Service en ligne' },
-	form = { id: 0, title: 'Formulaire de satisfaction' },
-	linkLabel = "Lien d'intégration de la page d'accueil",
+	issues = [
+		{
+			form: { id: 0, title: 'Formulaire de satisfaction' },
+			linkLabel: "Lien d'intégration de la page d'accueil"
+		},
+		{
+			form: { id: 0, title: 'Formulaire de satisfaction' },
+			linkLabel: 'Lien invalide (identifiant 1234)'
+		}
+	],
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaLinkIssueEmailProps) => {
-	const linksUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms/${form.id.toString()}?tab=links`;
+	const productUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms`;
+	const hasSeveralIssues = issues.length > 1;
 
 	return (
 		<JdmaLayout
@@ -19,26 +28,47 @@ export const JdmaLinkIssueEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Des utilisateurs ont déposé, ou tenté de déposer, un avis sur un{' '}
-				<strong>lien d'intégration fermé ou invalide.</strong>
+				Des utilisateurs ont déposé, ou tenté de déposer, des avis sur{' '}
+				<strong>
+					{hasSeveralIssues
+						? "des liens d'intégration fermés ou invalides."
+						: "un lien d'intégration fermé ou invalide."}
+				</strong>
 			</Text>
 
 			<Text style={paragraph}>
 				Pour résoudre le problème,{' '}
-				<strong>supprimez ou modifiez le code du lien d'intégration</strong> de
-				votre site en ligne, ou créez un nouveau lien si vous souhaitez garder
-				une récolte d'avis à cet endroit.
+				<strong>
+					supprimez ou modifiez le code{' '}
+					{hasSeveralIssues
+						? "de ces liens d'intégration"
+						: "du lien d'intégration"}
+				</strong>{' '}
+				de votre site en ligne, ou créez un nouveau lien si vous souhaitez
+				garder une récolte d'avis à cet endroit.
+			</Text>
+
+			<Text style={paragraph}>
+				Service : <strong>{product.title}</strong>
 			</Text>
 
 			<ul style={list}>
-				<li style={listItem}>Service : {product.title}</li>
-				<li style={listItem}>Formulaire : {form.title}</li>
-				<li style={listItem}>Lien d'intégration : {linkLabel}</li>
+				{issues.map(({ form, linkLabel }) => (
+					<li key={`${form.id}-${linkLabel}`} style={listItem}>
+						Formulaire « {form.title} » :{' '}
+						<Link
+							href={`${productUrl}/${form.id.toString()}?tab=links`}
+							target="_blank"
+						>
+							{linkLabel}
+						</Link>
+					</li>
+				))}
 			</ul>
 
 			<Section style={ctaSection}>
-				<Button href={linksUrl} style={ctaButton}>
-					Voir le lien d'intégration concerné
+				<Button href={productUrl} style={ctaButton}>
+					Voir les formulaires du service
 				</Button>
 			</Section>
 		</JdmaLayout>
