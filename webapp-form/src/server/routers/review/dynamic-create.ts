@@ -37,6 +37,11 @@ export const dynamicCreateReviewMutation = async ({
 		}
 	});
 
+	await prisma.form.update({
+		where: { id: review.form_id },
+		data: { last_review_at: newReview.created_at }
+	});
+
 	if (newReview.button?.isDeleted)
 		await prisma.closedButtonLog.upsert({
 			where: { button_id: newReview.button.id },

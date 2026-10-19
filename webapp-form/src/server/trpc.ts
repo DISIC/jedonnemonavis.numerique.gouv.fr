@@ -8,6 +8,7 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getClientIp } from '../utils/clientIp';
 import prisma from '../utils/db';
+import { parseButtonId } from '../utils/tools';
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
 
@@ -153,7 +154,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
 					ip_id: hashedIp,
 					ip_adress: transformIp(ip),
 					product_id: parseInt(product_id ?? '0'),
-					button_id: parseInt(button_id ?? '0'),
+					button_id: parseButtonId(button_id) ?? 0,
 					total_attempts: 5,
 					first_attempt: currentTime,
 					last_attempt: currentTime,

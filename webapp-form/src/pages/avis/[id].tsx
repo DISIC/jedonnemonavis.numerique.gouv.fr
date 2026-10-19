@@ -22,6 +22,7 @@ import {
 	getInvalidEmailBlocks,
 	getPersonalDataBlocks
 } from '@/src/utils/form-validation';
+import { parseButtonId } from '@/src/utils/tools';
 
 type AvisPageProps = {
 	form: FormWithElements;
@@ -459,7 +460,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
 	const widgetNonce = isWidget ? (query.nonce as string) || null : null;
-	const buttonId = parseInt(query.button as string) || null;
+	const buttonId = parseButtonId(query.button);
 	const formConfigParam = query.formConfig as string | undefined;
 
 	if (!isPreview && !!formConfigParam) {
