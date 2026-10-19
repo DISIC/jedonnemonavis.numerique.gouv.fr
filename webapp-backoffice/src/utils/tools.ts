@@ -66,7 +66,7 @@ type FormatDateOptions = {
 	withHour?: boolean;
 	hourOnly?: boolean;
 	hourFormat?: HourFormat;
-	monthFormat?: 'default' | 'literal';
+	monthFormat?: 'default' | 'literal' | 'short';
 };
 
 function formatHourPart(date: Date, format: HourFormat): string {
@@ -107,7 +107,9 @@ export function formatDateToFrenchString(
 
 	const datePart = new Intl.DateTimeFormat('fr-FR', {
 		year: 'numeric',
-		month: monthFormat === 'literal' ? 'long' : 'numeric',
+		month: ({ default: 'numeric', literal: 'long', short: 'short' } as const)[
+			monthFormat
+		],
 		day: 'numeric'
 	}).format(date);
 

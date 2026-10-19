@@ -312,9 +312,9 @@ const DateRangePickerButton = ({
 		) {
 			const today = dateToLocalISO(new Date());
 			return `${formatDateToFrenchString(reviewLogDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(today, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
@@ -325,9 +325,9 @@ const DateRangePickerButton = ({
 			isValidDate(endDate)
 		) {
 			return `${formatDateToFrenchString(startDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(endDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
@@ -336,9 +336,9 @@ const DateRangePickerButton = ({
 				sharedFilters.dateShortcut
 			);
 			return `${formatDateToFrenchString(sDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(eDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
