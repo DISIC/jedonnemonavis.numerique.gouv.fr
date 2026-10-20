@@ -17,6 +17,7 @@ interface Props {
 	answers: FormAnswers;
 	setAnswers: (value: SetStateAction<FormAnswers>) => void;
 	isWidget?: boolean;
+	hidePersonalDataAlert?: boolean;
 }
 
 export const TextAreaBlock = ({
@@ -25,7 +26,8 @@ export const TextAreaBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget
+	isWidget,
+	hidePersonalDataAlert
 }: Props) => {
 	const { classes, cx } = useStyles();
 	const textareaAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -37,7 +39,8 @@ export const TextAreaBlock = ({
 				htmlFor={`textarea-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
+				{displayLabel}{' '}
+				{block.isRequired && <span className={classes.asterisk}>*</span>}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<Input
@@ -78,9 +81,6 @@ export const TextAreaBlock = ({
 				stateRelatedMessage="Maximum 15000 caractères"
 				textArea
 			/>
-			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
-				{textareaValue.length} / 15000
-			</div>
 			{/*
 			  Rappel permanent, affiché même sur un champ vide : c'est ce qui évite
 			  la saisie, alors que l'alerte ne fait que la rattraper. Le
@@ -90,9 +90,9 @@ export const TextAreaBlock = ({
 			*/}
 			<Notice
 				className={cx(classes.notice)}
-				title="Pour votre sécurité, ne partagez pas de données personnelles. Ce formulaire ne permet pas à l’administration de vous répondre."
+				title="Pour votre sécurité, ne partagez pas d’informations sensibles telles qu'un nom, adresse ou numéro de dossier."
 			/>
-			<PersonalDataAlert value={textareaValue} />
+			{!hidePersonalDataAlert && <PersonalDataAlert value={textareaValue} />}
 		</div>
 	);
 };
@@ -101,12 +101,6 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	inputContainer: {
 		display: 'flex',
 		flexDirection: 'column'
-	},
-	textCount: {
-		alignSelf: 'flex-end',
-		marginTop: fr.spacing('1v'),
-		marginBottom: 0,
-		marginRight: fr.spacing('1v')
 	},
 	hint: {
 		fontSize: '0.9rem',
@@ -117,6 +111,7 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	notice: {
 		background: 'none',
 		padding: 0,
+		marginTop: fr.spacing('1v'),
 		marginBottom: fr.spacing('4v'),
 		'.fr-container': {
 			padding: 0,
@@ -129,5 +124,8 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 				}
 			}
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default
 	}
 }));
