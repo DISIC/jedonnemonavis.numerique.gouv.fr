@@ -51,7 +51,8 @@ export const MarkInputBlock = ({
 						isWidget ? 'fr-text--sm' : 'fr-text--md'
 					)}
 				>
-					{displayLabel} {!block.isRequired && '(optionnel)'}
+					{displayLabel}{' '}
+					{block.isRequired && <span className={classes.asterisk}>*</span>}
 				</span>
 				{block.content && (
 					<span className={fr.cx('fr-hint-text')}>{block.content}</span>
@@ -174,5 +175,8 @@ const useStyles = tss.withName({ MarkInputBlock }).create(() => ({
 		color: 'white',
 		fontWeight: 'bold',
 		borderColor: fr.colors.decisions.background.flat.blueFrance.default
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default
 	}
 }));
