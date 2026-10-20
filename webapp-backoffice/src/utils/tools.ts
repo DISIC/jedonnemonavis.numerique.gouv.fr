@@ -814,7 +814,19 @@ export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	if (rawCallback.startsWith('//')) {
 		return defaultUrl;
 	}
-	return rawCallback;
+	if (/[\x00-\x1f\x7f\\]/.test(rawCallback)) {
+		return defaultUrl;
+	}
+	const base = 'http://localhost';
+	try {
+		const url = new URL(rawCallback, base);
+		if (url.origin !== base || url.pathname.startsWith('//')) {
+			return defaultUrl;
+		}
+		return `${url.pathname}${url.search}${url.hash}`;
+	} catch {
+		return defaultUrl;
+	}
 };
 
 export const getButtonCode = ({
