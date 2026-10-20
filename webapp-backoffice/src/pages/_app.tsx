@@ -84,7 +84,12 @@ function App({ Component, pageProps }: AppProps) {
 		if (process.env.NODE_ENV === 'production')
 			init({
 				url: MATOMO_URL ? MATOMO_URL : '',
-				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
+				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : '',
+				excludeUrlsPatterns: [
+					/^\/register/,
+					/^\/reset-password/,
+					/^\/login\/otp/
+				]
 			});
 	}, []);
 
