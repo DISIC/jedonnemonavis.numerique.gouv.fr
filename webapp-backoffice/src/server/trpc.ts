@@ -126,11 +126,10 @@ const scrubSensitiveValues = (value: any): any => {
 
 // Auth middleware
 const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
-	const user = await ctx.prisma.user.findUnique({
-		where: {
-			email: ctx.session?.user?.email as string
-		}
-	});
+	const sessionEmail = ctx.session?.user?.email;
+	const user = sessionEmail
+		? await ctx.prisma.user.findUnique({ where: { email: sessionEmail } })
+		: null;
 
 	if (meta?.authRequired && (!ctx.session?.user || !user)) {
 		throw new TRPCError({
