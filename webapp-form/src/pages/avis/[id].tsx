@@ -14,6 +14,7 @@ import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 import FormClosed from '../form-closed';
+import { PersonalDataAlert } from '@/src/components/form/elements/PersonalDataAlert';
 import {
 	DynamicAnswerData,
 	FormAnswers,
@@ -359,10 +360,13 @@ export default function AvisPage({
 
 	// Variante bloquante : tant qu'une donnée personnelle est présente dans un
 	// champ libre de l'étape, on ne laisse ni continuer ni envoyer. L'alerte qui
-	// nomme la donnée est rendue sous le champ concerné, par `PersonalDataAlert`.
-	const hasPersonalDataInStep =
-		getPersonalDataBlocks(currentStep.form_template_blocks, answers, formConfig)
-			.length > 0;
+	// nomme la donnée est rendue par `PersonalDataAlert`.
+	const personalDataBlocks = getPersonalDataBlocks(
+		currentStep.form_template_blocks,
+		answers,
+		formConfig
+	);
+	const hasPersonalDataInStep = personalDataBlocks.length > 0;
 
 	return (
 		<div ref={contentRef}>
@@ -387,24 +391,36 @@ export default function AvisPage({
 									totalSteps={steps.length}
 									isWidget={isWidget}
 									showValidationErrors={showValidationErrors}
+									hidePersonalDataAlert={isContactConsentStep}
 								/>
 
 								{isContactConsentStep && (
-									<Checkbox
-										small={isWidget}
-										className={fr.cx('fr-mt-4v', 'fr-mb-0')}
-										options={[
-											{
-												label:
-													"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
-												nativeInputProps: {
-													checked: acceptsContact,
-													onChange: e =>
-														handleContactConsentChange(e.target.checked)
+									<div className={fr.cx('fr-mt-2v', 'fr-mb-10v')}>
+										<Checkbox
+											small={isWidget}
+											className={cx(classes.contactConsent, fr.cx('fr-mb-0'))}
+											options={[
+												{
+													label:
+														"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+													nativeInputProps: {
+														checked: acceptsContact,
+														onChange: e =>
+															handleContactConsentChange(e.target.checked)
+													}
 												}
-											}
-										]}
-									/>
+											]}
+										/>
+										{personalDataBlocks.map(block => (
+											<PersonalDataAlert
+												key={block.id}
+												value={
+													(answers[`block_${block.id}`] as DynamicAnswerData)
+														.answer_text ?? ''
+												}
+											/>
+										))}
+									</div>
 								)}
 
 								{isRateLimitReached && (
@@ -631,6 +647,12 @@ const useStyles = tss
 				height: `${blueSectionPxHeight}px`
 			}
 		},
+		contactConsent: {
+			'& .fr-label': {
+				fontSize: '1rem',
+				lineHeight: '1.5rem'
+			}
+		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			...fr.spacing('padding', {
@@ -647,7 +669,7 @@ const useStyles = tss
 			display: 'flex',
 			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
-			marginTop: fr.spacing(isWidget ? '4v' : '8v')
+			marginTop: fr.spacing(isWidget ? '10v' : '8v')
 		},
 		thanksSection: {
 			textAlign: 'center',

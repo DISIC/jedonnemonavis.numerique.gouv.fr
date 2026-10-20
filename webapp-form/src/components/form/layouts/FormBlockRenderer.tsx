@@ -22,11 +22,19 @@ interface Props {
 	setAnswers: (value: SetStateAction<FormAnswers>) => void;
 	isWidget?: boolean;
 	showValidationErrors?: boolean;
+	hidePersonalDataAlert?: boolean;
 }
 
 export const FormBlockRenderer = (props: Props) => {
-	const { block, form, answers, setAnswers, isWidget, showValidationErrors } =
-		props;
+	const {
+		block,
+		form,
+		answers,
+		setAnswers,
+		isWidget,
+		showValidationErrors,
+		hidePersonalDataAlert
+	} = props;
 
 	const formConfig = form.form_configs[0];
 	const labelConfig = formConfig?.form_config_labels?.find(
@@ -53,11 +61,21 @@ export const FormBlockRenderer = (props: Props) => {
 				return <SmileyBlock {...commonProps} />;
 
 			case 'input_text_area':
-				return <TextAreaBlock {...commonProps} />;
+				return (
+					<TextAreaBlock
+						{...commonProps}
+						hidePersonalDataAlert={hidePersonalDataAlert}
+					/>
+				);
 
 			case 'input_text':
 			case 'input_email':
-				return <TextInputBlock {...commonProps} />;
+				return (
+					<TextInputBlock
+						{...commonProps}
+						hidePersonalDataAlert={hidePersonalDataAlert}
+					/>
+				);
 
 			case 'mark_input':
 				return <MarkInputBlock {...commonProps} />;
