@@ -125,6 +125,9 @@ async function seed_root_form_template() {
 }
 
 async function seed_users_products() {
+	if (process.env.NODE_ENV === 'production') {
+		throw new Error('Test users and products cannot be seeded in production');
+	}
 	const formTemplates = await prisma.formTemplate.findMany({
 		take: 100
 	});
