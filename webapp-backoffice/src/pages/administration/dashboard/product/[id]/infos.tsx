@@ -210,11 +210,15 @@ const ProductInformationPage = (props: Props) => {
 				<div>
 					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>URLs</h3>
 					<div className={classes.urlsWrapper}>
-						{product.urls.map(url => (
-							<Tag key={url} linkProps={{ href: url }}>
-								{url}
-							</Tag>
-						))}
+						{product.urls.map(url =>
+							/^https?:\/\//i.test(url) ? (
+								<Tag key={url} linkProps={{ href: url }}>
+									{url}
+								</Tag>
+							) : (
+								<Tag key={url}>{url}</Tag>
+							)
+						)}
 					</div>
 				</div>
 				{ownRight === 'carrier_admin' && !hasLockedForm && (
