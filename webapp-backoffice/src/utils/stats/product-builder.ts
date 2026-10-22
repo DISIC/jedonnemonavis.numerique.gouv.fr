@@ -146,11 +146,35 @@ const ensureCategory = (
 	}
 };
 
+/**
+ * Sous-réponses d'une réponse parente.
+ *
+ * Les trois premiers critères ne sont pas redondants avec les deux derniers.
+ * `buckets` est la liste **aplatie de tous les intervalles**, services et
+ * formulaires confondus : le `date_histogram` a été écrasé par le `flatMap` de
+ * `fetchAndFormatData`, qui s'est contenté d'ajouter `date` à chaque bucket.
+ *
+ * Et `parent_answer_item_id` n'identifie pas un avis mais une *option de
+ * formulaire* (cf. l'indexation côté webapp-form) : il est donc stable d'une
+ * année sur l'autre, et partagé par tous les services qui utilisent le même
+ * gabarit. À lui seul il ne discrimine donc rien.
+ *
+ * Sans ces égalités, les sous-réponses de toute la période remontaient dans
+ * chaque bucket : un appel 2019→2026 en `interval: 'year'` renvoyait le total
+ * toutes années confondues, identique sur 2024, 2025 et 2026, là où l'appel
+ * sur la seule année 2024 donnait le bon chiffre.
+ *
+ * `interval: 'none'` n'est pas affecté : tous les buckets y portent la même
+ * date `all_time`, et l'égalité est alors toujours vraie.
+ */
 const findChildren = (buckets: Buckets, bucketData: BucketData): Buckets => {
 	return buckets.filter(b => {
-		const [, , , bParentFieldCode, bParentFieldAnswerItemId] =
+		const [bProductId, bFormId, , bParentFieldCode, bParentFieldAnswerItemId] =
 			b.key.split('#!#');
 		return (
+			b.date === bucketData.docDate &&
+			bProductId === bucketData.productId &&
+			bFormId === bucketData.formId &&
 			bParentFieldCode === bucketData.fieldCode &&
 			bParentFieldAnswerItemId === bucketData.answerItemId
 		);
