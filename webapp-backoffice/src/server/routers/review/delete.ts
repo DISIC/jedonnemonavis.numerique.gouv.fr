@@ -17,25 +17,13 @@ export const deleteReviewMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof deleteReviewInputSchema>;
 }) => {
-	const { review_id, product_id, form_id } = input;
+	const { review_id, product_id } = input;
 
 	await checkRightToProceed({
 		prisma: ctx.prisma,
 		session: ctx.session!,
 		product_id
 	});
-
-	const form = await ctx.prisma.form.findUnique({
-		where: { id: form_id },
-		select: { isTop250: true }
-	});
-
-	if (form?.isTop250) {
-		throw new TRPCError({
-			code: 'FORBIDDEN',
-			message: 'Reviews of a démarche essentielle form cannot be deleted'
-		});
-	}
 
 	const review = await ctx.prisma.review.findFirst({
 		where: { id: review_id, product_id },
@@ -46,6 +34,18 @@ export const deleteReviewMutation = async ({
 		throw new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'Review not found'
+		});
+	}
+
+	const form = await ctx.prisma.form.findUnique({
+		where: { id: review.form_id },
+		select: { isTop250: true }
+	});
+
+	if (form?.isTop250) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Reviews of a démarche essentielle form cannot be deleted'
 		});
 	}
 
@@ -126,7 +126,7 @@ export const deleteReviewMutation = async ({
 				user_id: parseInt(user.id),
 				action: 'service_review_delete',
 				product_id,
-				form_id,
+				form_id: review.form_id,
 				metadata: { review_id }
 			}
 		});

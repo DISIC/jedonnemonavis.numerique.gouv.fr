@@ -1,18 +1,16 @@
-import { ReviewUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import { createOrUpdateAnswers, formatDynamicAnswer } from './utils';
+import { dynamicAnswersInputSchema, reviewInputSchema } from './schemas';
+import {
+	assertReviewTargetsMatch,
+	createOrUpdateAnswers,
+	formatDynamicAnswer
+} from './utils';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 
 export const dynamicCreateReviewInputSchema = z.object({
-	review: ReviewUncheckedCreateInputSchema,
-	answers: z.array(
-		z.object({
-			block_id: z.number(),
-			answer_item_id: z.number().optional(),
-			answer_text: z.string().optional()
-		})
-	)
+	review: reviewInputSchema,
+	answers: dynamicAnswersInputSchema
 });
 
 export const dynamicCreateReviewMutation = async ({
@@ -25,8 +23,15 @@ export const dynamicCreateReviewMutation = async ({
 	const { prisma } = ctx;
 	const { review, answers } = input;
 
+	await assertReviewTargetsMatch(prisma, review);
+
 	const newReview = await prisma.review.create({
-		data: review,
+		data: {
+			product_id: review.product_id,
+			button_id: review.button_id,
+			form_id: review.form_id,
+			user_id: review.user_id
+		},
 		include: {
 			product: true,
 			button: true
