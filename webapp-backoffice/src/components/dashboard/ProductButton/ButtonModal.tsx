@@ -46,10 +46,6 @@ const ButtonModal = (props: Props) => {
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
 	const [instructionsPanelKey, setInstructionsPanelKey] = useState(0);
 
-	useIsModalOpen(modal, {
-		onConceal: () => setInstructionsPanelKey(key => key + 1)
-	});
-
 	const defaultTemplateButton = useMemo(
 		() =>
 			(button && button.form_template_button) ||
@@ -60,24 +56,33 @@ const ButtonModal = (props: Props) => {
 	const currentDefaultTemplateButton =
 		currentButton?.form_template_button || defaultTemplateButton;
 
-	useEffect(() => {
-		if (button) {
-			const hasTemplateButtons =
-				button.integration_type !== 'link' &&
-				formTemplateButtons &&
-				formTemplateButtons.length > 0;
+	const resetCurrentButton = () => {
+		if (!button) return;
 
-			setCurrentButton({
-				...button,
-				form_template_button: hasTemplateButtons
-					? defaultTemplateButton || null
-					: null,
-				form_template_button_id: hasTemplateButtons
-					? defaultTemplateButton?.id || null
-					: null
-			});
+		const hasTemplateButtons =
+			button.integration_type !== 'link' &&
+			formTemplateButtons &&
+			formTemplateButtons.length > 0;
+
+		setCurrentButton({
+			...button,
+			form_template_button: hasTemplateButtons
+				? defaultTemplateButton || null
+				: null,
+			form_template_button_id: hasTemplateButtons
+				? defaultTemplateButton?.id || null
+				: null
+		});
+	};
+
+	useEffect(resetCurrentButton, [button]);
+
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			resetCurrentButton();
+			setInstructionsPanelKey(key => key + 1);
 		}
-	}, [button]);
+	});
 
 	const updateButton = trpc.button.update.useMutation({
 		onSuccess: result => {
@@ -283,10 +288,7 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-							resetErrors('title');
-						}
+						onClick: () => resetErrors('title')
 					},
 					{
 						children: 'Renommer',
@@ -298,10 +300,7 @@ const ButtonModal = (props: Props) => {
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-						}
+						priority: 'secondary'
 					},
 					{
 						children: "Fermer le lien d'intégration",
