@@ -8,6 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
@@ -43,6 +44,11 @@ const ButtonModal = (props: Props) => {
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
+	const [instructionsPanelKey, setInstructionsPanelKey] = useState(0);
+
+	useIsModalOpen(modal, {
+		onConceal: () => setInstructionsPanelKey(key => key + 1)
+	});
 
 	const defaultTemplateButton = useMemo(
 		() =>
@@ -163,6 +169,7 @@ const ButtonModal = (props: Props) => {
 						<hr />
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
+								key={instructionsPanelKey}
 								button={currentButton}
 								buttonStyle={currentButton.button_style}
 								formTemplateButton={currentButton.form_template_button}
