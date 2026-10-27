@@ -48,7 +48,10 @@ export const dynamicCreateReviewMutation = async ({
 			review: newReview
 		});
 	} catch (e) {
-		console.log(e);
+		console.error(
+			'[review] answers not saved:',
+			e instanceof Error ? e.name : 'unknown error'
+		);
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);
