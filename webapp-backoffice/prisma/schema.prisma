@@ -540,15 +540,16 @@ model Favorite {
 }
 
 model Review {
-  id           Int     @default(autoincrement())
-  form_id      Int
-  product      Product @relation(fields: [product_id], references: [id])
-  product_id   Int
-  button       Button  @relation(fields: [button_id], references: [id])
-  button_id    Int
-  xwiki_id     Int?
-  user_id      String?
-  has_verbatim Boolean @default(false)
+  id                  Int     @default(autoincrement())
+  form_id             Int
+  product             Product @relation(fields: [product_id], references: [id])
+  product_id          Int
+  button              Button? @relation(fields: [button_id], references: [id], onDelete: Restrict)
+  button_id           Int?
+  requested_button_id Int?
+  xwiki_id            Int?
+  user_id             String?
+  has_verbatim        Boolean @default(false)
 
   reviewViewLogs ReviewViewLog[]
 
@@ -563,17 +564,18 @@ model Review {
 }
 
 model ArchivedReview {
-  id                 Int      @id @default(autoincrement())
-  original_review_id Int
-  review_created_at  DateTime
-  product_id         Int
-  form_id            Int
-  button_id          Int?
-  user_id            String?
-  has_verbatim       Boolean  @default(false)
-  answers            Json
-  deleted_by         Int?
-  archived_at        DateTime @default(now())
+  id                  Int      @id @default(autoincrement())
+  original_review_id  Int
+  review_created_at   DateTime
+  product_id          Int
+  form_id             Int
+  button_id           Int?
+  requested_button_id Int?
+  user_id             String?
+  has_verbatim        Boolean  @default(false)
+  answers             Json
+  deleted_by          Int?
+  archived_at         DateTime @default(now())
 
   @@index([product_id, form_id, archived_at])
   @@index([product_id, form_id, review_created_at, id])

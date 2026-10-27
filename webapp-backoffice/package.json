@@ -91,7 +91,7 @@
 		"react-dnd": "16.0.1",
 		"react-dnd-html5-backend": "16.0.1",
 		"react-dom": "18.2.0",
-		"react-email": "6.5.0",
+		"react-email": "6.9.5",
 		"react-hook-form": "7.47.0",
 		"recharts": "2.12.7",
 		"remark": "15.0.1",

@@ -1,15 +1,16 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import { dynamicAnswersInputSchema, reviewInputSchema } from './schemas';
+import { dynamicAnswersInputSchema, dynamicReviewInputSchema } from './schemas';
 import {
-	assertReviewTargetsMatch,
+	assertFormAcceptsReviews,
 	createOrUpdateAnswers,
-	formatDynamicAnswer
+	formatDynamicAnswer,
+	resolveReviewButton
 } from './utils';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 
 export const dynamicCreateReviewInputSchema = z.object({
-	review: reviewInputSchema,
+	review: dynamicReviewInputSchema,
 	answers: dynamicAnswersInputSchema
 });
 
@@ -23,20 +24,30 @@ export const dynamicCreateReviewMutation = async ({
 	const { prisma } = ctx;
 	const { review, answers } = input;
 
-	await assertReviewTargetsMatch(prisma, review);
+	await assertFormAcceptsReviews(prisma, review);
 
 	const newReview = await prisma.review.create({
 		data: {
-			product_id: review.product_id,
-			button_id: review.button_id,
-			form_id: review.form_id,
-			user_id: review.user_id
+			...review,
+			...(await resolveReviewButton(prisma, review.form_id, review.button_id))
 		},
 		include: {
 			product: true,
 			button: true
 		}
 	});
+
+	await prisma.form.update({
+		where: { id: review.form_id },
+		data: { last_review_at: newReview.created_at }
+	});
+
+	if (newReview.button?.isDeleted)
+		await prisma.closedButtonLog.upsert({
+			where: { button_id: newReview.button.id },
+			update: { count: { increment: 1 } },
+			create: { button_id: newReview.button.id }
+		});
 
 	const formattedAnswers = await Promise.all(
 		answers.map(answer => formatDynamicAnswer(prisma, answer))

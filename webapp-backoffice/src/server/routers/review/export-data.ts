@@ -1,7 +1,10 @@
 import type { Context } from '@/src/server/trpc';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { buildUserScopedKey, setMemoryValue } from '@/src/utils/memoryStorage';
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	getInvalidButtonLabel
+} from '@/src/utils/tools';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
 import { z } from 'zod';
@@ -123,7 +126,9 @@ export const exportReviewDataMutation = async ({
 							const value = line.id;
 							return `"${String(value).replace(/"/g, '""')}"`;
 						} else if (header === 'Bouton') {
-							const value = line.button.title;
+							const value =
+								line.button?.title ??
+								getInvalidButtonLabel(line.requested_button_id);
 							return `"${String(value).replace(/"/g, '""')}"`;
 						} else {
 							const value =

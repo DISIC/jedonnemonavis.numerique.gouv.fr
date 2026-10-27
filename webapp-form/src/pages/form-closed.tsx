@@ -6,7 +6,7 @@ import { trpc } from '../utils/trpc';
 import { useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 
-const FormClosed = ({ buttonId }: { buttonId: number }) => {
+const FormClosed = ({ buttonId }: { buttonId: number | null }) => {
 	const { classes, cx } = useStyles();
 	const { t } = useTranslation('common');
 
@@ -14,7 +14,7 @@ const FormClosed = ({ buttonId }: { buttonId: number }) => {
 		trpc.closedButtonLog.createOrUpdate.useMutation();
 
 	useEffect(() => {
-		newVisitOnClosedButton.mutate({ button_id: buttonId });
+		if (buttonId) newVisitOnClosedButton.mutate({ button_id: buttonId });
 	}, []);
 
 	return (
