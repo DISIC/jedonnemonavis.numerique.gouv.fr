@@ -247,8 +247,9 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						form_id = input.json.form_id;
 					}
 
-					const shouldLogEvent =
-						'shouldLogEvent' in input?.json ? input.json.shouldLogEvent : true;
+					const shouldLogEvent = !(
+						query === 'button.delete' && input?.json?.shouldLogEvent === false
+					);
 
 					if (user && action && shouldLogEvent) {
 						await ctx.prisma.userEvent.create({
