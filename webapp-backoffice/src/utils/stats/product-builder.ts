@@ -1,7 +1,9 @@
 import {
 	ProductBuilder,
 	BucketData,
+	CategoryData,
 	FormHelper,
+	Hit,
 	OpenProduct,
 	Buckets
 } from '../../types/custom';
@@ -164,15 +166,17 @@ const ensureCategory = (
  * toutes années confondues, identique sur 2024, 2025 et 2026, là où l'appel
  * sur la seule année 2024 donnait le bon chiffre.
  *
- * `interval: 'none'` n'est pas affecté : tous les buckets y portent la même
- * date `all_time`, et l'égalité est alors toujours vraie.
+ * La comparaison porte sur `bucket_date`, la provenance réelle, et non sur
+ * `date`, qui vaut `all_time` en `interval: 'none'`. Sans cela ce mode
+ * récupérerait toutes les périodes d'un coup sur la première réponse
+ * rencontrée, et `addOrUpdateHit` les recompterait à chaque fusion.
  */
 const findChildren = (buckets: Buckets, bucketData: BucketData): Buckets => {
 	return buckets.filter(b => {
 		const [bProductId, bFormId, , bParentFieldCode, bParentFieldAnswerItemId] =
 			b.key.split('#!#');
 		return (
-			b.date === bucketData.docDate &&
+			b.bucket_date === bucketData.bucketDate &&
 			bProductId === bucketData.productId &&
 			bFormId === bucketData.formId &&
 			bParentFieldCode === bucketData.fieldCode &&
@@ -181,10 +185,60 @@ const findChildren = (buckets: Buckets, bucketData: BucketData): Buckets => {
 	}) as Buckets;
 };
 
+/** Identité d'un bucket enfant, pour ne jamais le compter deux fois. */
+const childBucketId = (bucket: Buckets[number]): string =>
+	`${bucket.bucket_date}#!#${bucket.key}`;
+
+/**
+ * Replie `incoming` dans `target`, catégorie par catégorie puis réponse par
+ * réponse, en additionnant les compteurs et en descendant récursivement.
+ *
+ * Nécessaire parce qu'une même réponse de sortie agrège plusieurs buckets : une
+ * option dont l'identifiant a changé au fil des versions du gabarit, ou un
+ * formulaire historique dont les avis migrés portent un `form_id` différent.
+ * Ces buckets ont chacun leurs propres sous-réponses, et les écraser revenait à
+ * ne garder que celles du premier rencontré.
+ */
+const mergeCategories = (
+	target: CategoryData[],
+	incoming: CategoryData[]
+): CategoryData[] => {
+	incoming.forEach(category => {
+		const existing = target.find(c => c.category === category.category);
+
+		if (!existing) {
+			target.push(category);
+			return;
+		}
+
+		category.number_hits.forEach(hit => {
+			const match = existing.number_hits.find(
+				h => h.label === hit.label && h.intention === hit.intention
+			);
+
+			if (!match) {
+				existing.number_hits.push(hit);
+				return;
+			}
+
+			match.count += hit.count;
+
+			if (hit.children) {
+				match.children = match.children
+					? mergeCategories(match.children, hit.children)
+					: hit.children;
+			}
+		});
+	});
+
+	return target;
+};
+
 const addOrUpdateHit = (
 	builder: ProductBuilder,
 	bucketData: BucketData,
 	children: Buckets,
+	consumedChildren: WeakMap<Hit, Set<string>>,
 	formHelper?: FormHelper
 ): void => {
 	const usableFormId = `${formHelper?.id}` || bucketData.formId;
@@ -212,14 +266,36 @@ const addOrUpdateHit = (
 	);
 
 	if (existingHitIndex !== -1) {
-		hits[existingHitIndex].count += bucketData.docCount;
+		const hit = hits[existingHitIndex];
+
+		hit.count += bucketData.docCount;
+
+		// Deux buckets distincts peuvent désigner la même réponse de sortie tout en
+		// pointant vers les mêmes enfants — même option, libellé de question
+		// reformulé. On ne replie donc que ce que cette réponse n'a pas déjà pris.
+		const consumed = consumedChildren.get(hit) ?? new Set<string>();
+		const fresh = children.filter(b => !consumed.has(childBucketId(b)));
+
+		if (fresh.length > 0) {
+			fresh.forEach(b => consumed.add(childBucketId(b)));
+			consumedChildren.set(hit, consumed);
+
+			const incoming = handleChildren(fresh);
+
+			hit.children = hit.children
+				? mergeCategories(hit.children, incoming)
+				: incoming;
+		}
 	} else {
-		hits.push({
+		const hit: Hit = {
 			intention: bucketData.intention,
 			label: bucketData.answerText,
 			count: bucketData.docCount,
 			children: children.length > 0 ? handleChildren(children) : undefined
-		});
+		};
+
+		hits.push(hit);
+		consumedChildren.set(hit, new Set(children.map(childBucketId)));
 	}
 };
 
@@ -237,6 +313,10 @@ export const handleBucket = (
 		categoryIndexMap: new Map()
 	};
 
+	// Buckets enfants déjà repliés dans une réponse donnée. Porté hors de la
+	// sortie pour ne pas polluer la réponse de l'API.
+	const consumedChildren = new WeakMap<Hit, Set<string>>();
+
 	buckets.forEach(bucket => {
 		const bucketData = parseBucketKey(bucket);
 
@@ -252,7 +332,7 @@ export const handleBucket = (
 		ensureCategory(builder, bucketData, formHelper);
 
 		const children = findChildren(buckets, bucketData);
-		addOrUpdateHit(builder, bucketData, children, formHelper);
+		addOrUpdateHit(builder, bucketData, children, consumedChildren, formHelper);
 	});
 
 	return builder.products;
