@@ -10,21 +10,59 @@ import {
 import { parseBucketKey } from './bucket-parser';
 import { handleChildren } from './children-handler';
 
+const resolveFormHelper = (
+	productId: string,
+	formId: string,
+	formsHelper: FormHelper[]
+): FormHelper | undefined => {
+	const byId = formsHelper.find(f => f.id === parseInt(formId, 10));
+
+	if (byId) {
+		return byId;
+	}
+
+	return formsHelper.find(
+		f => !!f.legacy && f.product_id === parseInt(productId, 10)
+	);
+};
+
 const findFormHelper = (
 	bucketData: BucketData,
 	formsHelper: FormHelper[]
-): FormHelper | undefined => {
-	let formHelper = formsHelper.find(
-		f => f.id === parseInt(bucketData.formId, 10)
-	);
+): FormHelper | undefined =>
+	resolveFormHelper(bucketData.productId, bucketData.formId, formsHelper);
 
-	if (!formHelper) {
-		formHelper = formsHelper.find(
-			f => !!f.legacy && f.product_id === parseInt(bucketData.productId, 10)
-		);
-	}
+/**
+ * Identité du formulaire de sortie auquel un bucket appartient.
+ *
+ * Sur un formulaire historique, les avis migrés de l'ancien outil portent des
+ * `form_id` qui sont des pseudo-identifiants (1 ou 2), là où les avis récents
+ * portent la vraie clé. `findFormHelper` les ramène tous au même formulaire, et
+ * c'est bien le même : comparer les `form_id` bruts revenait à séparer une
+ * réponse parente de ses sous-réponses dès que les deux ne venaient pas du même
+ * lot. Le repli sur les valeurs brutes ne sert que pour un bucket qui ne se
+ * résout pas, pour ne pas confondre deux formulaires inconnus.
+ *
+ * Mémoïsé : `findChildren` est appelée par bucket et rebalaie toute la liste.
+ */
+const makeFormKey = (formsHelper: FormHelper[]) => {
+	const cache = new Map<string, string>();
 
-	return formHelper;
+	return (productId: string, formId: string): string => {
+		const raw = `${productId}#!#${formId}`;
+		const cached = cache.get(raw);
+
+		if (cached !== undefined) {
+			return cached;
+		}
+
+		const helper = resolveFormHelper(productId, formId, formsHelper);
+		const key = helper ? `form:${helper.id}` : `raw:${raw}`;
+
+		cache.set(raw, key);
+
+		return key;
+	};
 };
 
 const ensureProduct = (
@@ -151,7 +189,7 @@ const ensureCategory = (
 /**
  * Sous-réponses d'une réponse parente.
  *
- * Les trois premiers critères ne sont pas redondants avec les deux derniers.
+ * Les deux premiers critères ne sont pas redondants avec les deux derniers.
  * `buckets` est la liste **aplatie de tous les intervalles**, services et
  * formulaires confondus : le `date_histogram` a été écrasé par le `flatMap` de
  * `fetchAndFormatData`, qui s'est contenté d'ajouter `date` à chaque bucket.
@@ -171,14 +209,19 @@ const ensureCategory = (
  * récupérerait toutes les périodes d'un coup sur la première réponse
  * rencontrée, et `addOrUpdateHit` les recompterait à chaque fusion.
  */
-const findChildren = (buckets: Buckets, bucketData: BucketData): Buckets => {
+const findChildren = (
+	buckets: Buckets,
+	bucketData: BucketData,
+	formKey: (productId: string, formId: string) => string
+): Buckets => {
+	const parentFormKey = formKey(bucketData.productId, bucketData.formId);
+
 	return buckets.filter(b => {
 		const [bProductId, bFormId, , bParentFieldCode, bParentFieldAnswerItemId] =
 			b.key.split('#!#');
 		return (
 			b.bucket_date === bucketData.bucketDate &&
-			bProductId === bucketData.productId &&
-			bFormId === bucketData.formId &&
+			formKey(bProductId, bFormId) === parentFormKey &&
 			bParentFieldCode === bucketData.fieldCode &&
 			bParentFieldAnswerItemId === bucketData.answerItemId
 		);
@@ -317,6 +360,8 @@ export const handleBucket = (
 	// sortie pour ne pas polluer la réponse de l'API.
 	const consumedChildren = new WeakMap<Hit, Set<string>>();
 
+	const formKey = makeFormKey(formsHelper);
+
 	buckets.forEach(bucket => {
 		const bucketData = parseBucketKey(bucket);
 
@@ -331,7 +376,7 @@ export const handleBucket = (
 		ensureInterval(builder, bucketData, interval, formHelper);
 		ensureCategory(builder, bucketData, formHelper);
 
-		const children = findChildren(buckets, bucketData);
+		const children = findChildren(buckets, bucketData, formKey);
 		addOrUpdateHit(builder, bucketData, children, consumedChildren, formHelper);
 	});
 
