@@ -32,7 +32,20 @@ export type Buckets = Array<{
 	key: string;
 	key_as_string: string;
 	doc_count: number;
+	/**
+	 * Date d'affichage de l'intervalle. Vaut `all_time` en `interval: 'none'`,
+	 * où tous les buckets sont présentés comme un seul.
+	 */
 	date: string;
+	/**
+	 * Date réelle du bucket d'histogramme dont provient cette ligne.
+	 *
+	 * Distincte de `date`, qui est écrasée en `interval: 'none'` : c'est sur
+	 * celle-ci que se fait le rattachement parent/enfant, pour qu'une réponse
+	 * ne récupère jamais les sous-réponses d'une autre période — y compris
+	 * quand la sortie n'affiche qu'un seul intervalle.
+	 */
+	bucket_date: string;
 }>;
 
 export type BucketsInside = Array<{
@@ -124,6 +137,7 @@ export interface BucketData {
 	answerItemId: string;
 	docCount: number;
 	docDate: string;
+	bucketDate: string;
 }
 
 export interface ProductBuilder {

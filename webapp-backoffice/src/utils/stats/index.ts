@@ -140,7 +140,11 @@ export const fetchAndFormatData = async ({
 		bucket.terms_by_field.buckets.map((innerBucket: any) => ({
 			key: innerBucket.key,
 			doc_count: innerBucket.doc_count,
-			date: interval !== 'none' ? bucket.key_as_string : 'all_time'
+			date: interval !== 'none' ? bucket.key_as_string : 'all_time',
+			// `date` est la valeur d'affichage et s'efface en `interval: 'none'` ;
+			// la provenance réelle est conservée ici, seule base fiable pour
+			// rattacher une sous-réponse à sa réponse parente.
+			bucket_date: bucket.key_as_string
 		}))
 	);
 
