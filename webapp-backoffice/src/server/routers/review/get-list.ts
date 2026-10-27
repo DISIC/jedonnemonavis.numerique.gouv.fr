@@ -8,8 +8,8 @@ import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 
 export const getReviewListInputSchema = z.object({
-	numberPerPage: z.number(),
-	page: z.number().default(1),
+	numberPerPage: z.number().int().min(1).max(100),
+	page: z.number().int().min(1).default(1),
 	product_id: z.number().optional(),
 	form_id: z.number().optional(),
 	shouldIncludeAnswers: z.boolean().optional().default(false),
@@ -146,6 +146,9 @@ export const getReviewListQuery = async ({
 			.$queryRaw`
 				SELECT DISTINCT "review_id" FROM "Answer"
 				WHERE "field_code" = 'verbatim'
+				AND ("review_id", "review_created_at") IN (
+					SELECT "id", "created_at" FROM "Review" WHERE "product_id" = ${product.id}
+				)
 				${dateFilter}
 				AND ${searchWhereRaw}
 			`;

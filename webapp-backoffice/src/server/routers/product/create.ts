@@ -1,11 +1,19 @@
 import type { Context } from '@/src/server/trpc';
-import { actionMapping, normalizeString } from '@/src/utils/tools';
+import { actionMapping, isHttpUrl, normalizeString } from '@/src/utils/tools';
 import { z } from 'zod';
+
+const productUrlSchema = z
+	.string()
+	.trim()
+	.regex(/^[^\x00-\x1f\x7f]*$/)
+	.refine(url => !/^[a-z][a-z0-9+.-]*:/i.test(url) || isHttpUrl(url), {
+		message: 'URL must use http or https'
+	});
 
 export const productEditableFieldsSchema = z.object({
 	title: z.string().min(1),
 	entity_id: z.number(),
-	urls: z.array(z.string()).optional(),
+	urls: z.array(productUrlSchema).optional(),
 	volume: z.number().int().nullable().optional()
 });
 

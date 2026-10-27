@@ -300,7 +300,11 @@ export async function createReview(
 	try {
 		await createOrUpdateAnswers(ctx, { answers, review: newReview });
 	} catch (e) {
-		console.log(e);
+		console.error(
+			'[review] answers not saved:',
+			e instanceof Error ? e.name : 'unknown error',
+			(e as { code?: string })?.code ?? ''
+		);
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);
