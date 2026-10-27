@@ -66,7 +66,7 @@ type FormatDateOptions = {
 	withHour?: boolean;
 	hourOnly?: boolean;
 	hourFormat?: HourFormat;
-	monthFormat?: 'default' | 'literal';
+	monthFormat?: 'default' | 'literal' | 'short';
 };
 
 function formatHourPart(date: Date, format: HourFormat): string {
@@ -107,7 +107,9 @@ export function formatDateToFrenchString(
 
 	const datePart = new Intl.DateTimeFormat('fr-FR', {
 		year: 'numeric',
-		month: monthFormat === 'literal' ? 'long' : 'numeric',
+		month: ({ default: 'numeric', literal: 'long', short: 'short' } as const)[
+			monthFormat
+		],
 		day: 'numeric'
 	}).format(date);
 
@@ -800,6 +802,8 @@ export const getMissingPasswordRequirements = (password: string): string[] => {
 	return missing;
 };
 
+export const isHttpUrl = (url: string): boolean => /^https?:\/\//i.test(url);
+
 export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	const defaultUrl = '/administration/dashboard/products';
 	if (typeof rawCallback !== 'string') {
@@ -812,7 +816,19 @@ export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	if (rawCallback.startsWith('//')) {
 		return defaultUrl;
 	}
-	return rawCallback;
+	if (/[\x00-\x1f\x7f\\]/.test(rawCallback)) {
+		return defaultUrl;
+	}
+	const base = 'http://localhost';
+	try {
+		const url = new URL(rawCallback, base);
+		if (url.origin !== base || url.pathname.startsWith('//')) {
+			return defaultUrl;
+		}
+		return `${url.pathname}${url.search}${url.hash}`;
+	} catch {
+		return defaultUrl;
+	}
 };
 
 export const getButtonCode = ({

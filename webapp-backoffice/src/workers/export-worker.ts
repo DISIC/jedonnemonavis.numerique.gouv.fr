@@ -298,7 +298,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	const safeName = sanitizeFilename(productName);
 	const fileName = `Avis${
 		onlyDeleted ? '_supprimes' : ''
-	}_${safeName}_${currentDate}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`;
+	}_${safeName}_${currentDate}_${exportId}.${
+		exportFormat === 'csv' ? 'csv' : 'xlsx'
+	}`;
 	const contentType =
 		exportFormat === 'csv'
 			? 'text/csv; charset=utf-8'

@@ -51,7 +51,7 @@ const FormEditModal = ({ modal, form, productId }: Props) => {
 		await updateForm.mutateAsync({
 			id: form.id,
 			form: {
-				...data,
+				title: data.title,
 				product_id: productId
 			}
 		});

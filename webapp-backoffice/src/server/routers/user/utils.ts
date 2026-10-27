@@ -138,7 +138,7 @@ export async function makeRelationFromUserInvite(
 	if (userInvites.length > 0) {
 		await prisma.accessRight.updateMany({
 			where: { id: { in: userInvites.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
+			data: { user_email: normalizedEmail, user_email_invite: null }
 		});
 	}
 
@@ -149,9 +149,34 @@ export async function makeRelationFromUserInvite(
 	if (userInvitesEntity.length > 0) {
 		await prisma.adminEntityRight.updateMany({
 			where: { id: { in: userInvitesEntity.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
+			data: { user_email: normalizedEmail, user_email_invite: null }
 		});
 	}
+}
+
+export async function deleteUserRelations(
+	prisma: Prisma.TransactionClient,
+	userIds: number[]
+) {
+	const users = await prisma.user.findMany({
+		where: { id: { in: userIds } },
+		select: { email: true }
+	});
+	const emails = users.map(user => user.email);
+	const normalizedEmails = emails.map(email => email.toLowerCase());
+	const rightsWhere = {
+		OR: [
+			{ user_email: { in: emails } },
+			{ user_email_invite: { in: normalizedEmails } }
+		]
+	};
+
+	await prisma.favorite.deleteMany({ where: { user_id: { in: userIds } } });
+	await prisma.accessRight.deleteMany({ where: rightsWhere });
+	await prisma.adminEntityRight.deleteMany({ where: rightsWhere });
+	await prisma.userInviteToken.deleteMany({
+		where: { user_email: { in: normalizedEmails } }
+	});
 }
 
 /** Contrôle « admin ou soi-même » sur l'input parsé de la procédure. */

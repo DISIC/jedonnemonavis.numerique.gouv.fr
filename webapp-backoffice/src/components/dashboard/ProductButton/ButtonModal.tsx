@@ -8,6 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
@@ -43,6 +44,7 @@ const ButtonModal = (props: Props) => {
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
+	const [instructionsPanelKey, setInstructionsPanelKey] = useState(0);
 
 	const defaultTemplateButton = useMemo(
 		() =>
@@ -54,24 +56,33 @@ const ButtonModal = (props: Props) => {
 	const currentDefaultTemplateButton =
 		currentButton?.form_template_button || defaultTemplateButton;
 
-	useEffect(() => {
-		if (button) {
-			const hasTemplateButtons =
-				button.integration_type !== 'link' &&
-				formTemplateButtons &&
-				formTemplateButtons.length > 0;
+	const resetCurrentButton = () => {
+		if (!button) return;
 
-			setCurrentButton({
-				...button,
-				form_template_button: hasTemplateButtons
-					? defaultTemplateButton || null
-					: null,
-				form_template_button_id: hasTemplateButtons
-					? defaultTemplateButton?.id || null
-					: null
-			});
+		const hasTemplateButtons =
+			button.integration_type !== 'link' &&
+			formTemplateButtons &&
+			formTemplateButtons.length > 0;
+
+		setCurrentButton({
+			...button,
+			form_template_button: hasTemplateButtons
+				? defaultTemplateButton || null
+				: null,
+			form_template_button_id: hasTemplateButtons
+				? defaultTemplateButton?.id || null
+				: null
+		});
+	};
+
+	useEffect(resetCurrentButton, [button]);
+
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			resetCurrentButton();
+			setInstructionsPanelKey(key => key + 1);
 		}
-	}, [button]);
+	});
 
 	const updateButton = trpc.button.update.useMutation({
 		onSuccess: result => {
@@ -133,34 +144,22 @@ const ButtonModal = (props: Props) => {
 			return;
 		}
 
-		currentButton.form_id = props.form_id;
-
-		const {
-			form,
-			closedButtonLog,
-			form_template_button,
-			...buttonWithoutForm
-		} = currentButton;
-		updateButton.mutate(buttonWithoutForm);
+		updateButton.mutate({
+			id: currentButton.id,
+			form_id: props.form_id,
+			title: currentButton.title,
+			form_template_button_id: currentButton.form_template_button_id
+		});
 	};
 
 	const handleButtonDelete = () => {
 		if (currentButton && 'id' in currentButton) {
-			const {
-				form,
-				closedButtonLog,
-				form_template_button,
-				...buttonWithoutForm
-			} = currentButton;
-
 			deleteButton.mutate({
-				product_id: form.product_id,
-				title: buttonWithoutForm.title,
+				product_id: currentButton.form.product_id,
+				title: currentButton.title,
 				buttonPayload: {
-					...buttonWithoutForm,
-					deleted_at: new Date(),
-					delete_reason: currentButton.delete_reason || null,
-					isDeleted: true
+					id: currentButton.id,
+					delete_reason: currentButton.delete_reason || null
 				}
 			});
 		}
@@ -175,6 +174,7 @@ const ButtonModal = (props: Props) => {
 						<hr />
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
+								key={instructionsPanelKey}
 								button={currentButton}
 								buttonStyle={currentButton.button_style}
 								formTemplateButton={currentButton.form_template_button}
@@ -288,10 +288,7 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-							resetErrors('title');
-						}
+						onClick: () => resetErrors('title')
 					},
 					{
 						children: 'Renommer',
@@ -303,10 +300,7 @@ const ButtonModal = (props: Props) => {
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-						}
+						priority: 'secondary'
 					},
 					{
 						children: "Fermer le lien d'intégration",

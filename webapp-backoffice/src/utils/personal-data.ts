@@ -117,7 +117,7 @@ const PATTERNS: PersonalDataPattern[] = [
 		// usager qui contourne une détection naïve cherche justement à être
 		// recontacté, c'est le cas qu'on veut attraper.
 		regex:
-			/[a-z0-9._%+-]+\s*(?:@|\(\s*at\s*\)|\[\s*at\s*\])\s*[a-z0-9._-]+\s*\.\s*[a-z]{2,10}/gi
+			/[a-z0-9._%+-]{1,64}\s*(?:@|\(\s*at\s*\)|\[\s*at\s*\])\s*[a-z0-9._-]+\s*\.\s*[a-z]{2,10}/gi
 	},
 	{
 		category: 'telephone',

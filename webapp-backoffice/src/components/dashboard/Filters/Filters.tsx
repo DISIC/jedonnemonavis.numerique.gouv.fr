@@ -212,7 +212,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 									small
 									options={[
 										{
-											label: 'Réponse avec commentaire',
+											label: 'Réponses avec commentaire uniquement',
 											nativeInputProps: {
 												name: 'needVerbatim',
 												checked: filters.productReviews.filters.needVerbatim,
