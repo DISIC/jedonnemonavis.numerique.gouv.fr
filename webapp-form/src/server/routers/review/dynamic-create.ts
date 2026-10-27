@@ -50,7 +50,8 @@ export const dynamicCreateReviewMutation = async ({
 	} catch (e) {
 		console.error(
 			'[review] answers not saved:',
-			e instanceof Error ? e.name : 'unknown error'
+			e instanceof Error ? e.name : 'unknown error',
+			(e as { code?: string })?.code ?? ''
 		);
 	}
 

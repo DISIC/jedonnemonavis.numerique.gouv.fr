@@ -802,6 +802,8 @@ export const getMissingPasswordRequirements = (password: string): string[] => {
 	return missing;
 };
 
+export const isHttpUrl = (url: string): boolean => /^https?:\/\//i.test(url);
+
 export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	const defaultUrl = '/administration/dashboard/products';
 	if (typeof rawCallback !== 'string') {

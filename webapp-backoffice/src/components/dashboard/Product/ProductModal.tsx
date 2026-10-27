@@ -124,8 +124,7 @@ const ProductModal = (props: Props) => {
 				id: product.id,
 				product: {
 					title: tmpProduct.title,
-					entity_id: tmpProduct.entity_id,
-					urls: filteredUrls
+					entity_id: tmpProduct.entity_id
 				}
 			});
 		} else {
