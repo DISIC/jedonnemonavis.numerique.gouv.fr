@@ -619,6 +619,38 @@ verbatims restent dans Grist, jamais sur l'hébergeur.
 **Reste pour ce volet** : monter encore en volume (co-occurrences que Jules demandait) ; déployer
 le widget (ci-dessus).
 
+## 4 duodecies. Assignation v3 — meilleure facette thématique + polarité multi-valeur — LIVRÉ ✅
+
+Après montée en volume (feuille impôts ~2 000 avis) et **retours terrain positifs** sur la V2, un
+**retour PO** signale que la thématique site reste parfois VIDE alors qu'elle devrait être remplie.
+Un PO a fourni deux grilles d'ergonomie (**Bastien-Scapin** 8 critères + **Nielsen** 10 heuristiques).
+
+**Décision** : NE PAS importer les 18 critères (trop abstraits, redondants entre eux et avec nos axes,
+aggraveraient le sur/sous-tagging). On s'en sert comme source de définitions/exemples + **un ajout ciblé**.
+
+**Diagnostic** (feuille impôts, 1 997 avis, 710 thématiques vides = 35 %) : la majorité des vides sont
+CORRECTS (satisfaction pure, factuel, **hors-outil** = fiscalité/politique). Le vrai trou = les
+jugements de **complexité globale** (« trop compliqué », « usine à gaz », « à simplifier ») laissés
+vides car (a) le prompt était trop strict et (b) **aucune case** ne couvrait la complexité diffuse.
+
+**Changements v3** (3, c'est tout) :
+1. **+1 thématique `complexite_charge`** (« Complexité / charge de travail », = critère « Charge de
+   travail » de Bastien-Scapin) → ajoutée au seed de l'axe B (`src/extract_facets.py`).
+2. **Prompt assoupli** (`src/assign_facets.py::build_system`) : tagger une difficulté dès qu'elle est
+   clairement exprimée MÊME sans écran précis ; VIDE uniquement si le verbatim ne parle pas de l'outil.
+3. **Polarité MULTI-VALEUR** (positif / negatif / les deux / vide ; plus de « neutre ») + sorties
+   **`pourquoi`** (justification) et **`confiance`** (0-1) ; few-shot (dont contre-exemple hors-outil).
+
+**Validation** : test sur 100 vides négatifs → **73/100 récupérés** (72 = complexite_charge), les
+hors-site restant vides. Puis **re-passe des 710 vides** de la feuille (`scripts/apply_facets_to_empties.py`,
+résumable, marqueur `repass_v3`, STAT vide→taguée) → **172 récupérés** (149 complexite_charge),
+538 restés vides à juste titre. **Couverture thématique de la feuille : 64 % → 73 %.**
+
+⚠️ **Confiance mal calibrée** (quasi toujours ~1.0) : présente mais peu discriminante, à revoir.
+Modèle `openweight-medium` recommandé pour la qualité ; RPM ~30 (medium sature la limite tokens/min
+d'Albert sous charge soutenue). Candidats non retenus (à valider si futur diag) : `gestion_erreurs`,
+`controle_annulation`.
+
 ## 5. Prochaines étapes (proposées)
 
 1. ~~**Passe de consolidation des thèmes**~~ ✅ **fait** (§4 bis).

@@ -4,19 +4,29 @@ Prend le référentiel à 3 axes découvert par `extract_facets` (facettes_<tag>
 ENSEMBLE FERMÉ, et fait classer chaque verbatim par Albert sur les 3 axes indépendamment :
 
   * AXE A — objet(s) de la démarche      (0, 1 ou plusieurs ; enum du référentiel)
-  * AXE B — thématique(s) site           (0, 1 ou plusieurs ; enum du référentiel)
-  * AXE C — polarité                      (exactement une : positif / negatif / neutre)
+  * AXE B — thématique(s) site           (0 à 3 ; enum du référentiel)
+  * AXE C — polarité                      (MULTI-VALEUR : positif / negatif / les deux / vide)
 
 C'est ici que tombent les VRAIS volumes et la polarité (contrairement à l'attribution par
-cluster de `extract_facets`, trop grossière) : chaque verbatim est homogène (un objet, un
-sentiment). Prototype → un échantillon (ASSIGN_N, défaut 60), pas tout le corpus.
+cluster de `extract_facets`, trop grossière) : chaque verbatim est homogène. Prototype → un
+échantillon (ASSIGN_N, défaut 60), pas tout le corpus.
+
+Version v3 (2026-10) — amélioration de la facette thématique après retour PO :
+  - polarité MULTI-VALEUR (plus de "neutre" ; un avis mitigé porte positif ET negatif) ;
+  - sorties `pourquoi` (justification citant le texte) + `confiance` (0-1) ;
+  - prompt assoupli : on tague une difficulté dès qu'elle est clairement exprimée même sans
+    écran précis (ex. complexité globale → `complexite_charge`), et on ne laisse VIDE que si le
+    verbatim ne parle pas de l'outil (fiscalité, politique, remerciement, question de droit) ;
+  - few-shot (dont contre-exemple hors-outil) pour ancrer le modèle.
+Recommandé : ALBERT_CHAT_MODEL=openweight-medium (meilleur suivi des consignes) ; ASSIGN_RPM~30.
 
 Entrée  : facettes_<tag>.csv (référentiel) + cache/<demarche>/clean.parquet (verbatims)
 Sortie  : out/<demarche>/assignments_<tag>.csv (row_id, verbatim, dup_count, objets,
-          thematiques, polarite) — consommée par scripts/assign_html.py
+          thematiques, polarite, pourquoi, confiance) — consommée par scripts/assign_html.py
 
 Usage:
-    DEMARCHE=product-3059 RUN_TAG=mcs200 ASSIGN_N=60 uv run python -m src.assign_facets
+    DEMARCHE=product-3059 RUN_TAG=mcs200 ASSIGN_N=60 ASSIGN_RPM=30 \
+        ALBERT_CHAT_MODEL=openweight-medium uv run python -m src.assign_facets
 """
 
 from __future__ import annotations
@@ -33,7 +43,8 @@ from . import config
 
 CHAT_URL = f"{config.ALBERT_BASE_URL}/chat/completions"
 MAX_RETRIES = 6
-POLARITES = ["positif", "negatif", "neutre"]
+# v3 : la polarité est MULTI-VALEUR (positif / negatif / les deux / vide), plus de "neutre".
+POLARITES = ["positif", "negatif"]
 
 
 class QuotaExceeded(Exception):
@@ -91,10 +102,14 @@ def _assign_schema(obj_codes: list[str], th_codes: list[str]) -> dict:
                                "description": "0, 1 ou plusieurs objets métier (vide si aucun objet précis)"},
                     "thematiques": {"type": "array", "items": {"type": "string", "enum": th_codes},
                                     "description": "0, 1 ou plusieurs thématiques site (vide si simple ressenti global)"},
-                    "polarite": {"type": "string", "enum": POLARITES,
-                                 "description": "sentiment global de l'usager (obligatoire)"},
+                    "polarite": {"type": "array", "items": {"type": "string", "enum": POLARITES},
+                                 "description": "0, 1 ou 2 : positif si satisfaction, negatif si insatisfaction ; "
+                                                "LES DEUX si mitigé ; VIDE si aucun sentiment (factuel, question)"},
+                    "pourquoi": {"type": "string",
+                                 "description": "1 phrase citant le texte pour justifier les facettes retenues (ou l'absence)"},
+                    "confiance": {"type": "number", "description": "confiance globale dans l'assignation, entre 0 et 1"},
                 },
-                "required": ["objets", "thematiques", "polarite"],
+                "required": ["objets", "thematiques", "polarite", "pourquoi", "confiance"],
             },
         },
     }
@@ -109,6 +124,40 @@ def _sample(df: pd.DataFrame, n: int) -> pd.DataFrame:
     top = df.nlargest(min(n // 4, 15), "dup_count")
     rest = df.drop(top.index).sample(n=n - len(top), random_state=42)
     return pd.concat([top, rest]).drop_duplicates("row_id").head(n)
+
+
+def build_system(objets: list[dict], themes: list[dict]) -> str:
+    """Prompt système v3 (3 axes, polarité multi, pourquoi+confiance, règle assouplie + few-shot).
+    `objets`/`themes` = listes de dicts {code, label} issues du référentiel. Réutilisé par le
+    script de re-passe des vides (`scripts/apply_facets_to_empties.py`)."""
+    obj_block = "\n".join(f"- {o['code']} : {o['label']}" for o in objets)
+    th_block = "\n".join(f"- {t['code']} : {t['label']}" for t in themes)
+    demarche_label = os.environ.get("ASSIGN_DEMARCHE_LABEL", "").strip()
+    ctx_demarche = f" ({demarche_label})" if demarche_label else ""
+    system = (
+        "Tu classes le verbatim d'un usager sur une démarche administrative en ligne"
+        f"{ctx_demarche} selon TROIS axes INDÉPENDANTS. Fonde-toi UNIQUEMENT sur le "
+        "texte, n'invente rien. Réponds via le format structuré.\n\n"
+        "AXE A — OBJET(S) : le produit / la rubrique EXPLICITEMENT nommé(e). 0, 1 ou plusieurs. "
+        "VIDE si le verbatim ne vise aucun objet précis (ressenti général, jugement global).\n"
+        "AXE B — THÉMATIQUE(S) SITE (0 à 3) : la nature de la difficulté rencontrée sur l'OUTIL "
+        "en ligne. Tague une difficulté dès qu'elle est CLAIREMENT exprimée, MÊME sans viser un "
+        "écran précis (un jugement global de complexité/lourdeur → complexite_charge s'il existe). "
+        "Ne mets pas toutes les thématiques : choisis la/les plus pertinentes. VIDE UNIQUEMENT si "
+        "le verbatim NE PARLE PAS de l'outil : montant/coût de la démarche, fiscalité, politique, "
+        "remerciement pur, ou question de droit/réglementation.\n"
+        "AXE C — POLARITÉ (0 à 2) : positif si satisfaction exprimée, negatif si insatisfaction ; "
+        "LES DEUX si mitigé ; VIDE si aucun sentiment (constat factuel, question).\n\n"
+        "pourquoi : 1 phrase citant le texte. confiance : 0 à 1.\n\n"
+        f"OBJETS disponibles :\n{obj_block}\n\nTHÉMATIQUES SITE disponibles :\n{th_block}\n\n"
+        "EXEMPLES :\n"
+        '- « une usine à gaz, on n\'y comprend rien » -> thematiques:["complexite_charge"], polarite:["negatif"]\n'
+        '- « Je ne savais pas où cliquer pour continuer » -> thematiques:["parcours"], polarite:["negatif"]\n'
+        '- « le site est clair mais le téléphone injoignable » -> polarite:["positif","negatif"]\n'
+        '- « Trop cher, vous êtes des voleurs » -> thematiques:[], polarite:["negatif"]  (HORS-OUTIL)\n'
+        '- « Parfait, merci » -> thematiques:[], polarite:["positif"]'
+    )
+    return system + config.context_block()
 
 
 def main() -> None:
@@ -146,25 +195,7 @@ def main() -> None:
         print("Rien de nouveau à classer (cible déjà atteinte).")
         return
 
-    obj_block = "\n".join(f"- {o['code']} : {o['label']}" for o in objets)
-    th_block = "\n".join(f"- {t['code']} : {t['label']}" for t in themes)
-    demarche_label = os.environ.get("ASSIGN_DEMARCHE_LABEL", "").strip()
-    ctx_demarche = f" ({demarche_label})" if demarche_label else ""
-    system = (
-        "Tu classes le verbatim d'un usager sur une démarche administrative en ligne"
-        f"{ctx_demarche} selon TROIS axes INDÉPENDANTS. Fonde-toi UNIQUEMENT sur le "
-        "texte, n'invente rien. Réponds via le format structuré.\n\n"
-        "AXE A — OBJET(S) : de quoi parle l'usager (rubrique / produit fiscal concerné). 0, 1 "
-        "ou plusieurs. VIDE si le verbatim ne vise aucun objet précis (ressenti général, "
-        "remerciement, jugement global).\n"
-        "AXE B — THÉMATIQUE(S) SITE : nature de la ou des difficultés rencontrées sur l'outil. "
-        "0, 1 ou plusieurs. VIDE si le verbatim n'exprime qu'une satisfaction / insatisfaction "
-        "globale sans difficulté précise.\n"
-        "AXE C — POLARITÉ : sentiment global de l'usager. TOUJOURS exactement une valeur "
-        "(positif, negatif ou neutre).\n\n"
-        f"OBJETS disponibles :\n{obj_block}\n\nTHÉMATIQUES SITE disponibles :\n{th_block}"
-    )
-    system += config.context_block()
+    system = build_system(objets, themes)
     schema = _assign_schema(obj_codes, th_codes)
 
     # Throttle client-side pour rester sous le quota chat d'Albert (~100/min) et NE PAS
@@ -200,9 +231,11 @@ def main() -> None:
                 "intention": getattr(r, "intention", ""),
                 "objets": " ".join(a["objets"]),
                 "thematiques": " ".join(a["thematiques"]),
-                "polarite": a["polarite"],
+                "polarite": " ".join(a["polarite"]),
+                "pourquoi": str(a.get("pourquoi", "")).replace("\n", " "),
+                "confiance": round(float(a.get("confiance", 0.0)), 2),
             })
-            print(f"  [{i}/{len(sample)}] {a['polarite']:8} "
+            print(f"  [{i}/{len(sample)}] pol={'/'.join(a['polarite']) or '∅':15} "
                   f"obj={a['objets']} th={a['thematiques']}  « {verbatim[:60].replace(chr(10),' ')} »",
                   flush=True)
             if i % 25 == 0:  # sauvegarde intermédiaire : crash-safe + reprenable + progrès visible

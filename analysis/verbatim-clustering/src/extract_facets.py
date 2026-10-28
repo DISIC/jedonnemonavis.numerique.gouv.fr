@@ -71,6 +71,12 @@ SEED_THEMATIQUES = [
      "Accessibilité pour les publics fragiles (seniors, handicap), lisibilité, langage."),
     ("bugs_lags", "Bugs et lenteurs",
      "Dysfonctionnements techniques, erreurs, lenteurs/lags, indisponibilités."),
+    # Ajouté v3 (2026-10) après retour PO : captait mal la complexité DIFFUSE. Correspond au
+    # critère « Charge de travail » de Bastien-Scapin.
+    ("complexite_charge", "Complexité / charge de travail",
+     "Complexité GLOBALE / lourdeur / trop d'efforts (« trop compliqué », « usine à gaz », "
+     "« à simplifier ») SANS viser un écran précis. À ne pas confondre avec la clarté d'une "
+     "rubrique donnée (clarte_rubriques)."),
 ]
 
 
