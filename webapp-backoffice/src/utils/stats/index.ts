@@ -120,7 +120,7 @@ export const fetchAndFormatData = async ({
 						terms: {
 							script: {
 								source: `
-								return doc["product_id"].value + "#!#" + (doc["form_id"].length != 0 ? doc["form_id"].value : "1") + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value;
+								return (doc["product_id"].size() != 0 ? doc["product_id"].value : "") + "#!#" + (doc["form_id"].length != 0 ? doc["form_id"].value : "1") + "#!#" + (doc["field_code.keyword"].size() != 0 ? doc["field_code.keyword"].value : "") + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + (doc["field_label.keyword"].size() != 0 ? doc["field_label.keyword"].value : "") + "#!#" + (doc["intention.keyword"].size() != 0 ? doc["intention.keyword"].value : "") + "#!#" + (doc["answer_text.keyword"].size() != 0 ? doc["answer_text.keyword"].value : "") + "#!#" + (doc["answer_item_id"].size() != 0 ? doc["answer_item_id"].value : "");
 								`,
 								lang: 'painless'
 							},
