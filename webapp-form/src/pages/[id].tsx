@@ -650,7 +650,18 @@ export const getServerSideProps: GetServerSideProps<{
 					? { id: buttonFormId }
 					: !isNaN(previewFormId)
 					? { id: previewFormId, form_template: { slug: 'root' } }
-					: { NOT: { isDeleted: true } },
+					: {
+							// isDeleted est nullable : NOT: { isDeleted: true } écarterait aussi
+							// les anciens formulaires restés à NULL.
+							OR: [{ isDeleted: false }, { isDeleted: null }],
+							// Les liens hérités (xwiki) ne précisent pas le formulaire : on
+							// cible explicitement le formulaire d'avis, comme le fait déjà la
+							// branche `button`. Sinon un second formulaire du service (bug,
+							// alertes…) peut passer devant et faire répondre 404.
+							...(isXWikiLink ? { form_template: { slug: 'root' } } : {})
+					  },
+				// Sans tri explicite, l'ordre dépend de Postgres : forms[0] doit être stable.
+				orderBy: { created_at: 'asc' },
 				include: {
 					product: {
 						select: {
