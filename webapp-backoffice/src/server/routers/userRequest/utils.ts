@@ -6,7 +6,11 @@ import { sendMail } from '@/src/utils/mailer';
 import { Prisma, PrismaClient, RequestMode } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
-import { generateValidationToken, makeRelationFromUserInvite } from '../user';
+import {
+	deleteUserRelations,
+	generateValidationToken,
+	makeRelationFromUserInvite
+} from '../user';
 import type { CreateUserRequestUserInput } from './create';
 
 export async function createUserRequest(
@@ -122,8 +126,10 @@ export async function updateUserRequest(
 				data: { user_id: null }
 			});
 
-			await prisma.user.delete({
-				where: { id: updatedUserRequest.user.id }
+			const userId = updatedUserRequest.user.id;
+			await prisma.$transaction(async tx => {
+				await deleteUserRelations(tx, [userId]);
+				await tx.user.delete({ where: { id: userId } });
 			});
 
 			const emailHtml = await renderUserRequestRefusedEmail({

@@ -8,6 +8,7 @@ import {
 	userPassword
 } from '../variables';
 import { login, logout } from './common';
+import { getEmail } from './register';
 
 export function checkAccountHeader(name: string, invitedEmail: string) {
 	cy.get('header').contains('Compte').click({ force: true });
@@ -85,6 +86,10 @@ export function testEmail({
 		cy.contains('p', expectedMEssage).should('exist');
 		cy.contains('button', selectors.action.save).should('exist');
 	} else {
+		// Le changement d'e-mail désactive le compte : il faut passer par le lien
+		// de confirmation envoyé à la nouvelle adresse avant de pouvoir se
+		// reconnecter.
+		getEmail();
 		login(newEmailTest, userPassword);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 	}

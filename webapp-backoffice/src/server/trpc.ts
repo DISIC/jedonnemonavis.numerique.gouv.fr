@@ -126,13 +126,19 @@ const scrubSensitiveValues = (value: any): any => {
 
 // Auth middleware
 const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
-	const user = await ctx.prisma.user.findUnique({
-		where: {
-			email: ctx.session?.user?.email as string
-		}
-	});
+	const sessionEmail = ctx.session?.user?.email;
+	const user = sessionEmail
+		? await ctx.prisma.user.findUnique({ where: { email: sessionEmail } })
+		: null;
 
 	if (meta?.authRequired && (!ctx.session?.user || !user)) {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'You are not authorized to perform this action'
+		});
+	}
+
+	if (user && user.active === false) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: 'You are not authorized to perform this action'
@@ -241,8 +247,9 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						form_id = input.json.form_id;
 					}
 
-					const shouldLogEvent =
-						'shouldLogEvent' in input?.json ? input.json.shouldLogEvent : true;
+					const shouldLogEvent = !(
+						query === 'button.delete' && input?.json?.shouldLogEvent === false
+					);
 
 					if (user && action && shouldLogEvent) {
 						await ctx.prisma.userEvent.create({

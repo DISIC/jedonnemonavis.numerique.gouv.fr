@@ -40,7 +40,11 @@ import {
 	getNotificationsEmailPreviewQuery
 } from './get-notifications-email-preview';
 
-export { generateValidationToken, makeRelationFromUserInvite } from './utils';
+export {
+	deleteUserRelations,
+	generateValidationToken,
+	makeRelationFromUserInvite
+} from './utils';
 
 export const userRouter = router({
 	getList: protectedProcedure

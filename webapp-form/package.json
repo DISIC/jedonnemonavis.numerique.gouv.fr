@@ -67,11 +67,11 @@
 		"zod-prisma-types": "3.1.8"
 	},
 	"resolutions": {
-		"dompurify": "3.4.13",
+		"dompurify": "3.4.17",
 		"i18next-fs-backend": "2.6.6",
 		"@opentelemetry/core": "2.8.0",
-		"**/@elastic/transport/undici": "6.28.0",
-		"**/jsdom/undici": "7.29.0",
+		"**/@elastic/transport/undici": "6.28.1",
+		"**/jsdom/undici": "7.29.1",
 		"tar-fs": "3.1.2",
 		"ws": "8.21.0",
 		"cookie": "1.1.1",

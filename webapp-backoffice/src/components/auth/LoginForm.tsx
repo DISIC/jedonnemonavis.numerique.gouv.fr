@@ -110,7 +110,7 @@ export const LoginForm = () => {
 		if (errors.emailNotFound)
 			return 'Aucun compte connu avec cette adresse e-mail.';
 		if (errors.userInactive)
-			return "Votre compte n'est pas validé, veuillez cliquer sur le lien reçu par email lors de l'inscription.";
+			return "Votre compte n'est pas validé, veuillez cliquer sur le lien de confirmation reçu par email.";
 		return '';
 	};
 

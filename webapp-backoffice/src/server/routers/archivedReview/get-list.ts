@@ -4,8 +4,8 @@ import { z } from 'zod';
 export const getArchivedReviewListInputSchema = z.object({
 	product_id: z.number(),
 	form_id: z.number(),
-	numberPerPage: z.number().default(20),
-	page: z.number().default(1)
+	numberPerPage: z.number().int().min(0).max(100).default(20),
+	page: z.number().int().min(1).default(1)
 });
 
 export const getArchivedReviewListQuery = async ({
