@@ -43,7 +43,7 @@ export const getByChildFieldCodeQuery = async ({
 			term: {
 				terms: {
 					script:
-						'doc["answer_item_id"].value + "#" + doc["answer_text.keyword"].value',
+						'(doc["answer_item_id"].size() != 0 ? doc["answer_item_id"].value : "") + "#" + (doc["answer_text.keyword"].size() != 0 ? doc["answer_text.keyword"].value : "")',
 					size: 1000
 				}
 			}
@@ -75,7 +75,7 @@ export const getByChildFieldCodeQuery = async ({
 			term: {
 				terms: {
 					script:
-						"doc['parent_answer_item_id'].value + '#' + doc['answer_text.keyword'].value + '#' + doc['intention.keyword'].value + '#' + doc['field_label.keyword'].value",
+						"(doc['parent_answer_item_id'].size() != 0 ? doc['parent_answer_item_id'].value : '') + '#' + (doc['answer_text.keyword'].size() != 0 ? doc['answer_text.keyword'].value : '') + '#' + (doc['intention.keyword'].size() != 0 ? doc['intention.keyword'].value : '') + '#' + (doc['field_label.keyword'].size() != 0 ? doc['field_label.keyword'].value : '')",
 					size: 1000
 				}
 			}

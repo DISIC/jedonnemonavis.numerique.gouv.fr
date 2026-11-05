@@ -24,22 +24,37 @@ export const validateUserQuery = async ({
 			code: 'NOT_FOUND',
 			message: 'Invalid token'
 		});
-	} else {
-		const updatedUser = await updateUser(
-			ctx.prisma,
-			userValidationToken.user.id,
-			{
-				...userValidationToken.user,
-				active: true
-			}
-		);
-
-		await ctx.prisma.userValidationToken.delete({
-			where: {
-				id: userValidationToken.id
-			}
-		});
-
-		return { data: updatedUser };
 	}
+
+	const blockingRequest = await ctx.prisma.userRequest.findFirst({
+		where: {
+			user_id: userValidationToken.user.id,
+			status: { in: ['pending', 'refused'] }
+		},
+		select: { id: true }
+	});
+
+	if (blockingRequest) {
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Invalid token'
+		});
+	}
+
+	const updatedUser = await updateUser(
+		ctx.prisma,
+		userValidationToken.user.id,
+		{
+			...userValidationToken.user,
+			active: true
+		}
+	);
+
+	await ctx.prisma.userValidationToken.delete({
+		where: {
+			id: userValidationToken.id
+		}
+	});
+
+	return { data: updatedUser };
 };

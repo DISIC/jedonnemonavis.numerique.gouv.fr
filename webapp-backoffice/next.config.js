@@ -18,7 +18,10 @@ const nextConfig = {
 	],
 	assetPrefix: '/v2',
 	rewrites() {
-		return [{ source: '/v2/_next/:path*', destination: '/_next/:path*' }];
+		// Seuls les fichiers statiques passent par assetPrefix : /v2/_next/data est mis en cache par le proxy.
+		return [
+			{ source: '/v2/_next/static/:path*', destination: '/_next/static/:path*' }
+		];
 	},
 	async headers() {
 		return [
