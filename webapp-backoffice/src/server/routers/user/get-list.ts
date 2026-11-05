@@ -37,22 +37,7 @@ export const getUserListQuery = async ({
 		}
 	];
 
-	let where: Prisma.UserWhereInput = {
-		OR: [
-			{
-				UserRequests: {
-					some: {
-						status: 'accepted'
-					}
-				}
-			},
-			{
-				UserRequests: {
-					none: {}
-				}
-			}
-		]
-	};
+	let where: Prisma.UserWhereInput = {};
 
 	if (search) {
 		if (search.includes(' ')) {

@@ -13,23 +13,15 @@ export const selectors = {
 	footer: 'footer',
 	footerLinks: '.fr-footer__bottom-list',
 	footerLogo: '.fr-logo',
-	loginForm: {
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		continueButton: '[class*="LoginForm-button"]'
-	},
+	proconnectButton: 'button.fr-connect',
 	signupForm: {
 		firstName: 'input[name="firstName"]',
 		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		submitButton: 'button[type="submit"]'
+		email: 'input[name="email"]'
 	},
 	accountForm: {
 		firstName: 'input[name="firstName"]',
 		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		emailConfirmation: 'input[name="emailConfirmation"]',
 		confirm: 'input[name="word"]'
 	},
 	input: {
@@ -72,9 +64,6 @@ export const selectors = {
 		menu: 'nav.fr-sidemenu',
 		menuItem: 'li.fr-sidemenu__item'
 	},
-	errorMessages: '.fr-messages-group',
-	passwordInput: 'input.fr-password__input',
-	passwordToggle: 'label[for*="toggle-show"]',
 	modalHeader: '.fr-modal__header',
 	card: {
 		identity: 'Identité',

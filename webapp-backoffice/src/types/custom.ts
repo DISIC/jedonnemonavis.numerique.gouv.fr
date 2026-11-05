@@ -1,7 +1,5 @@
-import { PasswordInputProps } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { AnswerIntention, Prisma } from '@prisma/client';
-import { ReactNode } from 'react';
 import { z } from 'zod';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
@@ -210,11 +208,6 @@ export interface CustomModalProps {
 	isOpenedByDefault: boolean;
 	id: string;
 }
-
-export type PasswordMessages = {
-	severity: PasswordInputProps.Severity;
-	message: ReactNode;
-}[];
 
 type MtmType = {
 	event: string;

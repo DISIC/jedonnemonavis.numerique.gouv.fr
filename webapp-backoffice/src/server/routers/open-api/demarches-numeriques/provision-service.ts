@@ -8,7 +8,6 @@ import { z } from 'zod';
 import type { Context } from '@/src/server/trpc';
 import { ButtonWithElements } from '@/src/types/prismaTypesExtended';
 import {
-	generateRandomString,
 	getButtonCode,
 	getButtonUrl,
 	normalizeString
@@ -33,8 +32,8 @@ const DN_INVITER_NAME = 'Démarches Numériques';
  * Voir docs/demarches-numeriques-provisioning.md.
  *
  * NB : l'envoi des mails d'invitation (mail spécifique créateur + mail classique pour les
- * autres admins) est ajouté au lot L2. Ici on crée les droits + les jetons d'invitation et
- * on renvoie les liens d'inscription ; aucun mail n'est encore envoyé.
+ * autres admins) est ajouté au lot L2. Ici on crée les droits et on renvoie les liens de
+ * connexion ; aucun mail n'est encore envoyé.
  */
 
 const BUTTON_INCLUDE = {
@@ -64,13 +63,6 @@ function buildIntegration(
 	return { integration_url, integration_code };
 }
 
-function buildRegisterUrl(email: string, token: string): string {
-	return `${process.env.NODEMAILER_BASEURL}/register?${new URLSearchParams({
-		email,
-		inviteToken: token
-	})}`;
-}
-
 export const provisionServiceInputSchema = z.object({
 	external_id: z.string().min(1),
 	demarche_name: z.string().min(1),
@@ -92,7 +84,7 @@ export const provisionServiceOutputSchema = z.object({
 			email: z.string(),
 			role: z.string(),
 			account_existed: z.boolean(),
-			register_url: z.string().nullable()
+			login_url: z.string().nullable()
 		})
 	),
 	already_existed: z.boolean()
@@ -197,8 +189,7 @@ export const provisionServiceMutation = async ({
 		email: string;
 		isCreator: boolean;
 		account_existed: boolean;
-		token: string | null;
-		register_url: string | null;
+		login_url: string | null;
 	}[] = [];
 
 	const result = await ctx.prisma.$transaction(async tx => {
@@ -241,7 +232,7 @@ export const provisionServiceMutation = async ({
 			include: BUTTON_INCLUDE
 		});
 
-		// Droits admin (créateur + autres) + jetons d'invitation pour les comptes absents.
+		// Droits admin (créateur + autres) ; les comptes absents sont rattachés au login ProConnect.
 		for (const email of emails) {
 			const user = await tx.user.findUnique({ where: { email } });
 
@@ -254,20 +245,11 @@ export const provisionServiceMutation = async ({
 				}
 			});
 
-			let token: string | null = null;
-			let register_url: string | null = null;
-			if (!user) {
-				token = generateRandomString(32);
-				await tx.userInviteToken.create({ data: { user_email: email, token } });
-				register_url = buildRegisterUrl(email, token);
-			}
-
 			recipients.push({
 				email,
 				isCreator: email === creatorEmail,
 				account_existed: !!user,
-				token,
-				register_url
+				login_url: user ? null : `${process.env.NODEMAILER_BASEURL}/login`
 			});
 		}
 
@@ -295,7 +277,7 @@ export const provisionServiceMutation = async ({
 
 	// Envoi des mails (hors transaction). Créateur = mail spécifique DN×JDMA ; autres
 	// invités = mail classique. Non bloquant : un échec d'envoi ne remet pas en cause le
-	// service déjà créé (DN peut relancer, les jetons restent valides).
+	// service déjà créé (DN peut relancer).
 	const baseUrl = process.env.NODEMAILER_BASEURL;
 	for (const r of recipients) {
 		try {
@@ -314,8 +296,6 @@ export const provisionServiceMutation = async ({
 				);
 			} else if (r.isCreator) {
 				const html = await renderDnCreatorInviteEmail({
-					recipientEmail: r.email,
-					inviteToken: r.token as string,
 					demarcheName: input.demarche_name,
 					baseUrl
 				});
@@ -323,13 +303,11 @@ export const provisionServiceMutation = async ({
 					'Votre formulaire « Je donne mon avis » est prêt',
 					r.email,
 					html,
-					`Créez votre compte pour suivre les résultats : ${r.register_url}`
+					`Connectez-vous avec ProConnect pour suivre les résultats : ${r.login_url}`
 				);
 			} else {
 				const html = await renderUserInviteEmail({
 					inviterName: DN_INVITER_NAME,
-					recipientEmail: r.email,
-					inviteToken: r.token as string,
 					productTitle: input.demarche_name,
 					baseUrl
 				});
@@ -337,7 +315,7 @@ export const provisionServiceMutation = async ({
 					'Invitation à rejoindre « Je donne mon avis »',
 					r.email,
 					html,
-					`Créez votre compte : ${r.register_url}`
+					`Connectez-vous avec ProConnect pour y accéder : ${r.login_url}`
 				);
 			}
 		} catch (err) {
@@ -360,7 +338,7 @@ export const provisionServiceMutation = async ({
 			email: r.email,
 			role: 'carrier_admin',
 			account_existed: r.account_existed,
-			register_url: r.register_url
+			login_url: r.login_url
 		})),
 		already_existed: false
 	};

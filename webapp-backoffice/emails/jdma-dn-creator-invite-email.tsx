@@ -9,15 +9,10 @@ import { JdmaDnCreatorInviteEmailProps } from './interface';
  * reçoivent le mail d'invitation classique (JdmaUserInviteEmail).
  */
 export const JdmaDnCreatorInviteEmail = ({
-	recipientEmail = 'user@example.com',
-	inviteToken = 'example-token-123',
 	demarcheName = 'Votre démarche',
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaDnCreatorInviteEmailProps) => {
-	const link = `${baseUrl}/register?${new URLSearchParams({
-		email: recipientEmail,
-		inviteToken
-	})}`;
+	const link = `${baseUrl}/login`;
 
 	return (
 		<JdmaLayout baseUrl={baseUrl}>
@@ -32,8 +27,8 @@ export const JdmaDnCreatorInviteEmail = ({
 				usagers à la fin de votre démarche.
 			</Text>
 			<Text style={paragraph}>
-				Pour suivre les résultats et gérer ce formulaire, créez votre compte en
-				cliquant sur le lien ci-dessous.
+				Pour suivre les résultats et gérer ce formulaire, connectez-vous avec
+				ProConnect en cliquant sur le lien ci-dessous.
 			</Text>
 			<Link href={link} target="_blank" style={buttonLink}>
 				{link}

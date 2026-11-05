@@ -98,16 +98,6 @@ const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 
 export type UserWithEntities = Prisma.UserGetPayload<typeof UserWithEntities>;
 
-const UserRequestWithUser = Prisma.validator<Prisma.UserRequestDefaultArgs>()({
-	include: {
-		user: publicUserSelect
-	}
-});
-
-export type UserRequestWithUser = Prisma.UserRequestGetPayload<
-	typeof UserRequestWithUser
->;
-
 const UserWithAccessRight = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
 		accessRights: true
