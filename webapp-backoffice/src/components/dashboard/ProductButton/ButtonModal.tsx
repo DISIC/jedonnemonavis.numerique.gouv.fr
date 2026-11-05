@@ -8,7 +8,6 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
@@ -19,6 +18,7 @@ import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	modal: CustomModalProps;
+	openCount: number;
 	modalType?: ButtonModalType;
 	button?: ButtonWithElements;
 	onButtonMutation: (isTest: boolean, button: ButtonWithElements) => void;
@@ -39,12 +39,17 @@ const defaultErrors = {
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, modalType, button, onButtonMutation, formTemplateButtons } =
-		props;
+	const {
+		modal,
+		openCount,
+		modalType,
+		button,
+		onButtonMutation,
+		formTemplateButtons
+	} = props;
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
-	const [instructionsPanelKey, setInstructionsPanelKey] = useState(0);
 
 	const defaultTemplateButton = useMemo(
 		() =>
@@ -75,14 +80,7 @@ const ButtonModal = (props: Props) => {
 		});
 	};
 
-	useEffect(resetCurrentButton, [button]);
-
-	useIsModalOpen(modal, {
-		onConceal: () => {
-			resetCurrentButton();
-			setInstructionsPanelKey(key => key + 1);
-		}
-	});
+	useEffect(resetCurrentButton, [button, openCount]);
 
 	const updateButton = trpc.button.update.useMutation({
 		onSuccess: result => {
@@ -174,7 +172,7 @@ const ButtonModal = (props: Props) => {
 						<hr />
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
-								key={instructionsPanelKey}
+								key={openCount}
 								button={currentButton}
 								buttonStyle={currentButton.button_style}
 								formTemplateButton={currentButton.form_template_button}
