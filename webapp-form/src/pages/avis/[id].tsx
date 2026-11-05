@@ -7,12 +7,14 @@ import { FormWithElements } from '@/src/utils/types';
 import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 import FormClosed from '../form-closed';
+import { PersonalDataAlert } from '@/src/components/form/elements/PersonalDataAlert';
 import {
 	DynamicAnswerData,
 	FormAnswers,
@@ -20,7 +22,10 @@ import {
 	hasBlockAnswer,
 	hasAllRequiredBlockAnswers,
 	getInvalidEmailBlocks,
-	getPersonalDataBlocks
+	getPersonalDataBlocks,
+	getContactStep,
+	isStepHidden,
+	omitStepAnswers
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -46,6 +51,7 @@ export default function AvisPage({
 
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
+	const [acceptsContact, setAcceptsContact] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
 	const [showValidationErrors, setShowValidationErrors] = useState(false);
@@ -92,15 +98,25 @@ export default function AvisPage({
 	}, [isWidget, widgetNonce, currentStepIndex, isSubmitted]);
 
 	const formConfig = form.form_configs[0];
-	const allSteps = form.form_template.form_template_steps;
-	const steps = allSteps.filter(step => {
-		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-		);
-		return !isHidden;
-	});
+	const visibleSteps = form.form_template.form_template_steps.filter(
+		step => !isStepHidden(step, formConfig)
+	);
+	const contactStep = getContactStep(visibleSteps, formConfig);
+	const steps = acceptsContact
+		? visibleSteps
+		: visibleSteps.filter(step => step !== contactStep);
 
 	const currentStep = steps[currentStepIndex];
+	const isContactConsentStep =
+		!!contactStep &&
+		visibleSteps[visibleSteps.indexOf(contactStep) - 1] === currentStep;
+
+	const handleContactConsentChange = (checked: boolean) => {
+		setAcceptsContact(checked);
+		if (!checked && contactStep) {
+			setAnswers(prev => omitStepAnswers(prev, contactStep));
+		}
+	};
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
 		onSuccess: () => {
@@ -344,10 +360,13 @@ export default function AvisPage({
 
 	// Variante bloquante : tant qu'une donnée personnelle est présente dans un
 	// champ libre de l'étape, on ne laisse ni continuer ni envoyer. L'alerte qui
-	// nomme la donnée est rendue sous le champ concerné, par `PersonalDataAlert`.
-	const hasPersonalDataInStep =
-		getPersonalDataBlocks(currentStep.form_template_blocks, answers, formConfig)
-			.length > 0;
+	// nomme la donnée est rendue par `PersonalDataAlert`.
+	const personalDataBlocks = getPersonalDataBlocks(
+		currentStep.form_template_blocks,
+		answers,
+		formConfig
+	);
+	const hasPersonalDataInStep = personalDataBlocks.length > 0;
 
 	return (
 		<div ref={contentRef}>
@@ -372,7 +391,37 @@ export default function AvisPage({
 									totalSteps={steps.length}
 									isWidget={isWidget}
 									showValidationErrors={showValidationErrors}
+									hidePersonalDataAlert={isContactConsentStep}
 								/>
+
+								{isContactConsentStep && (
+									<div className={fr.cx('fr-mt-2v', 'fr-mb-10v')}>
+										<Checkbox
+											small={isWidget}
+											className={cx(classes.contactConsent, fr.cx('fr-mb-0'))}
+											options={[
+												{
+													label:
+														"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+													nativeInputProps: {
+														checked: acceptsContact,
+														onChange: e =>
+															handleContactConsentChange(e.target.checked)
+													}
+												}
+											]}
+										/>
+										{personalDataBlocks.map(block => (
+											<PersonalDataAlert
+												key={block.id}
+												value={
+													(answers[`block_${block.id}`] as DynamicAnswerData)
+														.answer_text ?? ''
+												}
+											/>
+										))}
+									</div>
+								)}
 
 								{isRateLimitReached && (
 									<div role="alert">
@@ -598,6 +647,12 @@ const useStyles = tss
 				height: `${blueSectionPxHeight}px`
 			}
 		},
+		contactConsent: {
+			'& .fr-label': {
+				fontSize: '1rem',
+				lineHeight: '1.5rem'
+			}
+		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			...fr.spacing('padding', {
@@ -614,7 +669,7 @@ const useStyles = tss
 			display: 'flex',
 			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
-			marginTop: fr.spacing(isWidget ? '4v' : '8v')
+			marginTop: fr.spacing(isWidget ? '10v' : '8v')
 		},
 		thanksSection: {
 			textAlign: 'center',

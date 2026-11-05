@@ -95,16 +95,25 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							field_code: 'verbatim',
 							position: 0,
 							isRequired: true
-						},
+						}
+					]
+				}
+			},
+			{
+				title: 'Email',
+				description:
+					'Cette étape permet à l’usager de laisser son adresse email s’il accepte d’être recontacté.',
+				position: 2,
+				isHideable: false,
+				form_template_blocks: {
+					create: [
 						{
-							label: 'Adresse mail',
-							content:
-								'Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message.',
+							label: 'Adresse email',
 							type_bloc: 'input_email',
 							field_code: 'contact_email',
-							position: 1,
+							position: 0,
 							isHideable: true,
-							isRequired: false
+							isRequired: true
 						}
 					]
 				}

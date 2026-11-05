@@ -198,7 +198,7 @@ export const Field = (props: Props) => {
 					*/}
 					<Notice
 						className={cx(classes.notice)}
-						title="Pour votre sécurité, ne partagez pas de données personnelles. Ce formulaire ne permet pas à l’administration de vous répondre."
+						title="Pour votre sécurité, ne partagez pas d’informations sensibles telles qu'un nom, adresse ou numéro de dossier."
 					/>
 					<PersonalDataAlert value={opinion[field.name] || ''} />
 				</div>
