@@ -7,6 +7,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
+import { isHttpUrl } from '@/src/utils/tools';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -210,11 +211,15 @@ const ProductInformationPage = (props: Props) => {
 				<div>
 					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>URLs</h3>
 					<div className={classes.urlsWrapper}>
-						{product.urls.map(url => (
-							<Tag key={url} linkProps={{ href: url }}>
-								{url}
-							</Tag>
-						))}
+						{product.urls.map(url =>
+							isHttpUrl(url) ? (
+								<Tag key={url} linkProps={{ href: url }}>
+									{url}
+								</Tag>
+							) : (
+								<Tag key={url}>{url}</Tag>
+							)
+						)}
 					</div>
 				</div>
 				{ownRight === 'carrier_admin' && !hasLockedForm && (

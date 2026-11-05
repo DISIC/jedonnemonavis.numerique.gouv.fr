@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backoffice",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["--cwd", "webapp-backoffice", "dev"],
+      "port": 3000
+    }
+  ]
+}

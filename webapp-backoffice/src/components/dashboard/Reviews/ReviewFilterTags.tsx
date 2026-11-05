@@ -35,7 +35,7 @@ const ReviewFilterTags = (props: Props) => {
 			if (filterValue === true) {
 				const label =
 					key === 'needVerbatim'
-						? 'Réponse avec commentaire'
+						? 'Réponses avec commentaire uniquement'
 						: key === 'needOtherDifficulties'
 						? 'Autres difficultés'
 						: 'Autre aide';

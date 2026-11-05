@@ -24,6 +24,7 @@ export const parseBucketKey = (bucket: any): BucketData => {
 		answerText,
 		answerItemId,
 		docCount: bucket.doc_count,
-		docDate: bucket.date
+		docDate: bucket.date,
+		bucketDate: bucket.bucket_date
 	};
 };

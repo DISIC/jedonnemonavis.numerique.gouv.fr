@@ -10,10 +10,15 @@ const AccountPage = () => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
+	const userId = parseInt(id as string);
+
+	if (isNaN(userId)) {
+		return { notFound: true };
+	}
 
 	const focusedUser = await prisma.user.findUnique({
 		where: {
-			id: parseInt(id as string)
+			id: userId
 		},
 		include: {
 			accessRights: {
@@ -82,13 +87,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	await prisma.$disconnect();
 
+	if (!focusedUser) {
+		return { notFound: true };
+	}
+
 	return {
 		props: {
-			isOwn: focusedUser?.id === currentUser.id,
-			userId: focusedUser?.id,
-			user: JSON.parse(
-				JSON.stringify(focusedUser ? omitPassword(focusedUser) : null)
-			)
+			isOwn: focusedUser.id === currentUser.id,
+			userId: focusedUser.id,
+			user: JSON.parse(JSON.stringify(omitPassword(focusedUser)))
 		}
 	};
 };

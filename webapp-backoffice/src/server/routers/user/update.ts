@@ -50,6 +50,14 @@ export const updateUserMutation = async ({
 	}
 
 	if (dataToUpdate.email) {
+		// La connexion se fait uniquement via ProConnect : il n'y a plus de mail de
+		// confirmation, seul un administrateur peut donc changer une adresse.
+		if (!isAdmin)
+			throw new TRPCError({
+				code: 'FORBIDDEN',
+				message: 'Email can only be changed by an administrator'
+			});
+
 		const userHasConflict = await ctx.prisma.user.findUnique({
 			where: {
 				email: dataToUpdate.email

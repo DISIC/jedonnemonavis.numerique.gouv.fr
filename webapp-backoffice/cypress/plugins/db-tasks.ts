@@ -48,6 +48,15 @@ type ApiKeyRightsCtx = {
 	user_ids: number[];
 };
 
+type LegacyXwikiCtx = {
+	entity_id: number;
+	product_id: number;
+	xwiki_id: number;
+	root_form_id: number;
+	bug_form_id: number;
+	button_id: number;
+};
+
 type Ctx = {
 	entity_id: number;
 	product_ids: number[];
@@ -371,6 +380,75 @@ export const dbTasks = {
 		await prisma.product.deleteMany({ where: { id: ctx.product_id } });
 		await prisma.entity.deleteMany({ where: { id: ctx.entity_id } });
 		await prisma.user.deleteMany({ where: { id: { in: ctx.user_ids } } });
+		return null;
+	},
+	// Reproduit un service « historique » : un lien xwiki (sans `button=`) sur un
+	// produit qui porte deux formulaires, le formulaire « bug » étant créé avant
+	// le formulaire d'avis.
+	'db:setupLegacyXwikiCtx': async (): Promise<LegacyXwikiCtx> => {
+		const suffix = crypto.randomBytes(4).toString('hex');
+		const rootTpl = await prisma.formTemplate.findUniqueOrThrow({
+			where: { slug: 'root' }
+		});
+		const bugTpl = await prisma.formTemplate.findUniqueOrThrow({
+			where: { slug: 'bug' }
+		});
+		const entity = await prisma.entity.create({
+			data: { name: `EX-${suffix}`, acronym: `EX${suffix}` }
+		});
+		const { _max } = await prisma.product.aggregate({
+			_max: { xwiki_id: true }
+		});
+		const xwikiId = (_max.xwiki_id ?? 900000) + 1;
+		const product = await prisma.product.create({
+			data: {
+				title: `PX-${suffix}`,
+				entity_id: entity.id,
+				xwiki_id: xwikiId
+			}
+		});
+		// Créé en premier : c'est lui que la requête renvoyait en forms[0] tant
+		// qu'elle ne filtrait pas sur le template.
+		const bugForm = await prisma.form.create({
+			data: {
+				title: `Remontées - ${suffix}`,
+				form_template_id: bugTpl.id,
+				product_id: product.id
+			}
+		});
+		const rootForm = await prisma.form.create({
+			data: {
+				title: `Avis - ${suffix}`,
+				form_template_id: rootTpl.id,
+				product_id: product.id,
+				isPublic: true
+			}
+		});
+		const button = await prisma.button.create({
+			data: {
+				title: `BX-${suffix}`,
+				form_id: rootForm.id,
+				xwiki_title: 'button',
+				isTest: false
+			}
+		});
+
+		return {
+			entity_id: entity.id,
+			product_id: product.id,
+			xwiki_id: xwikiId,
+			root_form_id: rootForm.id,
+			bug_form_id: bugForm.id,
+			button_id: button.id
+		};
+	},
+	'db:cleanupLegacyXwikiCtx': async (ctx: LegacyXwikiCtx): Promise<null> => {
+		await prisma.button.deleteMany({ where: { id: ctx.button_id } });
+		await prisma.form.deleteMany({
+			where: { id: { in: [ctx.root_form_id, ctx.bug_form_id] } }
+		});
+		await prisma.product.deleteMany({ where: { id: ctx.product_id } });
+		await prisma.entity.deleteMany({ where: { id: ctx.entity_id } });
 		return null;
 	}
 };
