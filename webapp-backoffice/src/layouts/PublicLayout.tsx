@@ -558,6 +558,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
+					className={cx(classes.footer)}
 					accessibility="non compliant"
 					accessibilityLinkProps={{
 						href: '/public/accessibility'
@@ -600,6 +601,10 @@ const useStyles = tss
 	.create(({ countUserRequests }) => ({
 		logo: {
 			maxHeight: fr.spacing('11v')
+		},
+		// Keep the floating "Signaler un problème" button from covering footer text
+		footer: {
+			paddingBottom: fr.spacing('10v')
 		},
 		firstItem: {
 			display: 'flex',
