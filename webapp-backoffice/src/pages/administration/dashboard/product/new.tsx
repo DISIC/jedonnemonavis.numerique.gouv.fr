@@ -8,6 +8,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Autocomplete } from '@mui/material';
 import { useAutocompleteCreateButton } from '@/src/components/ui/AutocompleteCreatePaper';
+import { Loader } from '@/src/components/ui/Loader';
 import { Entity, Product } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -69,7 +70,7 @@ const NewProduct = () => {
 
 	const {
 		data: entitiesResult,
-		isLoading: isLoadingEntities,
+		isFetching: isLoadingEntities,
 		refetch: refetchEntities
 	} = trpc.entity.getList.useQuery(
 		{
@@ -202,7 +203,12 @@ const NewProduct = () => {
 									sx={{ width: '100%' }}
 									options={entityOptions}
 									loading={isLoadingEntities}
-									loadingText="Chargement des organisations..."
+									loadingText={
+										<span className={cx(classes.loadingOption)}>
+											<Loader size="sm" />
+											Chargement des organisations…
+										</span>
+									}
 									{...createEntityProps}
 									filterOptions={createFilterOptionsWithArgument(false)}
 									onChange={(_, optionSelected) => {
@@ -329,6 +335,11 @@ const useStyles = tss.withName({ NewProduct }).create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	loadingOption: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('2v')
 	},
 	autocomplete: {
 		width: '100%'
