@@ -3,10 +3,10 @@ import {
 	getKeysFromArrayOfObjects
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
+import { SegmentedControl } from '@codegouvfr/react-dsfr/SegmentedControl';
 import { Tooltip } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface AnyKey {
@@ -30,7 +30,7 @@ type Props = {
 	tooltip?: string;
 	isFormDashboardType?: boolean;
 	smallTitle?: boolean;
-	verticalTableFirstColumnHeader?: string;
+	tableHeaderLabel?: string;
 };
 
 const orderData = (
@@ -103,10 +103,12 @@ const ChartWrapper = ({
 	tooltip,
 	isFormDashboardType = false,
 	smallTitle,
-	verticalTableFirstColumnHeader
+	tableHeaderLabel = 'Critères évalués'
 }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
+	// Unique radio group name: several charts can be on the same page
+	const viewControlName = `chart-view-${useId().replace(/:/g, '')}`;
 	const { classes, cx } = useStyles({ view });
 
 	if (!data || !data.length) return <>{children}</>;
@@ -231,38 +233,13 @@ const ChartWrapper = ({
 		));
 	};
 
-	const displayVerticalTable = () => (
-		<div className={cx(classes.tableContainer)}>
-			<table className={cx(fr.cx('fr-table'), classes.table)}>
-				<thead>
-					<tr>
-						<th scope="col">{verticalTableFirstColumnHeader}</th>
-						<th scope="col">{singleRowLabel || 'Nombre de réponses'}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{headers.map((h, index) => (
-						<tr key={`${h}_${index}_${title}`}>
-							<td>{h}</td>
-							<td>{cells[index]?.value}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
-	);
-
 	const displayTable = () => {
-		if (singleRow && verticalTableFirstColumnHeader) {
-			return displayVerticalTable();
-		}
-
 		return (
 			<div className={cx(classes.tableContainer)}>
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
 					<thead>
 						<tr>
-							<th scope="row">Critères évalués</th>
+							<th scope="row">{tableHeaderLabel}</th>
 							{headers.map((h, index) => (
 								<th scope="col" key={`${h}_${index}_${title}`}>
 									{h}
@@ -331,46 +308,39 @@ const ChartWrapper = ({
 						</p>
 					)}
 				</div>
-				<div className={classes.flexAlignCenter} role="tablist">
-					<Button
-						priority="secondary"
-						nativeButtonProps={{ role: 'tab' }}
-						className={cx(
-							classes.button,
-							view === 'chart' && classes.activeButton,
-							view !== 'chart' && classes.inactiveChartBtn
-						)}
-						onClick={() => {
-							setView('chart');
-							push(['trackEvent', 'Product - Stats', 'View-Chart']);
-						}}
-					>
-						<span
-							className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
-							aria-hidden="true"
-						></span>
-						Graphique
-					</Button>
-					<Button
-						priority="secondary"
-						nativeButtonProps={{ role: 'tab' }}
-						className={cx(
-							classes.button,
-							view === 'table' && classes.activeButton,
-							view !== 'table' && classes.inactiveTableBtn
-						)}
-						onClick={() => {
-							setView('table');
-							push(['trackEvent', 'Product - Stats', 'View-Table']);
-						}}
-					>
-						<span
-							className="ri-grid-line fr-mr-1v fr-icon--sm"
-							aria-hidden="true"
-						></span>
-						Tableau
-					</Button>
-				</div>
+				<SegmentedControl
+					small
+					hideLegend
+					legend="Mode d'affichage"
+					classes={{ 'element-each__label': classes.segmentedLabel }}
+					name={viewControlName}
+					segments={[
+						{
+							label: 'Graphique',
+							iconId: 'ri-bar-chart-2-line',
+							nativeInputProps: {
+								value: 'chart',
+								checked: view === 'chart',
+								onChange: () => {
+									setView('chart');
+									push(['trackEvent', 'Product - Stats', 'View-Chart']);
+								}
+							}
+						},
+						{
+							label: 'Tableau',
+							iconId: 'ri-grid-line',
+							nativeInputProps: {
+								value: 'table',
+								checked: view === 'table',
+								onChange: () => {
+									setView('table');
+									push(['trackEvent', 'Product - Stats', 'View-Table']);
+								}
+							}
+						}
+					]}
+				/>
 			</div>
 			<div
 				className={cx(
@@ -479,39 +449,11 @@ const useStyles = tss.withName({ ChartWrapper }).create(() => ({
 			justifyContent: 'flex-start'
 		}
 	},
-	flexAlignCenter: {
-		display: 'flex',
-		alignItems: 'center'
-	},
-	button: {
-		backgroundColor: 'transparent',
-		borderTop: '1px solid',
-		borderBottom: '1px solid',
-		color: 'black',
-		borderColor: fr.colors.decisions.background.default.grey.active,
-		cursor: 'pointer',
-		padding: '0.2rem 0.5rem'
-	},
-	activeButton: {
-		color: fr.colors.decisions.background.flat.blueFrance.default,
-		borderTopColor: fr.colors.decisions.background.flat.blueFrance.default,
-		borderBottomColor: fr.colors.decisions.background.flat.blueFrance.default,
-		borderTop: '2px solid',
-		borderLeft: '1px solid',
-		borderRight: '1px solid',
-		borderRadius: '0.25rem'
-	},
-	inactiveTableBtn: {
-		borderRight: '1px solid',
-		borderTopRightRadius: '0.25rem',
-		borderBottomRightRadius: '0.25rem',
-		borderColor: fr.colors.decisions.background.default.grey.active
-	},
-	inactiveChartBtn: {
-		borderLeft: '1px solid',
-		borderTopLeftRadius: '0.25rem',
-		borderBottomLeftRadius: '0.25rem',
-		borderColor: fr.colors.decisions.background.default.grey.active
+	// 16px labels; doubled selector beats DSFR's `.fr-segmented--sm input + label` (0.875rem)
+	segmentedLabel: {
+		'&&': {
+			fontSize: '1rem'
+		}
 	}
 }));
 
