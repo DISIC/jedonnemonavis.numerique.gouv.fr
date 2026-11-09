@@ -1,6 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface InfoTooltipProps {
@@ -20,14 +20,24 @@ interface InfoTooltipProps {
  */
 const InfoTooltip = ({ title, buttonLabel, className }: InfoTooltipProps) => {
 	const { classes, cx } = useStyles();
+	const tooltipId = `info-tooltip-${useId().replace(/:/g, '')}`;
 
 	return (
 		<span className={classes.root}>
-			<Tooltip kind="hover" className={className} title={title}>
+			<Tooltip
+				kind="hover"
+				id={tooltipId}
+				className={className}
+				title={title}
+			>
 				<button
 					type="button"
-					className={cx(classes.button, fr.cx('ri-information-line'))}
+					className={cx(
+						classes.button,
+						fr.cx('ri-information-line', 'fr-icon--sm')
+					)}
 					aria-label={buttonLabel}
+					aria-describedby={tooltipId}
 				/>
 			</Tooltip>
 		</span>

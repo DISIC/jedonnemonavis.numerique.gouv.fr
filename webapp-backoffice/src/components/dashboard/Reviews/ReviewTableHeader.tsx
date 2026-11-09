@@ -76,13 +76,6 @@ const ReviewTableHeader = (props: Props) => {
 						</th>
 					);
 				})}
-				{new Array(2).fill(0).map((i, index) => (
-					<th
-						className={cx(classes.badgeVerbatim)}
-						key={`fake_div_${index}`}
-						aria-hidden="true"
-					></th>
-				))}
 				<th
 					className={cx(
 						classes.badgeVerbatim,
@@ -160,6 +153,7 @@ const useStyles = tss.create({
 		flex: '0 0 calc(100% / 6);'
 	},
 	actionHeader: {
+		marginLeft: 'auto',
 		paddingRight: fr.spacing('4v'),
 		[fr.breakpoints.down('lg')]: {
 			paddingRight: 0
