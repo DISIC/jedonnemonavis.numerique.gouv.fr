@@ -39,11 +39,6 @@ export interface JdmaInviteEmailProps {
 	baseUrl?: string;
 }
 
-export interface JdmaOtpEmailProps {
-	code: string;
-	baseUrl?: string;
-}
-
 export interface JdmaProductArchivedEmailProps {
 	userName: string;
 	productTitle: string;
@@ -57,28 +52,15 @@ export interface JdmaProductRestoredEmailProps {
 	baseUrl?: string;
 }
 
-export interface JdmaTokenEmailProps {
-	token: string;
-	baseUrl?: string;
-}
 export interface JdmaUserInviteEmailProps {
 	inviterName: string;
-	recipientEmail: string;
-	inviteToken: string;
 	productTitle?: string;
 	entityName?: string;
 	baseUrl?: string;
 }
 
 export interface JdmaDnCreatorInviteEmailProps {
-	recipientEmail: string;
-	inviteToken: string;
 	demarcheName: string;
-	baseUrl?: string;
-}
-
-export interface JdmaUserRequestRefusedEmailProps {
-	message?: string;
 	baseUrl?: string;
 }
 

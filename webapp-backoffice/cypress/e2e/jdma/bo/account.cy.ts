@@ -3,23 +3,19 @@ import {
 	clickModifyCard,
 	deleteAccount,
 	fillAccountForm,
-	openAccountInfos,
-	testEmail
+	openAccountInfos
 } from '../../../utils/helpers/account';
 import { login, logout } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
-	adminEmail,
 	firstNameTest,
 	invitedEmailBis,
-	lastNameTest,
-	newEmailTest,
-	userPassword
+	lastNameTest
 } from '../../../utils/variables';
 
 describe('jdma-account', () => {
 	it('change identity parameters', () => {
-		login(invitedEmailBis, userPassword);
+		login(invitedEmailBis);
 		cy.injectAxe();
 		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
@@ -33,55 +29,29 @@ describe('jdma-account', () => {
 		logout();
 	});
 
-	it('change email : bad emails patterns should not work', () => {
-		testEmail({
-			email: 'zrgzgr.gr',
-			confirmationEmail: 'test@gmail.com',
-			expectedMEssage: 'Les adresses e-mail ne correspondent pas'
-		});
-	});
-
-	it('change email : different emails should not work', () => {
-		testEmail({
-			email: 'test1@gmail.com',
-			confirmationEmail: 'test@gmail.com',
-			expectedMEssage: 'Les adresses e-mail ne correspondent pas'
-		});
-	});
-
-	it('change email : not whitelisted emails should not work', () => {
-		testEmail({
-			email: 'test@gmail.com',
-			confirmationEmail: 'test@gmail.com',
-			expectedMEssage:
-				'Cette adresse mail ne fait pas partie des domaines autorisés. Veuillez contacter le support si vous souhaitez utiliser cette adresse.'
-		});
-	});
-
-	it('change email : allready existing emails should not work', () => {
-		testEmail({
-			email: adminEmail,
-			confirmationEmail: adminEmail,
-			expectedMEssage: 'Cette adresse mail existe déjà'
-		});
-	});
-
-	it('change email : should work if everything OK', () => {
-		testEmail({ email: newEmailTest, confirmationEmail: newEmailTest });
+	it('shows the ProConnect email as read-only credentials', () => {
+		login(invitedEmailBis);
+		cy.injectAxe();
+		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
+		openAccountInfos();
+		cy.contains('h3', selectors.card.credentials)
+			.parents('.fr-card')
+			.within(() => {
+				cy.contains(invitedEmailBis).should('be.visible');
+				cy.contains('votre compte ProConnect').should('be.visible');
+				cy.contains('button', selectors.action.modify).should('not.exist');
+				cy.contains('Mot de passe').should('not.exist');
+			});
 	});
 
 	it('delete account', () => {
-		login(newEmailTest, userPassword);
+		login(invitedEmailBis);
 		cy.injectAxe();
-		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
+		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 		openAccountInfos();
 		cy.injectAxe();
 		deleteAccount();
 		cy.url().should('include', '/login');
-		cy.get(selectors.loginForm.email).type(newEmailTest);
-		cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-		cy.contains('p', 'Aucun compte connu avec cette adresse e-mail.').should(
-			'exist'
-		);
+		cy.get(selectors.proconnectButton).should('be.visible');
 	});
 });

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -18,12 +19,11 @@ export async function middleware(request: NextRequest) {
 		request.nextUrl.pathname.startsWith('/static') || // exclude static files
 		request.nextUrl.pathname.startsWith('/open-api') || // exclude api doc
 		request.nextUrl.pathname.startsWith('/public') || // exclude api doc
-		request.nextUrl.pathname.startsWith('/reset-password') || // exclude reset password
 		PUBLIC_FILE.test(request.nextUrl.pathname) // exclude all files in the public folder
 	)
 		return NextResponse.next();
 
-	const isTokenValid = !!token && (token.exp as number) * 1000 > Date.now();
+	const isTokenValid = isAuthTokenValid(token);
 
 	if (request.nextUrl.pathname.startsWith('/administration') && !isTokenValid) {
 		const url = request.nextUrl.clone();

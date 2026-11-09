@@ -1,6 +1,6 @@
 import { login } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, appUrl } from '../../../utils/variables';
 
 // Seed flags the root form of "Impots.gouv.fr" as a démarche essentielle
 // (isDemarcheEssentielle in prisma/seeds/products.ts -> Form.isTop250 = true).
@@ -8,7 +8,7 @@ const DE_PRODUCT = 'Impots.gouv.fr';
 
 describe('jdma-demarche-essentielle', () => {
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 	});
 
 	const goToDemarcheEssentielleForms = () => {

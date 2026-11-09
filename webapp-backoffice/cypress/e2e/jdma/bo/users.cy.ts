@@ -1,11 +1,11 @@
 import { createOrEditProduct, login } from '../../../utils/helpers/common';
 import { navigateToCreatedProduct } from '../../../utils/helpers/users';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword } from '../../../utils/variables';
+import { adminEmail } from '../../../utils/variables';
 
 describe('jdma-users', () => {
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 		cy.injectAxe();
 	});
 
