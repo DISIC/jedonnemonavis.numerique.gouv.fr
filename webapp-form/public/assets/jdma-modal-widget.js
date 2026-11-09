@@ -389,6 +389,43 @@
 	// ---------------------------------------------------------------------------
 	var panel = null;
 
+	var panelCloseBtn = null;
+	var inertedElements = [];
+
+	// ---------------------------------------------------------------------------
+	// Background isolation while the dialog is open.
+	// The keydown trap below cannot see Tab presses made inside the iframe
+	// (they fire in the iframe's document), so focus could leave the form
+	// for the page behind. Making every other <body> child `inert` removes
+	// the background from the tab order, pointer events and the a11y tree.
+	// ---------------------------------------------------------------------------
+	function setBackgroundInert(isInert) {
+		if (isInert) {
+			inertedElements = [];
+			var children = document.body.children;
+			for (var i = 0; i < children.length; i++) {
+				var el = children[i];
+				// Skip the dialog itself and elements already inert (restore only ours)
+				if (el === panel || el.hasAttribute('inert')) continue;
+				el.setAttribute('inert', '');
+				inertedElements.push(el);
+			}
+		} else {
+			for (var j = 0; j < inertedElements.length; j++) {
+				inertedElements[j].removeAttribute('inert');
+			}
+			inertedElements = [];
+		}
+	}
+
+	// Fallback for browsers without `inert`: if focus still lands outside
+	// the open dialog, bring it back to the close button.
+	function keepFocusInPanel(e) {
+		if (panel && panelCloseBtn && !panel.contains(e.target)) {
+			panelCloseBtn.focus();
+		}
+	}
+
 	// ---------------------------------------------------------------------------
 	// Focus-trap helper: keeps Tab cycling within the panel
 	// ---------------------------------------------------------------------------
@@ -490,6 +527,9 @@
 		panel.appendChild(iframe);
 
 		document.body.appendChild(panel);
+		panelCloseBtn = closeBtn;
+
+		setBackgroundInert(true);
 
 		// Update trigger state
 		trigger.setAttribute('aria-expanded', 'true');
@@ -500,6 +540,7 @@
 		// Keyboard handlers
 		document.addEventListener('keydown', handleEscape);
 		document.addEventListener('keydown', trapFocus);
+		document.addEventListener('focusin', keepFocusInPanel);
 
 		// Close when clicking outside the panel
 		document.addEventListener('mousedown', handleClickOutside);
@@ -507,8 +548,11 @@
 
 	function closePanel() {
 		if (!panel) return;
+		document.removeEventListener('focusin', keepFocusInPanel);
+		setBackgroundInert(false);
 		document.body.removeChild(panel);
 		panel = null;
+		panelCloseBtn = null;
 		trigger.setAttribute('aria-expanded', 'false');
 		document.removeEventListener('keydown', handleEscape);
 		document.removeEventListener('keydown', trapFocus);
