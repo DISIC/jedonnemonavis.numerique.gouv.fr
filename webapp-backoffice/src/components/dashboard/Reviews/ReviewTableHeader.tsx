@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -12,6 +13,7 @@ const ReviewTableHeader = (props: Props) => {
 	const { onClick, form } = props;
 
 	const { cx, classes } = useStyles({});
+	const isMobile = useMediaQuery(fr.breakpoints.down('md'));
 
 	const mainBlocks = form.form_template.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -41,13 +43,10 @@ const ReviewTableHeader = (props: Props) => {
 	];
 
 	return (
-		<thead className={cx(classes.lineContainer)}>
-			<tr
-				className={cx(
-					classes.trContainer,
-					fr.cx('fr-hidden', 'fr-unhidden-md')
-				)}
-			>
+		<thead
+			className={isMobile ? fr.cx('fr-sr-only') : cx(classes.lineContainer)}
+		>
+			<tr className={cx(classes.trContainer)}>
 				{sortList.map((sort, index) => {
 					const isSortable = props.sort.includes(sort.code || sort.label);
 					return (
@@ -55,7 +54,6 @@ const ReviewTableHeader = (props: Props) => {
 							className={cx(
 								classes.badgeVerbatim,
 								isSortable ? classes.pointer : '',
-								fr.cx('fr-hidden', 'fr-unhidden-md'),
 								classes.thContainer
 							)}
 							key={index}
@@ -127,9 +125,6 @@ const useStyles = tss.create({
 		lineHeight: 1,
 		span: {
 			position: 'relative'
-		},
-		[fr.breakpoints.down('md')]: {
-			display: 'none'
 		}
 	},
 	thIcon: {
