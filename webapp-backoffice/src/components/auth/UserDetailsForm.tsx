@@ -165,7 +165,12 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 									{userDetails.referralSource === 'Autre (précisez)' && (
 										<Input
 											className={fr.cx('fr-mt-4v')}
-											label=""
+											label={
+												<p className={fr.cx('fr-mb-0')}>
+													Précision{' '}
+													<span className={cx(classes.asterisk)}>*</span>
+												</p>
+											}
 											nativeInputProps={{
 												onChange: e => {
 													setCustomReferralSource(e.target.value);
