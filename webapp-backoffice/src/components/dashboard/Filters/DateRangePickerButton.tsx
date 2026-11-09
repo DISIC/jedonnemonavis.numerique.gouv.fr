@@ -411,10 +411,6 @@ const DateRangePickerButton = ({
 									Date de début
 								</label>
 								<DateField
-									aria-labelledby="date-debut-label"
-									aria-describedby={
-										errors.startDate ? 'date-debut-error' : undefined
-									}
 									value={localStartDate}
 									onChange={handleDateFieldChange('currentStartDate')}
 									maxDate={today}
@@ -424,6 +420,12 @@ const DateRangePickerButton = ({
 									slotProps={{
 										textField: {
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-debut-label',
+												'aria-describedby': errors.startDate
+													? 'date-debut-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
@@ -450,10 +452,6 @@ const DateRangePickerButton = ({
 									Date de fin
 								</label>
 								<DateField
-									aria-labelledby="date-fin-label"
-									aria-describedby={
-										errors.endDate ? 'date-fin-error' : undefined
-									}
 									value={localEndDate}
 									onChange={handleDateFieldChange('currentEndDate')}
 									maxDate={today}
@@ -464,6 +462,12 @@ const DateRangePickerButton = ({
 										textField: {
 											variant: 'outlined',
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-fin-label',
+												'aria-describedby': errors.endDate
+													? 'date-fin-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
