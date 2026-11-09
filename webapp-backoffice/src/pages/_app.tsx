@@ -1,6 +1,6 @@
 import PublicLayout from '@/src/layouts/PublicLayout';
 import { trpc } from '@/src/utils/trpc';
-import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
+import { MuiDsfrThemeProvider } from '@/src/utils/mui-theme';
 import { createNextDsfrIntegrationApi } from '@codegouvfr/react-dsfr/next-pagesdir';
 import { init } from '@socialgouv/matomo-next';
 import { SessionProvider } from 'next-auth/react';
