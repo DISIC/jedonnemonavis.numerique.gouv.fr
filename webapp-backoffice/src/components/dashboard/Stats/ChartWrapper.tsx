@@ -30,6 +30,7 @@ type Props = {
 	tooltip?: string;
 	isFormDashboardType?: boolean;
 	smallTitle?: boolean;
+	verticalTableFirstColumnHeader?: string;
 };
 
 const orderData = (
@@ -101,7 +102,8 @@ const ChartWrapper = ({
 	displayTotal,
 	tooltip,
 	isFormDashboardType = false,
-	smallTitle
+	smallTitle,
+	verticalTableFirstColumnHeader
 }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
@@ -206,7 +208,7 @@ const ChartWrapper = ({
 		if (singleRow) {
 			return (
 				<tr>
-					<td>{singleRowLabel || 'Nombre de réponses'}</td>
+					<th scope="row">{singleRowLabel || 'Nombre de réponses'}</th>
 					{cells.map((c, index) => (
 						<td key={`${JSON.stringify(c)}_${index}_${title}`}>{c.value}</td>
 					))}
@@ -216,7 +218,7 @@ const ChartWrapper = ({
 
 		return rows.map((r, index) => (
 			<tr key={`${r}_${index}_${title}`}>
-				<td>{r}</td>
+				<th scope="row">{r}</th>
 				{cells.map((c, indexC) => (
 					<>
 						<td key={`${r}_${index}_${JSON.stringify(c)}_${indexC}_${title}`}>
@@ -229,7 +231,32 @@ const ChartWrapper = ({
 		));
 	};
 
+	const displayVerticalTable = () => (
+		<div className={cx(classes.tableContainer)}>
+			<table className={cx(fr.cx('fr-table'), classes.table)}>
+				<thead>
+					<tr>
+						<th scope="col">{verticalTableFirstColumnHeader}</th>
+						<th scope="col">{singleRowLabel || 'Nombre de réponses'}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{headers.map((h, index) => (
+						<tr key={`${h}_${index}_${title}`}>
+							<td>{h}</td>
+							<td>{cells[index]?.value}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
+
 	const displayTable = () => {
+		if (singleRow && verticalTableFirstColumnHeader) {
+			return displayVerticalTable();
+		}
+
 		return (
 			<div className={cx(classes.tableContainer)}>
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
