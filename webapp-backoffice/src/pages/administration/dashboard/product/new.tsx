@@ -7,6 +7,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Autocomplete } from '@mui/material';
+import { useAutocompleteCreateButton } from '@/src/components/ui/AutocompleteCreatePaper';
 import { Entity, Product } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -15,6 +16,16 @@ import { useDebounce } from 'usehooks-ts';
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'>;
 
+// Assign one element to several refs (callback or object refs)
+const mergeRefs =
+	<T,>(...refs: (React.Ref<T> | undefined)[]) =>
+	(el: T | null) => {
+		refs.forEach(r => {
+			if (typeof r === 'function') r(el);
+			else if (r) (r as React.MutableRefObject<T | null>).current = el;
+		});
+	};
+
 const entity_modal = createModal({
 	id: 'entity-modal',
 	isOpenedByDefault: false
@@ -22,6 +33,10 @@ const entity_modal = createModal({
 
 const NewProduct = () => {
 	const { cx, classes } = useStyles();
+	const { autocompleteProps: createEntityProps } = useAutocompleteCreateButton({
+		onCreate: () => entity_modal.open(),
+		createLabel: 'Créer une nouvelle organisation'
+	});
 	const {
 		createdProduct,
 		updateCreatedProduct,
@@ -175,7 +190,7 @@ const NewProduct = () => {
 						name="entity_id"
 						control={control}
 						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => {
+						render={({ field: { onChange, value, name, ref: fieldRef } }) => {
 							useEffect(() => {
 								onChange(selectedEntityValue);
 							}, [selectedEntityValue]);
@@ -188,13 +203,10 @@ const NewProduct = () => {
 									options={entityOptions}
 									loading={isLoadingEntities}
 									loadingText="Chargement des organisations..."
-									filterOptions={createFilterOptionsWithArgument(true)}
+									{...createEntityProps}
+									filterOptions={createFilterOptionsWithArgument(false)}
 									onChange={(_, optionSelected) => {
-										if (optionSelected?.value === -1) {
-											entity_modal.open();
-										} else {
-											setSelectedEntityValue(optionSelected?.value);
-										}
+										setSelectedEntityValue(optionSelected?.value);
 									}}
 									isOptionEqualToValue={option => option.value === value}
 									defaultValue={entityOptions.find(
@@ -218,6 +230,8 @@ const NewProduct = () => {
 											<Input
 												nativeInputProps={{
 													...params.inputProps,
+													// Share the input with react-hook-form so it can focus it on error
+													ref: mergeRefs(params.inputProps.ref, fieldRef),
 													type: 'search',
 													required: true,
 													placeholder: 'Rechercher une organisation'
@@ -250,24 +264,8 @@ const NewProduct = () => {
 										</div>
 									)}
 									renderOption={(props, option) => (
-										<li
-											{...props}
-											className={fr.cx(
-												option.value === -1 ? 'fr-p-0' : 'fr-p-3v'
-											)}
-										>
-											{option.value === -1 ? (
-												<div
-													className={cx(classes.buttonSelect, fr.cx('fr-p-3v'))}
-												>
-													<span className={fr.cx('fr-mr-2v')}>
-														{option.label}
-													</span>
-													<i className={fr.cx('fr-icon-add-circle-line')} />
-												</div>
-											) : (
-												option.label
-											)}
+										<li {...props} className={fr.cx('fr-p-3v')}>
+											{option.label}
 										</li>
 									)}
 								/>
@@ -280,7 +278,7 @@ const NewProduct = () => {
 						control={control}
 						name="title"
 						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => {
+						render={({ field: { onChange, value, name, ref } }) => {
 							return (
 								<Input
 									label={
@@ -299,6 +297,8 @@ const NewProduct = () => {
 										</>
 									}
 									nativeInputProps={{
+										// Lets react-hook-form focus this field on error
+										ref,
 										onChange,
 										value,
 										name,
@@ -350,19 +350,6 @@ const useStyles = tss.withName({ NewProduct }).create(() => ({
 		},
 		border: 'none',
 		padding: 0
-	},
-	buttonSelect: {
-		color: 'white',
-		backgroundColor:
-			fr.colors.decisions.background.actionHigh.blueFrance.default,
-		display: 'flex',
-		justifyContent: 'center',
-		cursor: 'pointer',
-		i: {
-			['&::before']: {
-				'--icon-size': '1.1rem'
-			}
-		}
 	}
 }));
 
