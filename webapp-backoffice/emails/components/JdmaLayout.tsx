@@ -19,7 +19,7 @@ interface JdmaLayoutProps {
 
 export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 	return (
-		<Html>
+		<Html lang="fr">
 			<Head />
 			{preview && <Preview>{preview}</Preview>}
 			<Body style={main}>

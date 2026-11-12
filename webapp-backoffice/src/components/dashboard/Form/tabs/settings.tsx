@@ -157,16 +157,18 @@ const SettingsTab = ({
 								</a>{' '}
 								de votre compte.
 							</p>
-							<span
+							<ButtonDSFR
+								priority="secondary"
+								size="small"
+								type="button"
 								className={classes.previewEmailButton}
-								role="button"
 								onClick={() => {
 									setIsAlertEmailPreviewOpen(true);
 									alert_email_preview_modal.open();
 								}}
 							>
 								Voir un exemple de mail d’alerte
-							</span>
+							</ButtonDSFR>
 						</div>
 
 						<div
@@ -325,17 +327,7 @@ const useStyles = tss.withName({ SettingsTab }).create({
 		}
 	},
 	previewEmailButton: {
-		textWrap: 'nowrap',
-		fontSize: '0.875rem',
-		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
-		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
-		backgroundSize: '100% 1px',
-		backgroundPosition: '0 100%',
-		backgroundRepeat: 'no-repeat',
-		'&:hover': {
-			cursor: 'pointer',
-			backgroundSize: '100% 2.25px'
-		},
+		whiteSpace: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'
