@@ -12,6 +12,7 @@ import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
 import { useJdmaWidget } from '../hooks/useJdmaWidget';
+import { useModalFocusRestore } from '../hooks/useModalFocusRestore';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
@@ -94,6 +95,7 @@ function App({ Component, pageProps }: AppProps) {
 	}, []);
 
 	useJdmaWidget(!isAdminDashboard);
+	useModalFocusRestore();
 
 	return (
 		<MuiDsfrThemeProvider>
