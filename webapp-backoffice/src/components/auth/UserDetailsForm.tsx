@@ -44,6 +44,11 @@ const sourceOptions = [
 	'Autre (précisez)'
 ] as const;
 
+type FormErrors = {
+	referralSource?: string;
+	customReferralSource?: string;
+};
+
 type UserDetailsFormProps = {
 	onCreated: () => void;
 };
@@ -60,6 +65,7 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 		updatedAt: new Date()
 	});
 	const [customReferralSource, setCustomReferralSource] = useState<string>();
+	const [errors, setErrors] = useState<FormErrors>({});
 
 	const createUserDetails = trpc.userDetails.create.useMutation({
 		onSuccess: () => onCreated()
@@ -67,8 +73,34 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 
 	if (session === null) return null;
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const validate = (): FormErrors => {
+		const nextErrors: FormErrors = {};
+		if (!userDetails.referralSource) {
+			nextErrors.referralSource = 'Veuillez sélectionner une option.';
+		} else if (
+			userDetails.referralSource === 'Autre (précisez)' &&
+			!customReferralSource?.trim()
+		) {
+			nextErrors.customReferralSource =
+				'Veuillez préciser comment vous avez connu JDMA.';
+		}
+		return nextErrors;
+	};
+
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		const nextErrors = validate();
+		setErrors(nextErrors);
+		const firstInvalidField = Object.keys(nextErrors)[0];
+		
+		if (firstInvalidField) {
+			e.currentTarget
+				.querySelector<HTMLElement>(`[name="${firstInvalidField}"]`)
+				?.focus();
+			return;
+		}
+
 		const userId = parseInt(session?.user.id as string);
 		if (!userId) return;
 		const detailsToSubmit = {
@@ -117,7 +149,7 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 									<span className={cx(classes.asterisk)}>*</span> sont
 									obligatoires
 								</p>
-								<form onSubmit={handleSubmit}>
+								<form onSubmit={handleSubmit} noValidate>
 									<Input
 										label="Quel est votre poste ?"
 										hintText="Exemple : chef de projet, développeur, designer, product owner, ..."
@@ -140,6 +172,8 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 												<span className={cx(classes.asterisk)}>*</span>
 											</p>
 										}
+										state={errors.referralSource ? 'error' : 'default'}
+										stateRelatedMessage={errors.referralSource}
 										nativeSelectProps={{
 											name: 'referralSource',
 											value: userDetails.referralSource,
@@ -149,8 +183,10 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 													...prev,
 													referralSource: value
 												}));
+												setErrors({});
 											},
-											required: true
+											required: true,
+											'aria-invalid': errors.referralSource ? true : undefined
 										}}
 									>
 										<option value="" disabled hidden>
@@ -165,11 +201,28 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 									{userDetails.referralSource === 'Autre (précisez)' && (
 										<Input
 											className={fr.cx('fr-mt-4v')}
-											label=""
+											label={
+												<p className={fr.cx('fr-mb-0')}>
+													Précision{' '}
+													<span className={cx(classes.asterisk)}>*</span>
+												</p>
+											}
+											state={errors.customReferralSource ? 'error' : 'default'}
+											stateRelatedMessage={errors.customReferralSource}
+											classes={{
+												message: fr.cx('fr-message', 'fr-message--error')
+											}}
 											nativeInputProps={{
 												onChange: e => {
 													setCustomReferralSource(e.target.value);
+													setErrors(prev => ({
+														...prev,
+														customReferralSource: undefined
+													}));
 												},
+												'aria-invalid': errors.customReferralSource
+													? true
+													: undefined,
 												value: customReferralSource,
 												name: 'customReferralSource',
 												placeholder: 'Veuillez préciser',

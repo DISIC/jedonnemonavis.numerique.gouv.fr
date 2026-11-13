@@ -130,17 +130,23 @@ const ReviewFiltersModalRoot = (props: Props) => {
 			size="large"
 		>
 			<div className={cx(classes.section)}>
-				<p className={cx(classes.subtitle)}>Satisfaction globale</p>
-				<Checkbox options={satisfactionOptions} state="default" />
+				<Checkbox
+					legend="Satisfaction globale"
+					classes={{ legend: cx(classes.subtitle) }}
+					options={satisfactionOptions}
+					state="default"
+				/>
 			</div>
 
 			<hr className={cx(classes.separator)} />
 
 			<div className={cx(classes.section)}>
-				<p className={cx(classes.subtitle)}>
-					Note donnée à la clarté des informations
-				</p>
-				<Checkbox options={comprehensionOptions} state="default" />
+				<Checkbox
+					legend="Note donnée à la clarté des informations"
+					classes={{ legend: cx(classes.subtitle) }}
+					options={comprehensionOptions}
+					state="default"
+				/>
 			</div>
 
 			{isGlobalAdmin && (
@@ -220,6 +226,15 @@ const useStyles = tss.withName({ ReviewFiltersModalRoot }).create(() => ({
 	section: {
 		'& .fr-fieldset': {
 			marginBottom: 0,
+			marginLeft: 0,
+			marginRight: 0,
+			paddingLeft: 0,
+			paddingRight: 0,
+			width: 'fit-content',
+			maxWidth: '100%',
+			'& .fr-fieldset__content': {
+				marginInline: 0
+			},
 			'&  .fr-label': {
 				...fr.spacing('padding', { topBottom: '2v' }),
 				'&::before': {
@@ -228,13 +243,15 @@ const useStyles = tss.withName({ ReviewFiltersModalRoot }).create(() => ({
 			}
 		},
 		'& .fr-fieldset__element': {
+			paddingLeft: 0,
 			marginBottom: 0
 		}
 	},
 	subtitle: {
 		...fr.typography[19].style,
-		marginBottom: fr.spacing('2w'),
-		fontWeight: 'bold',
+		margin: 0,
+		paddingLeft: 0,
+		fontWeight: 'bold !important',
 		color: fr.colors.decisions.text.label.grey.default
 	},
 	separator: {

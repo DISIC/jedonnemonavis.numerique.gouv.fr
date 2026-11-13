@@ -411,10 +411,6 @@ const DateRangePickerButton = ({
 									Date de début
 								</label>
 								<DateField
-									aria-labelledby="date-debut-label"
-									aria-describedby={
-										errors.startDate ? 'date-debut-error' : undefined
-									}
 									value={localStartDate}
 									onChange={handleDateFieldChange('currentStartDate')}
 									maxDate={today}
@@ -424,6 +420,12 @@ const DateRangePickerButton = ({
 									slotProps={{
 										textField: {
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-debut-label',
+												'aria-describedby': errors.startDate
+													? 'date-debut-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
@@ -450,10 +452,6 @@ const DateRangePickerButton = ({
 									Date de fin
 								</label>
 								<DateField
-									aria-labelledby="date-fin-label"
-									aria-describedby={
-										errors.endDate ? 'date-fin-error' : undefined
-									}
 									value={localEndDate}
 									onChange={handleDateFieldChange('currentEndDate')}
 									maxDate={today}
@@ -464,6 +462,12 @@ const DateRangePickerButton = ({
 										textField: {
 											variant: 'outlined',
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-fin-label',
+												'aria-describedby': errors.endDate
+													? 'date-fin-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
@@ -480,22 +484,55 @@ const DateRangePickerButton = ({
 						</div>
 					</LocalizationProvider>
 
-					<div className={cx(classes.shortcutsRow)}>
+					<ul
+						className={cx(classes.shortcutsRow)}
+						aria-label="Raccourcis de période"
+					>
 						{dateShortcuts.map(ds => {
 							const isSelected = localShortcut === ds.name && !localDisplayNew;
 							return (
+								<li key={ds.name}>
+									<button
+										type="button"
+										aria-pressed={isSelected}
+										className={cx(
+											classes.shortcutButton,
+											isSelected ? classes.shortcutButtonSelected : undefined
+										)}
+										onClick={() => handleShortcutClick(ds.name)}
+									>
+										{ds.label}
+										{isSelected && (
+											<span
+												aria-hidden="true"
+												className={cx(
+													classes.selectedIcon,
+													fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+												)}
+											/>
+										)}
+									</button>
+								</li>
+							);
+						})}
+						{showNewReviewsOption && reviewLogDate && (
+							<li>
 								<button
-									key={ds.name}
 									type="button"
-									aria-pressed={isSelected}
+									aria-pressed={localDisplayNew}
 									className={cx(
 										classes.shortcutButton,
-										isSelected ? classes.shortcutButtonSelected : undefined
+										localDisplayNew ? classes.shortcutButtonSelected : undefined
 									)}
-									onClick={() => handleShortcutClick(ds.name)}
+									onClick={handleNewReviewsClick}
+									title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
+										reviewLogDate,
+										{ withHour: true }
+									)})`}
 								>
-									{ds.label}
-									{isSelected && (
+									Nouvelles réponses (du{' '}
+									{formatDateToFrenchString(reviewLogDate)} à aujourd'hui)
+									{localDisplayNew && (
 										<span
 											aria-hidden="true"
 											className={cx(
@@ -505,36 +542,9 @@ const DateRangePickerButton = ({
 										/>
 									)}
 								</button>
-							);
-						})}
-						{showNewReviewsOption && reviewLogDate && (
-							<button
-								type="button"
-								aria-pressed={localDisplayNew}
-								className={cx(
-									classes.shortcutButton,
-									localDisplayNew ? classes.shortcutButtonSelected : undefined
-								)}
-								onClick={handleNewReviewsClick}
-								title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
-									reviewLogDate,
-									{ withHour: true }
-								)})`}
-							>
-								Nouvelles réponses (du {formatDateToFrenchString(reviewLogDate)}{' '}
-								à aujourd'hui)
-								{localDisplayNew && (
-									<span
-										aria-hidden="true"
-										className={cx(
-											classes.selectedIcon,
-											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
-										)}
-									/>
-								)}
-							</button>
+							</li>
 						)}
-					</div>
+					</ul>
 					<hr className={cx(classes.separator)} />
 					<DateRangeCalendar
 						rangeStart={calendarRangeStart}
@@ -622,6 +632,13 @@ const useStyles = tss.create({
 		...fr.spacing('margin', { rightLeft: '6v' })
 	},
 	shortcutsRow: {
+		// List reset (ul/li) — no bullets, no DSFR list spacing
+		listStyle: 'none',
+		margin: 0,
+		'& > li': {
+			margin: 0,
+			padding: 0
+		},
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: fr.spacing('2v'),

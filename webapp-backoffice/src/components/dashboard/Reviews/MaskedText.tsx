@@ -1,6 +1,6 @@
 import { splitMaskedText } from '@/src/utils/personal-data';
 import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
-import React from 'react';
+import React, { useId } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -32,6 +32,7 @@ type Props = {
  */
 export const MaskedText = ({ text, renderSegment }: Props) => {
 	const { classes } = useStyles();
+	const idPrefix = `masked-${useId().replace(/:/g, '')}`;
 
 	const segments = splitMaskedText(text);
 
@@ -42,9 +43,17 @@ export const MaskedText = ({ text, renderSegment }: Props) => {
 					<Tooltip
 						key={index}
 						kind="hover"
+						id={`${idPrefix}-${index}`}
 						title="Les informations personnelles sont supprimées pour le respect de la vie privée"
 					>
-						<em className={classes.mask}>{segment.text}</em>
+						<button
+							type="button"
+							className={classes.maskButton}
+							aria-describedby={`${idPrefix}-${index}`}
+							onClick={e => e.stopPropagation()}
+						>
+							<em className={classes.mask}>{segment.text}</em>
+						</button>
 					</Tooltip>
 				) : renderSegment ? (
 					renderSegment(segment.text, index)
@@ -57,6 +66,16 @@ export const MaskedText = ({ text, renderSegment }: Props) => {
 };
 
 const useStyles = tss.withName({ MaskedText }).create(() => ({
+	maskButton: {
+		display: 'inline',
+		padding: 0,
+		border: 'none',
+		background: 'none',
+		font: 'inherit',
+		color: 'inherit',
+		textAlign: 'inherit',
+		cursor: 'help'
+	},
 	mask: {
 		fontStyle: 'italic',
 		cursor: 'help'

@@ -89,6 +89,13 @@ const ReviewsTab = (props: Props) => {
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
 
+	const focusRowButton = (reviewId: number) => {
+		rowRefsMap.current
+			.get(reviewId)
+			?.querySelector<HTMLButtonElement>('[data-review-action]')
+			?.focus();
+	};
+
 	const isGlobalAdmin = session?.user?.role.includes('admin') ?? false;
 
 	useEffect(() => {
@@ -381,7 +388,7 @@ const ReviewsTab = (props: Props) => {
 		if (firstReviewId === undefined) return;
 		shouldFocusFirstRowRef.current = false;
 		requestAnimationFrame(() => {
-			rowRefsMap.current.get(firstReviewId)?.focus();
+			focusRowButton(firstReviewId);
 		});
 	}, [isTableFetching, reviews]);
 
@@ -511,7 +518,7 @@ const ReviewsTab = (props: Props) => {
 		setSelectedReview(null);
 		if (lastViewedId !== undefined) {
 			requestAnimationFrame(() => {
-				rowRefsMap.current.get(lastViewedId)?.focus();
+				focusRowButton(lastViewedId);
 			});
 		}
 	};

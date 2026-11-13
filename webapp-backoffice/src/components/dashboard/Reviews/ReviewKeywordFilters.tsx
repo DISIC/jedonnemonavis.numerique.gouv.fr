@@ -2,7 +2,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
+import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { push } from '@socialgouv/matomo-next';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -68,11 +68,11 @@ const ReviewKeywordFilters = (props: Props) => {
 	return (
 		<div className={cx(classes.keywordsBox, fr.cx('fr-mb-8v', 'fr-mt-4v'))}>
 			<p className={fr.cx('fr-mb-0')}>
-				<strong className={classes.containerTitle}>
+				<strong id="keywords-title" className={classes.containerTitle}>
 					Filtrer par mot récurrent
 				</strong>{' '}
-				<Tooltip
-					kind="hover"
+				<InfoTooltip
+					buttonLabel="Comment sont choisis les mots récurrents ?"
 					title="Les mots récurrents apparaissent à partir de 5 occurrences d'un mot, dans des réponses différentes"
 				/>
 				<Badge severity="new" as="span" className={fr.cx('fr-ml-2v')} small>
@@ -92,24 +92,29 @@ const ReviewKeywordFilters = (props: Props) => {
 					</div>
 				) : (
 					<>
-						{' '}
-						{keywords.map(keywordObject => {
-							const isSelected =
-								selectedKeyword === `"${keywordObject.keyword}"`;
-							return (
-								<Tag
-									pressed={isSelected}
-									nativeButtonProps={{
-										onClick: () => {
-											onClick(isSelected ? '' : keywordObject.keyword);
-										}
-									}}
-									key={keywordObject.keyword}
-								>
-									{keywordObject.keyword}
-								</Tag>
-							);
-						})}
+						<ul
+							className={cx(classes.keywordsList)}
+							aria-labelledby="keywords-title"
+						>
+							{keywords.map(keywordObject => {
+								const isSelected =
+									selectedKeyword === `"${keywordObject.keyword}"`;
+								return (
+									<li key={keywordObject.keyword}>
+										<Tag
+											pressed={isSelected}
+											nativeButtonProps={{
+												onClick: () => {
+													onClick(isSelected ? '' : keywordObject.keyword);
+												}
+											}}
+										>
+											{keywordObject.keyword}
+										</Tag>
+									</li>
+								);
+							})}
+						</ul>
 						{isKeywordsLoading && !isFilterChange ? (
 							<Loader size="sm" />
 						) : (
@@ -157,6 +162,26 @@ const useStyles = tss.withName({ ReviewKeywordFilters }).create({
 		alignItems: 'center',
 		[fr.breakpoints.down('md')]: {
 			gap: fr.spacing('1v')
+		}
+	},
+	keywordsList: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: fr.spacing('2v'),
+		[fr.breakpoints.down('md')]: {
+			gap: fr.spacing('1v')
+		},
+		listStyle: 'none',
+		margin: 0,
+		padding: 0,
+		'& > li': {
+			display: 'inline-flex',
+			margin: 0,
+			padding: 0
+		},
+		'& .fr-tag': {
+			margin: 0
 		}
 	},
 	loadMoreButton: {
