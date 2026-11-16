@@ -317,7 +317,7 @@ const NewForm = (props: Props) => {
 												},
 												illustration: (
 													<Image
-														alt={`Illustration type de formulaire ${template.slug}`}
+														alt=""
 														src={`/assets/form-template-${template.slug}.svg`}
 														width={56}
 														height={56}
