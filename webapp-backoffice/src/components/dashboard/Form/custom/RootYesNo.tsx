@@ -37,13 +37,7 @@ const RootYesNo = (props: Props) => {
 			{step.form_template_blocks.slice(2, 6).map(childBlock => {
 				const isParentHidden = getIsParentHidden(childBlock);
 				return (
-					<div
-						key={childBlock.id}
-						className={cx(
-							classes.childContainer,
-							isParentHidden ? classes.parentHidden : null
-						)}
-					>
+					<div key={childBlock.id} className={cx(classes.childContainer)}>
 						<RadioTiles
 							block={childBlock}
 							disabled={disabled || isParentHidden}
@@ -99,11 +93,6 @@ const useStyles = tss.withName({ RootYesNo }).create({
 		p: {
 			marginTop: fr.spacing('4v')
 		},
-		'*': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
-	parentHidden: {
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
 		}

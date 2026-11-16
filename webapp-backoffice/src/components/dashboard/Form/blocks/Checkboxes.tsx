@@ -101,7 +101,13 @@ const Checkboxes = (props: Props) => {
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<div className={cx(fr.cx('fr-col-12'), classes.checkboxContainer)}>
+			<div
+				className={cx(
+					fr.cx('fr-col-12'),
+					classes.checkboxContainer,
+					!disabled && classes.keepContrast
+				)}
+			>
 				<>
 					<Checkbox
 						legend={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
@@ -175,6 +181,15 @@ const Checkboxes = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Checkboxes }).create({
+	// Hidden options keep a disabled input but their label keeps the normal contrast
+	keepContrast: {
+		'& .fr-fieldset input:disabled + label': {
+			color: fr.colors.decisions.text.label.grey.default
+		},
+		'& .fr-fieldset input:disabled + label .fr-hint-text': {
+			color: fr.colors.decisions.text.mention.grey.default
+		}
+	},
 	smallText: {
 		fontSize: '0.8rem',
 		color: fr.colors.decisions.text.disabled.grey.default

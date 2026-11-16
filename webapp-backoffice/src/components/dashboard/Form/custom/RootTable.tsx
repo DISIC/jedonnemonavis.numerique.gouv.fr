@@ -51,10 +51,7 @@ const RootTable = (props: Props) => {
 					{step.form_template_blocks.slice(7).map(childBlock => {
 						const isParentHidden = getIsParentHidden(childBlock);
 						return (
-							<tr
-								key={childBlock.id}
-								className={cx(isParentHidden ? classes.parentHidden : null)}
-							>
+							<tr key={childBlock.id}>
 								<td>
 									<label className={cx(classes.childLabel)}>
 										{childBlock.label}
@@ -167,11 +164,6 @@ const useStyles = tss.withName({ RootTable }).create({
 		p: {
 			marginTop: fr.spacing('4v')
 		},
-		'*': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
-	parentHidden: {
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
 		}
