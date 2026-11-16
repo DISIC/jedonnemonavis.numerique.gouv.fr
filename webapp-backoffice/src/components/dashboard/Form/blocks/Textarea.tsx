@@ -24,9 +24,8 @@ const Textarea = (props: Props) => {
 			)}
 			<Input
 				className={cx(classes.blockTextarea, fr.cx('fr-mb-2v'))}
-				label={''}
+				label={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
 				textArea
-				nativeTextAreaProps={{ 'aria-label': 'Champs de texte de test' }}
 			/>
 			{block.downLabel && (
 				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
