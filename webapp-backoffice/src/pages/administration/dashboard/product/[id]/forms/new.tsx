@@ -17,13 +17,12 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Form, FormTemplate, RightAccessStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
@@ -125,12 +124,21 @@ const NewForm = (props: Props) => {
 		handleSubmit,
 		reset,
 		watch,
-		formState: { errors }
+		formState: { errors, submitCount }
 	} = useForm<FormValues>({
 		defaultValues: {
 			title: defaultTitle || selectedFormTemplate?.title || ''
 		}
 	});
+
+	const titleInfoId = 'form-title-info';
+	const titleErrorId = 'form-title-error';
+	const titleErrorRef = useRef<HTMLParagraphElement>(null);
+
+	// Move focus to the error message when a submit reveals it
+	useEffect(() => {
+		if (errors.title) titleErrorRef.current?.focus();
+	}, [submitCount]);
 
 	const createFormConfig = trpc.formConfig.create.useMutation({
 		onSuccess: () => {
@@ -362,43 +370,65 @@ const NewForm = (props: Props) => {
 														errors[name] ? 'fr-input-group--error' : undefined
 													)}
 												>
-													<Input
-														label={
-															<p className={fr.cx('fr-mb-0')}>
-																Nom du formulaire{' '}
-																<span className={cx(classes.asterisk)}>*</span>
-															</p>
+													<label
+														className={fr.cx('fr-label')}
+														htmlFor="form-title"
+													>
+														<p className={fr.cx('fr-mb-0')}>
+															Nom du formulaire{' '}
+															<span className={cx(classes.asterisk)}>*</span>
+														</p>
+														<span className={fr.cx('fr-hint-text')}>
+															Visible uniquement par vous et les autres membres
+															de l’équipe
+														</span>
+													</label>
+													{/* Native input: react-dsfr Input overrides aria-describedby */}
+													<input
+														id="form-title"
+														className={fr.cx(
+															'fr-input',
+															errors[name] ? 'fr-input--error' : undefined
+														)}
+														type="text"
+														onChange={onChange}
+														value={value || ''}
+														name={name}
+														required
+														aria-invalid={errors[name] ? true : undefined}
+														aria-describedby={
+															errors[name]
+																? `${titleInfoId} ${titleErrorId}`
+																: titleInfoId
 														}
-														nativeInputProps={{
-															onChange,
-															value: value || '',
-															name,
-															required: true,
-															onKeyDown: e => {
-																if (e.key === 'Enter') {
-																	e.preventDefault();
-																	handleSubmit(onSubmitCreateForm)();
-																}
+														onKeyDown={e => {
+															if (e.key === 'Enter') {
+																e.preventDefault();
+																handleSubmit(onSubmitCreateForm)();
 															}
 														}}
-														hintText={
-															<>
-																<span className={fr.cx('fr-hint-text')}>
-																	Visible uniquement par vous et les autres
-																	membres de l’équipe
-																</span>
-															</>
-														}
-														state="info"
-														stateRelatedMessage={
-															'Vous pouvez modifier ce nom par défaut'
-														}
 													/>
-													{errors[name] && (
-														<p className={fr.cx('fr-error-text')}>
-															{errors[name]?.message}
+													<div className={fr.cx('fr-messages-group')}>
+														<p
+															id={titleInfoId}
+															className={fr.cx(
+																'fr-message',
+																'fr-message--info'
+															)}
+														>
+															Vous pouvez modifier ce nom par défaut
 														</p>
-													)}
+														{errors[name] && (
+															<p
+																id={titleErrorId}
+																ref={titleErrorRef}
+																tabIndex={-1}
+																className={fr.cx('fr-error-text')}
+															>
+																{errors[name]?.message}
+															</p>
+														)}
+													</div>
 												</div>
 											);
 										}}
