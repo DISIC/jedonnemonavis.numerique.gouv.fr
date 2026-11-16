@@ -53,12 +53,7 @@ const Smiley = (props: Props) => {
 									}
 								}}
 							>
-								<Image
-									src={smiley.img}
-									alt=""
-									width={56}
-									height={56}
-								/>
+								<Image src={smiley.img} alt="" width={56} height={56} />
 								{smiley.label}
 							</label>
 						</li>
