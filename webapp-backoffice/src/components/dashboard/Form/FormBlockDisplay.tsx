@@ -13,7 +13,7 @@ import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
-import TextInput from './blocks/TextInput';
+import TextInput, { getQuestionId } from './blocks/TextInput';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -151,7 +151,7 @@ const FormBlockDisplay = (props: Props) => {
 					}
 				>
 					<div className={cx(classes.headerInfo)}>
-						<h3>{block.label}</h3>
+						<h3 id={getQuestionId(block)}>{block.label}</h3>
 						{isBlockHidden && (
 							<Badge
 								className={cx(classes.hiddenBadge, fr.cx('fr-ml-2v'))}

@@ -1,7 +1,6 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
 import { tss } from 'tss-react';
 
 interface Props {
@@ -17,16 +16,25 @@ const Textarea = (props: Props) => {
 		<>
 			{block.upLabel && (
 				<p
+					id="consigne-commentaire"
 					dangerouslySetInnerHTML={{
 						__html: sanitizeRichHtml(block.upLabel)
 					}}
 				></p>
 			)}
-			<Input
-				className={cx(classes.blockTextarea, fr.cx('fr-mb-2v'))}
-				label={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
-				textArea
-			/>
+			{/* Native field: react-dsfr Input overrides aria-describedby */}
+			<div
+				className={cx(
+					classes.blockTextarea,
+					fr.cx('fr-input-group', 'fr-mb-2v')
+				)}
+			>
+				<textarea
+					className={fr.cx('fr-input')}
+					aria-labelledby="question-commentaire"
+					aria-describedby={block.upLabel ? 'consigne-commentaire' : undefined}
+				/>
+			</div>
 			{block.downLabel && (
 				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
 					<span className={fr.cx('fr-icon-info-fill', 'fr-mr-1v')} />{' '}
