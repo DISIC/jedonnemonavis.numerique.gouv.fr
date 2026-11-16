@@ -83,7 +83,7 @@ const FormConfigurator = (props: Props) => {
 
 	return (
 		<div className={cx(classes.container, fr.cx('fr-grid-row'))}>
-			<div className={fr.cx('fr-col-3')}>
+			<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 				<FormStepper
 					steps={steps}
 					onClick={changeStep}
@@ -93,7 +93,7 @@ const FormConfigurator = (props: Props) => {
 					isStepModified={isStepModified}
 				/>
 			</div>
-			<div className={fr.cx('fr-col-9')}>
+			<div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
 				<FormStepDisplay
 					step={currentStep}
 					form={form}
@@ -112,7 +112,15 @@ const FormConfigurator = (props: Props) => {
 
 const useStyles = tss.withName({ FormConfigurator }).create({
 	container: {
-		height: '100%'
+		height: '100%',
+		// Row on desktop (fr-grid-row), stacked column on mobile
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			flexWrap: 'nowrap',
+			'& > [class*="fr-col"]': {
+				flex: '0 0 auto'
+			}
+		}
 	}
 });
 

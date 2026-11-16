@@ -99,11 +99,18 @@ const textColor = fr.colors.decisions.background.default.grey.default;
 const useStyles = tss.withName({ FormStepper }).create({
 	container: {
 		height: '100%',
+		width: '100%',
 		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
 		padding: fr.spacing('6v'),
 		color: textColor
 	},
 	sideMenu: {
+		// DSFR pulls the sidemenu out by -1rem on mobile: keep it inside the container
+		'&&': {
+			marginLeft: 0,
+			marginRight: 0
+		},
+		// Light text and active bar on the dark blue background
 		'.fr-sidemenu__inner': {
 			boxShadow: 'none'
 		},

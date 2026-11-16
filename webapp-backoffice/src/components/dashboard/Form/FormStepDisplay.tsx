@@ -293,6 +293,7 @@ const FormStepDisplay = (props: Props) => {
 const useStyles = tss.withName({ FormStepDisplay }).create({
 	container: {
 		height: '100%',
+		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
 		gap: fr.spacing('6v'),
