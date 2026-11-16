@@ -124,6 +124,7 @@ const NewForm = (props: Props) => {
 		control,
 		handleSubmit,
 		reset,
+		watch,
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
@@ -284,15 +285,15 @@ const NewForm = (props: Props) => {
 							<form id="form-creation-form">
 								{availableFormTemplates.length > 0 && (
 									<RadioButtons
+										className={classes.templateRadios}
 										legend={
 											<>
 												Type de formulaire
 												<span className={classes.asterisk}>*</span>
 											</>
 										}
-										disabled={hasCreatedForm}
 										options={
-											availableFormTemplates.map(template => ({
+											formTemplates.data.map(template => ({
 												label: (
 													<p className="fr-m-0">
 														{template.title}&nbsp;
@@ -307,6 +308,11 @@ const NewForm = (props: Props) => {
 												nativeInputProps: {
 													value: template.id,
 													checked: selectedFormTemplate?.id === template.id,
+													disabled:
+														hasCreatedForm ||
+														!availableFormTemplates.some(
+															t => t.id === template.id
+														),
 													onChange: () => setSelectedFormTemplate(template)
 												},
 												illustration: (
@@ -463,9 +469,17 @@ const NewForm = (props: Props) => {
 		}
 	})();
 
+	const watchedTitle = watch('title');
+	const headTitle =
+		(formStep === 'CREATE' ? watchedTitle?.trim() : formTitle) ||
+		formTitle ||
+		selectedFormTemplate?.title ||
+		currentStepValues.title;
+
 	return (
 		<OnboardingLayout
 			title={currentStepValues.title}
+			headTitle={headTitle}
 			onConfirm={currentStepValues.confirmAction}
 			noBackground={currentStepValues.noBackground}
 			isConfirmDisabled={formStep === 'GENERATING'}
@@ -487,6 +501,15 @@ export default NewForm;
 const useStyles = tss.withName({ NewForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	// Only the radio input is greyed out when disabled, the card keeps its regular look
+	templateRadios: {
+		'& .fr-radio-rich input[type=radio]:disabled + label': {
+			color: fr.colors.decisions.text.label.grey.default
+		},
+		'& .fr-radio-rich input[type=radio]:disabled + label .fr-hint-text': {
+			color: fr.colors.decisions.text.mention.grey.default
+		}
 	},
 	infoContainer: {
 		display: 'flex',
