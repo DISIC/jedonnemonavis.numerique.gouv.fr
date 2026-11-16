@@ -24,6 +24,7 @@ const Smiley = (props: Props) => {
 			)}
 			<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 				<legend className={fr.cx('fr-fieldset__legend')}>
+					<span className={fr.cx('fr-sr-only')}>{block.label}</span>
 					{block.content && (
 						<span className={fr.cx('fr-hint-text', 'fr-mt-2v')}>
 							{block.content}

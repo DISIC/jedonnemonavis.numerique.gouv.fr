@@ -73,6 +73,7 @@ const Radios = (props: Props) => {
 	return (
 		<div className={classes.container}>
 			<RadioButtons
+				legend={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
 				options={block.options.map(opt => {
 					const isHidden = disabled
 						? false

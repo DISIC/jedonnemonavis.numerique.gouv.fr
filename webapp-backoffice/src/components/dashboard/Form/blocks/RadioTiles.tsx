@@ -18,6 +18,7 @@ const RadioTiles = (props: Props) => {
 	return (
 		<div className={classes.container}>
 			<fieldset>
+				<legend className={fr.cx('fr-sr-only')}>{block.label}</legend>
 				<ul>
 					{block.options.map(opt => (
 						<li key={opt.id}>
