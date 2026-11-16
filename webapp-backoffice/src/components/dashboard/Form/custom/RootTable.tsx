@@ -62,6 +62,9 @@ const RootTable = (props: Props) => {
 								</td>
 								<td colSpan={6}>
 									<fieldset>
+										<legend className={fr.cx('fr-sr-only')}>
+											{childBlock.label}
+										</legend>
 										{!disabled && isParentHidden ? (
 											<Badge className={cx(classes.hiddenBadge)} small>
 												<span
