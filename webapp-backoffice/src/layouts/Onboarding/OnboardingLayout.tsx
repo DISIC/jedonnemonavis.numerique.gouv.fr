@@ -14,6 +14,7 @@ import { tss } from 'tss-react/dsfr';
 interface OnboardingLayoutProps {
 	children: React.ReactNode;
 	title?: string;
+	headTitle?: string;
 	isCancelable?: boolean;
 	confirmText?: string;
 	hideMainHintText?: boolean;
@@ -41,6 +42,7 @@ const OnboardingLayout = ({
 	onConfirm,
 	onSkip,
 	title,
+	headTitle,
 	hideMainHintText,
 	hideBackButton,
 	noBackground,
@@ -166,7 +168,7 @@ const OnboardingLayout = ({
 	return (
 		<>
 			<Head>
-				<title>{`${title} | Je donne mon avis`}</title>
+				<title>{`${headTitle || title} | Je donne mon avis`}</title>
 			</Head>
 			<SkipLinks
 				links={[
