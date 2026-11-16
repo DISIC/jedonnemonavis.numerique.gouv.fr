@@ -2,7 +2,7 @@ import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
+import { useId } from 'react';
 import { tss } from 'tss-react';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
@@ -19,52 +19,77 @@ const FormStepper = (props: Props) => {
 	const { steps, configHelper, onClick, currentStep, isStepModified } = props;
 	const { classes, cx } = useStyles();
 
-	const items: SideMenuProps.Item[] = steps.map(step => {
-		const isHidden = configHelper.displays.some(
-			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-		);
-		const isCurrent = step.id === currentStep.id;
+	const collapseId = useId();
 
-		return {
-			text: (
-				<span className={cx(classes.itemContent)}>
-					{step.title}
-					{isHidden && (
-						<Badge as="span" className={cx(classes.hiddenBadge)} small>
-							<span
-								className={fr.cx('ri-eye-off-line', 'fr-mr-1v')}
-								aria-hidden="true"
-							/>
-							étape masquée
-						</Badge>
-					)}
-					{!isHidden && isStepModified(step.id) && (
-						<Badge as="span" className={cx(classes.modifiedBadge)} small>
-							étape modifiée
-						</Badge>
-					)}
-				</span>
-			),
-			linkProps: {
-				href: '#',
-				'aria-current': isCurrent ? 'step' : undefined,
-				onClick: (e: React.MouseEvent) => {
-					e.preventDefault();
-					if (!isCurrent) onClick(step);
-				}
-			}
-		};
-	});
-
+	// DSFR SideMenu only renders links: switching steps stays on the page,
+	// so we reuse its markup with a <button> in each list item.
 	return (
 		<div className={cx(classes.container)}>
-			<SideMenu
-				className={cx(classes.sideMenu)}
-				items={items}
-				title="Étapes du formulaire"
-				classes={{ title: fr.cx('fr-sr-only') }}
-				burgerMenuButtonText="Étapes du formulaire"
-			/>
+			<nav
+				className={cx(fr.cx('fr-sidemenu'), classes.sideMenu)}
+				aria-label="Étapes du formulaire"
+			>
+				<div className={fr.cx('fr-sidemenu__inner')}>
+					<button
+						type="button"
+						hidden
+						aria-expanded="false"
+						aria-controls={collapseId}
+						className={fr.cx('fr-sidemenu__btn')}
+					>
+						Étapes du formulaire
+					</button>
+					<div className={fr.cx('fr-collapse')} id={collapseId}>
+						<ul className={fr.cx('fr-sidemenu__list')}>
+							{steps.map(step => {
+								const isHidden = configHelper.displays.some(
+									d => d.kind === 'step' && d.parent_id === step.id && d.hidden
+								);
+								const isCurrent = step.id === currentStep.id;
+
+								return (
+									<li key={step.id} className={fr.cx('fr-sidemenu__item')}>
+										<button
+											type="button"
+											className={fr.cx('fr-sidemenu__link')}
+											aria-current={isCurrent ? 'step' : undefined}
+											onClick={() => {
+												if (!isCurrent) onClick(step);
+											}}
+										>
+											<span className={cx(classes.itemContent)}>
+												{step.title}
+												{isHidden && (
+													<Badge
+														as="span"
+														className={cx(classes.hiddenBadge)}
+														small
+													>
+														<span
+															className={fr.cx('ri-eye-off-line', 'fr-mr-1v')}
+															aria-hidden="true"
+														/>
+														étape masquée
+													</Badge>
+												)}
+												{!isHidden && isStepModified(step.id) && (
+													<Badge
+														as="span"
+														className={cx(classes.modifiedBadge)}
+														small
+													>
+														étape modifiée
+													</Badge>
+												)}
+											</span>
+										</button>
+									</li>
+								);
+							})}
+						</ul>
+					</div>
+				</div>
+			</nav>
 		</div>
 	);
 };
