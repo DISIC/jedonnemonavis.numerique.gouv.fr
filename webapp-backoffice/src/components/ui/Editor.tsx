@@ -2,7 +2,7 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { deserialize, serialize } from '@/src/utils/slate';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { BaseEditor, createEditor, Descendant, Node, Text } from 'slate';
 import { withHistory } from 'slate-history';
 import { Editable, Slate, withReact } from 'slate-react';
@@ -39,6 +39,7 @@ const Editor = (props: Props) => {
 		props;
 
 	const { classes, cx } = useStyles();
+	const hintId = useId();
 
 	const [value, setValue] = useState<Descendant[]>([]);
 	const [hasConfig, setHasConfig] = useState(false);
@@ -127,7 +128,7 @@ const Editor = (props: Props) => {
 					title="Appliquer le style italique (Ctrl+I)"
 				/>
 			</div>
-			<p className={fr.cx('fr-hint-text', 'fr-mb-2v')}>
+			<p id={hintId} className={fr.cx('fr-hint-text', 'fr-mb-2v')}>
 				Maximum {MAX_LENGTH} caractères
 			</p>
 			<Editable
@@ -136,6 +137,8 @@ const Editor = (props: Props) => {
 				maxLength={250}
 				renderLeaf={renderLeaf}
 				placeholder="Entrez du texte..."
+				aria-label="Texte d'introduction"
+				aria-describedby={hintId}
 				onKeyDown={event => {
 					if (!(event.ctrlKey || event.metaKey)) return;
 					const key = event.key.toLowerCase();
