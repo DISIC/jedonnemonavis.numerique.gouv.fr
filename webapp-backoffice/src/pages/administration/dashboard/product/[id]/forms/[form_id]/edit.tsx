@@ -269,7 +269,7 @@ const ProductFormPage = (props: Props) => {
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<div className={cx(classes.titleContainer)}>
 						<h1 className={fr.cx('fr-mb-0')}>
 							{form.title || form.form_template.title}
@@ -293,7 +293,12 @@ const ProductFormPage = (props: Props) => {
 						)}
 					</div>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div
+					className={cx(
+						classes.headerButtons,
+						fr.cx('fr-col-12', 'fr-col-md-4')
+					)}
+				>
 					<Button
 						priority="secondary"
 						iconId="fr-icon-edit-line"
@@ -307,10 +312,15 @@ const ProductFormPage = (props: Props) => {
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
 					<hr className={fr.cx('fr-hr')} />
 				</div>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h2 className={fr.cx('fr-mb-0')}>Personnaliser le formulaire</h2>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div
+					className={cx(
+						classes.headerButtons,
+						fr.cx('fr-col-12', 'fr-col-md-4')
+					)}
+				>
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
@@ -354,9 +364,14 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	},
 	headerButtons: {
 		display: 'flex',
+		flexWrap: 'wrap',
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
+		// Buttons go under the title on mobile, aligned with it
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start'
+		},
 		button: {
 			a: {
 				display: 'flex',
