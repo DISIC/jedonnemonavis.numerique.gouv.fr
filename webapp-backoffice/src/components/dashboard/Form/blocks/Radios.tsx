@@ -71,7 +71,7 @@ const Radios = (props: Props) => {
 	}, [displayHelper]);
 
 	return (
-		<div className={classes.container}>
+		<div className={cx(classes.container, !disabled && classes.keepContrast)}>
 			<RadioButtons
 				legend={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
 				options={block.options.map(opt => {
@@ -131,6 +131,15 @@ const Radios = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Radios }).create(() => ({
+	// Hidden options keep a disabled input but their label keeps the normal contrast
+	keepContrast: {
+		'& .fr-fieldset input:disabled + label': {
+			color: fr.colors.decisions.text.label.grey.default
+		},
+		'& .fr-fieldset input:disabled + label .fr-hint-text': {
+			color: fr.colors.decisions.text.mention.grey.default
+		}
+	},
 	container: {
 		marginTop: fr.spacing('4v'),
 		'.fr-radio-group': {

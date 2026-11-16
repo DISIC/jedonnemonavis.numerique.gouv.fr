@@ -251,9 +251,6 @@ const useStyles = tss.withName({ RootScales }).create({
 		}
 	},
 	parentHidden: {
-		'*': {
-			color: fr.colors.decisions.text.mention.grey.default
-		},
 		':not(:last-of-type)': {
 			marginBottom: fr.spacing('6v')
 		}
