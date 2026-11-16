@@ -44,22 +44,27 @@ const RootYesNo = (props: Props) => {
 							isParentHidden ? classes.parentHidden : null
 						)}
 					>
-						<label className={cx(classes.childLabel)}>
-							{childBlock.label}{' '}
-							{!disabled && isParentHidden && (
-								<Badge
-									className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
-									small
-								>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-									option parente masquée
-								</Badge>
-							)}
-						</label>
 						<RadioTiles
 							block={childBlock}
 							disabled={disabled || isParentHidden}
 							nbItems={2}
+							legendClassName={classes.childLabel}
+							legend={
+								<>
+									<span className={fr.cx('fr-sr-only')}>{block.label} </span>
+									{childBlock.label}{' '}
+									{!disabled && isParentHidden && (
+										<Badge
+											as="span"
+											className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
+											small
+										>
+											<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+											option parente masquée
+										</Badge>
+									)}
+								</>
+							}
 						/>
 					</div>
 				);
@@ -88,7 +93,7 @@ const useStyles = tss.withName({ RootYesNo }).create({
 	childLabel: {
 		display: 'block',
 		color: fr.colors.decisions.text.default.grey.default,
-		marginBottom: fr.spacing('3v')
+		marginBottom: fr.spacing('7v')
 	},
 	disabled: {
 		p: {
