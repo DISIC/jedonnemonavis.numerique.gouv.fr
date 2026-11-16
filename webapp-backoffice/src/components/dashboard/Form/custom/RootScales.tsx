@@ -53,49 +53,51 @@ const RootScales = (props: Props) => {
 							className={cx(isParentHidden ? classes.parentHidden : null)}
 							key={childBlock.id}
 						>
-							<div className={cx(classes.labelWrapper)}>
-								<label className={cx(classes.label)}>{childBlock.label}</label>
-							</div>
-							{!disabled && isParentHidden ? (
-								<Badge className={cx(classes.hiddenBadge)} small>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-									option parente masquée
-								</Badge>
-							) : (
-								<ul>
-									{exampleBlock.options.map(opt => (
-										<li key={opt.id}>
-											<input
-												id={`radio-${block.id}-${childBlock.id}-${opt.id}`}
-												type="radio"
-												name={`radio-${block.id}-${childBlock.id}`}
-												disabled={disabled || isParentHidden}
-												onClick={() => {
-													setSelectedOptions(prev => ({
-														...selectedOptions,
-														[childBlock.id]:
-															prev[childBlock.id] === opt.id.toString()
-																? ''
-																: opt.id.toString()
-													}));
-												}}
-												checked={
-													selectedOptions[childBlock.id] === opt.id.toString()
-												}
-											/>
-											<label
-												className={cx(
-													fr.cx('fr-label'),
-													classes.reviewInputLabel
-												)}
-												htmlFor={`radio-${block.id}-${childBlock.id}-${opt.id}`}
-											>
-												{opt.label}
-											</label>
-										</li>
-									))}
-								</ul>
-							)}
+							<fieldset className={cx(classes.fieldset)}>
+								<legend className={cx(classes.labelWrapper)}>
+									<span className={cx(classes.label)}>{childBlock.label}</span>
+								</legend>
+								{!disabled && isParentHidden ? (
+									<Badge className={cx(classes.hiddenBadge)} small>
+										<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+										option parente masquée
+									</Badge>
+								) : (
+									<ul>
+										{exampleBlock.options.map(opt => (
+											<li key={opt.id}>
+												<input
+													id={`radio-${block.id}-${childBlock.id}-${opt.id}`}
+													type="radio"
+													name={`radio-${block.id}-${childBlock.id}`}
+													disabled={disabled || isParentHidden}
+													onClick={() => {
+														setSelectedOptions(prev => ({
+															...selectedOptions,
+															[childBlock.id]:
+																prev[childBlock.id] === opt.id.toString()
+																	? ''
+																	: opt.id.toString()
+														}));
+													}}
+													checked={
+														selectedOptions[childBlock.id] === opt.id.toString()
+													}
+												/>
+												<label
+													className={cx(
+														fr.cx('fr-label'),
+														classes.reviewInputLabel
+													)}
+													htmlFor={`radio-${block.id}-${childBlock.id}-${opt.id}`}
+												>
+													{opt.label}
+												</label>
+											</li>
+										))}
+									</ul>
+								)}
+							</fieldset>
 						</div>
 					);
 				})}
@@ -208,7 +210,14 @@ const useStyles = tss.withName({ RootScales }).create({
 			}
 		}
 	},
+	fieldset: {
+		border: 0,
+		padding: 0,
+		margin: 0,
+		minWidth: 0
+	},
 	labelWrapper: {
+		padding: 0,
 		paddingBottom: fr.spacing('4v'),
 		color: fr.colors.decisions.text.default.grey.default
 	},
