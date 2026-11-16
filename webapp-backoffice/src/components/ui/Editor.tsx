@@ -9,7 +9,7 @@ import { Editable, Slate, withReact } from 'slate-react';
 import { tss } from 'tss-react';
 import Element from './editor/Element';
 import Leaf from './editor/Leaf';
-import MarkButton from './editor/MarkButton';
+import MarkButton, { toggleMark } from './editor/MarkButton';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 interface Props {
@@ -111,16 +111,20 @@ const Editor = (props: Props) => {
 				setValue(value);
 			}}
 		>
-			<div className={classes.toolbar}>
+			<div
+				className={classes.toolbar}
+				role="group"
+				aria-label="Mise en forme du texte"
+			>
 				<MarkButton
 					format="bold"
 					icon="ri-bold"
-					title="Appliquer le style gras"
+					title="Appliquer le style gras (Ctrl+B)"
 				/>
 				<MarkButton
 					format="italic"
 					icon="ri-italic"
-					title="Appliquer le style italic"
+					title="Appliquer le style italique (Ctrl+I)"
 				/>
 			</div>
 			<p className={fr.cx('fr-hint-text', 'fr-mb-2v')}>
@@ -132,6 +136,14 @@ const Editor = (props: Props) => {
 				maxLength={250}
 				renderLeaf={renderLeaf}
 				placeholder="Entrez du texte..."
+				onKeyDown={event => {
+					if (!(event.ctrlKey || event.metaKey)) return;
+					const key = event.key.toLowerCase();
+					if (key === 'b' || key === 'i') {
+						event.preventDefault();
+						toggleMark(editor, key === 'b' ? 'bold' : 'italic');
+					}
+				}}
 			/>
 			{hasReachedMaxLength ? (
 				<div className={fr.cx('fr-error-text')}>
