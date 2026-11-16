@@ -24,9 +24,8 @@ const TextInput = (props: Props) => {
 			)}
 			<Input
 				className={cx(classes.blockInput, fr.cx('fr-mb-2v'))}
-				label={''}
+				label={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
 				hintText={block.content}
-				nativeInputProps={{ 'aria-label': 'Champs de texte' }}
 			/>
 			{block.downLabel && (
 				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
