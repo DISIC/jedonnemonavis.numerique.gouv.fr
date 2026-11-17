@@ -158,6 +158,12 @@ const useStyles = tss.withName({ Radios }).create(() => ({
 		color: fr.colors.decisions.text.actionHigh.grey.default,
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
+		},
+		[fr.breakpoints.down('md')]: {
+			display: 'flex',
+			width: 'fit-content',
+			marginLeft: '0 !important',
+			marginTop: fr.spacing('1v')
 		}
 	}
 }));

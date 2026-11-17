@@ -206,12 +206,27 @@ const useStyles = tss.withName({ Checkboxes }).create({
 					top: '1.05rem !important'
 				}
 			}
+		},
+		[fr.breakpoints.down('md')]: {
+			'.fr-checkbox-group input[type=checkbox] + label': {
+				flexWrap: 'nowrap',
+				gap: fr.spacing('2v'),
+				'.fr-btn': {
+					flexShrink: 0
+				}
+			}
 		}
 	},
 	hiddenBadge: {
 		color: fr.colors.decisions.text.actionHigh.grey.default,
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
+		},
+		[fr.breakpoints.down('md')]: {
+			display: 'flex',
+			width: 'fit-content',
+			marginLeft: '0 !important',
+			marginTop: fr.spacing('1v')
 		}
 	}
 });
