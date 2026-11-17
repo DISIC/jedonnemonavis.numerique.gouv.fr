@@ -10,6 +10,7 @@ import { tss } from 'tss-react';
 import Element from './editor/Element';
 import Leaf from './editor/Leaf';
 import MarkButton, { toggleMark } from './editor/MarkButton';
+import { getQuestionId } from '../dashboard/Form/blocks/TextInput';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 interface Props {
@@ -137,7 +138,7 @@ const Editor = (props: Props) => {
 				maxLength={250}
 				renderLeaf={renderLeaf}
 				placeholder="Entrez du texte..."
-				aria-label="Texte d'introduction"
+				aria-labelledby={getQuestionId(block)}
 				aria-describedby={hintId}
 				onKeyDown={event => {
 					if (!(event.ctrlKey || event.metaKey)) return;
