@@ -406,9 +406,24 @@ const useStyles = tss
 		},
 		contentHeader: {
 			display: 'flex',
-			justifyContent: 'space-between'
+			justifyContent: 'space-between',
+			[fr.breakpoints.down('md')]: {
+				flexDirection: 'column',
+				alignItems: 'stretch'
+			}
 		},
-		headerActions: {},
+		headerActions: {
+			[fr.breakpoints.down('md')]: {
+				display: 'flex',
+				flexDirection: 'column',
+				gap: fr.spacing('4v'),
+				marginBottom: fr.spacing('4v'),
+				'.fr-btn': {
+					width: '100%',
+					justifyContent: 'center'
+				}
+			}
+		},
 		actionsContainer: {
 			position: 'fixed',
 			bottom: 0,
