@@ -130,15 +130,13 @@ const ProductLayout = ({
 						'fr-mb-md-0'
 					)}
 				>
-					<div role="navigation">
-						<SideMenu
-							align="left"
-							aria-label="Menu latéral"
-							items={menuItems}
-							burgerMenuButtonText="Menu"
-							sticky
-						/>
-					</div>
+					<SideMenu
+						align="left"
+						aria-label="Menu latéral"
+						items={menuItems}
+						burgerMenuButtonText="Menu"
+						sticky
+					/>
 				</div>
 				<div
 					className={fr.cx(
