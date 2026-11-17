@@ -17,6 +17,12 @@ type Props = {
 	 * conserver son surlignage des termes recherchés autour des libellés.
 	 */
 	renderSegment?: (segment: string, key: number) => React.ReactNode;
+	/**
+	 * Rend chaque fragment masqué focusable (bouton) pour afficher l'infobulle
+	 * au clavier. À désactiver dans les lignes cliquables de la liste des avis,
+	 * où le détail de l'avis reste accessible via « Voir l'avis ».
+	 */
+	focusable?: boolean;
 };
 
 /**
@@ -30,7 +36,11 @@ type Props = {
  * lisible par quiconque ouvre l'inspecteur — ce serait un masquage en
  * trompe-l'œil.
  */
-export const MaskedText = ({ text, renderSegment }: Props) => {
+export const MaskedText = ({
+	text,
+	renderSegment,
+	focusable = true
+}: Props) => {
 	const { classes } = useStyles();
 	const idPrefix = `masked-${useId().replace(/:/g, '')}`;
 
@@ -46,14 +56,17 @@ export const MaskedText = ({ text, renderSegment }: Props) => {
 						id={`${idPrefix}-${index}`}
 						title="Les informations personnelles sont supprimées pour le respect de la vie privée"
 					>
-						<button
-							type="button"
-							className={classes.maskButton}
-							aria-describedby={`${idPrefix}-${index}`}
-							onClick={e => e.stopPropagation()}
-						>
+						{focusable ? (
+							<button
+								type="button"
+								className={classes.maskButton}
+								aria-describedby={`${idPrefix}-${index}`}
+							>
+								<em className={classes.mask}>{segment.text}</em>
+							</button>
+						) : (
 							<em className={classes.mask}>{segment.text}</em>
-						</button>
+						)}
 					</Tooltip>
 				) : renderSegment ? (
 					renderSegment(segment.text, index)

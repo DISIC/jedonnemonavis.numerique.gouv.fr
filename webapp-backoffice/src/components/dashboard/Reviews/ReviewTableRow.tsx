@@ -193,6 +193,7 @@ const ReviewTableRow = ({
 					<p className={cx(classes.content, classes.contentVerbatim)}>
 						{verbatimAnswer ? (
 							<MaskedText
+								focusable={false}
 								text={verbatimAnswer.answer_text || ''}
 								renderSegment={(segment, key) => (
 									<React.Fragment key={key}>
@@ -221,8 +222,7 @@ const ReviewTableRow = ({
 					Voir l'avis
 					<span className={fr.cx('fr-sr-only')}>
 						{' '}
-						du{' '}
-						{formatFullFrenchDateTime(review.created_at?.toString() || '')}
+						du {formatFullFrenchDateTime(review.created_at?.toString() || '')}
 					</span>
 				</button>
 			</td>
