@@ -17,7 +17,6 @@ import { useDebounce } from 'usehooks-ts';
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'>;
 
-// Assign one element to several refs (callback or object refs)
 const mergeRefs =
 	<T,>(...refs: (React.Ref<T> | undefined)[]) =>
 	(el: T | null) => {
@@ -236,7 +235,6 @@ const NewProduct = () => {
 											<Input
 												nativeInputProps={{
 													...params.inputProps,
-													// Share the input with react-hook-form so it can focus it on error
 													ref: mergeRefs(params.inputProps.ref, fieldRef),
 													type: 'search',
 													required: true,
@@ -303,7 +301,6 @@ const NewProduct = () => {
 										</>
 									}
 									nativeInputProps={{
-										// Lets react-hook-form focus this field on error
 										ref,
 										onChange,
 										value,
