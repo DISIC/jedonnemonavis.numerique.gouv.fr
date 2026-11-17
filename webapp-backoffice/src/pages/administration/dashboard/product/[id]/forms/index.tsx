@@ -143,6 +143,7 @@ const ProductFormsPage = (props: Props) => {
 						<div role="alert">
 							<Alert
 								className={fr.cx('fr-col-12', 'fr-mb-8v')}
+								as="h2"
 								title="Votre formulaire a été créé avec succès !"
 								description={
 									<>
