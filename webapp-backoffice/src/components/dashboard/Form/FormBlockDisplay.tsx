@@ -248,8 +248,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		color: fr.colors.decisions.text.default.grey.default
 	},
 	header: {
+		gap: fr.spacing('4v'),
 		'& > div:nth-child(2)': {
 			textAlign: 'right'
+		},
+		[fr.breakpoints.up('md')]: {
+			flexWrap: 'nowrap' as const,
+			'& > div': {
+				flexShrink: 1
+			}
 		}
 	},
 	headerInfo: {
@@ -262,7 +269,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		gap: fr.spacing('2v'),
-		flexWrap: 'wrap' as const
+		flexWrap: 'wrap' as const,
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column' as const,
+			alignItems: 'stretch',
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

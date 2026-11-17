@@ -369,7 +369,12 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
 		[fr.breakpoints.down('md')]: {
-			justifyContent: 'start'
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
 		},
 		button: {
 			a: {

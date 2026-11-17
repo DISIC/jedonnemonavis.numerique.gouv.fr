@@ -213,11 +213,22 @@ const useStyles = tss.withName({ MarkButton }).create({
 	submit: {
 		marginTop: fr.spacing('4v'),
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	rightButtonsWrapper: {
 		display: 'flex',
-		gap: fr.spacing('4v')
+		gap: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column'
+		}
 	},
 	nbCharsHint: {
 		textAlign: 'right',
