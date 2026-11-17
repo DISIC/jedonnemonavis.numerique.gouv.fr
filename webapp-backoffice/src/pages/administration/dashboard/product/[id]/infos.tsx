@@ -240,6 +240,7 @@ const ProductInformationPage = (props: Props) => {
 							iconPosition="right"
 							priority="tertiary"
 							className={classes.buttonError}
+							aria-label={`Supprimer ce service numérique ${product.title}`}
 							onClick={() => {
 								if (hasLockedForm) {
 									setStatusProductState({
@@ -269,7 +270,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start'
+		}
 	},
 	column: {
 		display: 'flex',
@@ -288,7 +293,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 		boxShadow: 'none'
 	},
 	buttonError: {
-		color: fr.colors.decisions.text.default.error.default
+		color: fr.colors.decisions.text.default.error.default,
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	}
 });
 
