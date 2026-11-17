@@ -69,14 +69,12 @@ const FormStepper = (props: Props) => {
 	);
 };
 
-const textColor = fr.colors.decisions.background.default.grey.default;
-
 const useStyles = tss.withName({ FormStepper }).create({
 	container: {
 		height: '100%',
 		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
 		padding: fr.spacing('6v'),
-		color: textColor
+		color: fr.colors.decisions.background.default.grey.default,
 	},
 	sideMenu: {
 		'.fr-sidemenu__inner': {
@@ -88,7 +86,7 @@ const useStyles = tss.withName({ FormStepper }).create({
 			gap: '12px'
 		},
 		'.fr-sidemenu__link, .fr-sidemenu__btn': {
-			color: `${textColor} !important`,
+			color: `${fr.colors.decisions.background.default.grey.default} !important`,
 			paddingLeft: '20px',
 			'&:hover': {
 				backgroundColor: 'transparent !important',
@@ -96,7 +94,7 @@ const useStyles = tss.withName({ FormStepper }).create({
 			}
 		},
 		'.fr-sidemenu__link[aria-current]:not([aria-current=false])::before': {
-			backgroundColor: textColor,
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			width: '8px',
 			top: 0,
 			bottom: 0
