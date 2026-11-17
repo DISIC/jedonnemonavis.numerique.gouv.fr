@@ -2,6 +2,7 @@ import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
 import { tss } from 'tss-react';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
@@ -15,45 +16,55 @@ interface Props {
 }
 
 const FormStepper = (props: Props) => {
-	const { steps, configHelper, onClick, currentStep, form, isStepModified } =
-		props;
+	const { steps, configHelper, onClick, currentStep, isStepModified } = props;
 	const { classes, cx } = useStyles();
+
+	const items: SideMenuProps.Item[] = steps.map(step => {
+		const isHidden = configHelper.displays.some(
+			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
+		);
+		const isCurrent = step.id === currentStep.id;
+
+		return {
+			text: (
+				<span className={cx(classes.itemContent)}>
+					{step.title}
+					{isHidden && (
+						<Badge as="span" className={cx(classes.hiddenBadge)} small>
+							<span
+								className={fr.cx('ri-eye-off-line', 'fr-mr-1v')}
+								aria-hidden="true"
+							/>
+							étape masquée
+						</Badge>
+					)}
+					{!isHidden && isStepModified(step.id) && (
+						<Badge as="span" className={cx(classes.modifiedBadge)} small>
+							étape modifiée
+						</Badge>
+					)}
+				</span>
+			),
+			linkProps: {
+				href: '#',
+				'aria-current': isCurrent ? 'step' : undefined,
+				onClick: (e: React.MouseEvent) => {
+					e.preventDefault();
+					if (!isCurrent) onClick(step);
+				}
+			}
+		};
+	});
 
 	return (
 		<div className={cx(classes.container)}>
-			{steps.map(step => {
-				const isHidden = configHelper.displays.some(
-					d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-				);
-
-				return (
-					<button
-						title={`Aller à l'étape ${step.title}`}
-						disabled={step.id === currentStep.id}
-						key={step.id}
-						className={cx(
-							classes.step,
-							step.id === currentStep.id ? classes.currentStep : null,
-							isHidden ? classes.hiddenStep : null
-						)}
-						onClick={() => onClick(step)}
-					>
-						{step.title}
-						<br />
-						{isHidden && (
-							<Badge className={cx(classes.hiddenBadge)} small>
-								<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-								étape masquée
-							</Badge>
-						)}
-						{!isHidden && isStepModified(step.id) && (
-							<Badge className={cx(classes.modifiedBadge)} small>
-								étape modifiée
-							</Badge>
-						)}
-					</button>
-				);
-			})}
+			<SideMenu
+				className={cx(classes.sideMenu)}
+				items={items}
+				title="Étapes du formulaire"
+				classes={{ title: fr.cx('fr-sr-only') }}
+				burgerMenuButtonText="Étapes du formulaire"
+			/>
 		</div>
 	);
 };
@@ -61,36 +72,39 @@ const FormStepper = (props: Props) => {
 const useStyles = tss.withName({ FormStepper }).create({
 	container: {
 		height: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		gap: fr.spacing('3v'),
 		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
 		padding: fr.spacing('6v'),
-		color: fr.colors.decisions.background.default.grey.default
+		color: fr.colors.decisions.background.default.grey.default,
 	},
-	step: {
-		textAlign: 'left',
-		fontWeight: 'bold',
-		borderLeft: `4px solid ${fr.colors.decisions.border.default.blueFrance.default}`,
-		padding: fr.spacing('3v'),
-		'&:hover': {
-			borderColor: fr.colors.decisions.background.default.grey.default,
-			backgroundColor: 'transparent !important'
+	sideMenu: {
+		'.fr-sidemenu__inner': {
+			boxShadow: 'none'
 		},
-		'&:disabled': {
-			color: fr.colors.decisions.background.default.grey.default,
-			cursor: 'pointer'
+		'.fr-sidemenu__list': {
+			display: 'flex',
+			flexDirection: 'column',
+			gap: '12px'
+		},
+		'.fr-sidemenu__link, .fr-sidemenu__btn': {
+			color: `${fr.colors.decisions.background.default.grey.default} !important`,
+			paddingLeft: '20px',
+			'&:hover': {
+				backgroundColor: 'transparent !important',
+				textDecoration: 'underline'
+			}
+		},
+		'.fr-sidemenu__link[aria-current]:not([aria-current=false])::before': {
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
+			width: '8px',
+			top: 0,
+			bottom: 0
 		}
 	},
-	currentStep: {
-		borderLeft: `8px solid ${fr.colors.decisions.background.default.grey.default}`,
-		borderColor: `${fr.colors.decisions.background.default.grey.default} !important`
-	},
-	hiddenStep: {
-		color: `${fr.colors.decisions.background.actionLow.blueFrance.hover} !important`,
-		paddingTop: fr.spacing('1v'),
-		paddingBottom: fr.spacing('1v'),
-		borderLeft: `4px dotted ${fr.colors.decisions.border.default.blueFrance.default}`,
+	itemContent: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		gap: fr.spacing('1v'),
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		}

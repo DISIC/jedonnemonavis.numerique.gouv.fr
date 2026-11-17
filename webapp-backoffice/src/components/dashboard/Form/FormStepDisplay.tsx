@@ -4,7 +4,7 @@ import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
+import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { FormConfigKind } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
@@ -107,9 +107,9 @@ const FormStepDisplay = (props: Props) => {
 					<div className={cx(classes.headerInfo)}>
 						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
 						{step.description && (
-							<Tooltip
+							<InfoTooltip
 								className={classes.tooltip}
-								kind="hover"
+								buttonLabel="Pourquoi cette étape ?"
 								title={
 									<>
 										<b>Pourquoi cette étape ?</b>

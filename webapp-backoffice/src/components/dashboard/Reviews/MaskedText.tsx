@@ -1,6 +1,6 @@
 import { splitMaskedText } from '@/src/utils/personal-data';
 import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
-import React from 'react';
+import React, { useId } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -17,6 +17,12 @@ type Props = {
 	 * conserver son surlignage des termes recherchés autour des libellés.
 	 */
 	renderSegment?: (segment: string, key: number) => React.ReactNode;
+	/**
+	 * Rend chaque fragment masqué focusable (bouton) pour afficher l'infobulle
+	 * au clavier. À désactiver dans les lignes cliquables de la liste des avis,
+	 * où le détail de l'avis reste accessible via « Voir l'avis ».
+	 */
+	focusable?: boolean;
 };
 
 /**
@@ -30,8 +36,13 @@ type Props = {
  * lisible par quiconque ouvre l'inspecteur — ce serait un masquage en
  * trompe-l'œil.
  */
-export const MaskedText = ({ text, renderSegment }: Props) => {
+export const MaskedText = ({
+	text,
+	renderSegment,
+	focusable = true
+}: Props) => {
 	const { classes } = useStyles();
+	const idPrefix = `masked-${useId().replace(/:/g, '')}`;
 
 	const segments = splitMaskedText(text);
 
@@ -42,9 +53,20 @@ export const MaskedText = ({ text, renderSegment }: Props) => {
 					<Tooltip
 						key={index}
 						kind="hover"
+						id={`${idPrefix}-${index}`}
 						title="Les informations personnelles sont supprimées pour le respect de la vie privée"
 					>
-						<em className={classes.mask}>{segment.text}</em>
+						{focusable ? (
+							<button
+								type="button"
+								className={classes.maskButton}
+								aria-describedby={`${idPrefix}-${index}`}
+							>
+								<em className={classes.mask}>{segment.text}</em>
+							</button>
+						) : (
+							<em className={classes.mask}>{segment.text}</em>
+						)}
 					</Tooltip>
 				) : renderSegment ? (
 					renderSegment(segment.text, index)
@@ -57,6 +79,16 @@ export const MaskedText = ({ text, renderSegment }: Props) => {
 };
 
 const useStyles = tss.withName({ MaskedText }).create(() => ({
+	maskButton: {
+		display: 'inline',
+		padding: 0,
+		border: 'none',
+		background: 'none',
+		font: 'inherit',
+		color: 'inherit',
+		textAlign: 'inherit',
+		cursor: 'help'
+	},
 	mask: {
 		fontStyle: 'italic',
 		cursor: 'help'

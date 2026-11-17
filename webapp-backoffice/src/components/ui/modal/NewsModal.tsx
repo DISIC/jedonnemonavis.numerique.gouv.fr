@@ -31,16 +31,19 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 			size="large"
 		>
 			<p className={fr.cx('fr-mb-4v')}>Vous pouvez désormais : </p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Identifier les bugs sur vos services numériques grâce à vos usagers.
-				Créer des formulaires de “Remontées d’informations” est maintenant
-				possible. Plus d’infos sur la page des nouveautés.
-			</p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Affichez un bouton flottant sur votre site afin que vos usagers
-				trouvent le chemin de votre formulaire “Remontées d’informations” à
-				n’importe quel moment.
-			</p>
+			<ul className={classes.newsList}>
+				<li className={fr.cx('fr-mb-4v')}>
+					<span aria-hidden="true">⭐️</span> Identifier les bugs sur vos
+					services numériques grâce à vos usagers. Créer des formulaires de
+					“Remontées d’informations” est maintenant possible. Plus d’infos sur
+					la page des nouveautés.
+				</li>
+				<li className={fr.cx('fr-mb-4v')}>
+					<span aria-hidden="true">⭐️</span> Affichez un bouton flottant sur
+					votre site afin que vos usagers trouvent le chemin de votre
+					formulaire “Remontées d’informations” à n’importe quel moment.
+				</li>
+			</ul>
 			<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 				<Image
 					src="/assets/news-feature/modal-bug.png"
@@ -62,6 +65,15 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 };
 
 const useStyles = tss.create({
+	// The ⭐️ emoji acts as the bullet: no list marker, no DSFR list spacing
+	newsList: {
+		listStyle: 'none',
+		margin: 0,
+		paddingLeft: 0,
+		'& > li': {
+			paddingBottom: 0
+		}
+	},
 	imageContainer: {
 		display: 'flex',
 		justifyContent: 'center',

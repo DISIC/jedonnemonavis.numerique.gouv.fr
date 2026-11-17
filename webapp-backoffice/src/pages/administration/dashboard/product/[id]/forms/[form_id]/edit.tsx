@@ -18,7 +18,7 @@ import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
+import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { $Enums } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
@@ -275,9 +275,9 @@ const ProductFormPage = (props: Props) => {
 							{form.title || form.form_template.title}
 						</h1>
 						{form.form_template.description && (
-							<Tooltip
+							<InfoTooltip
 								className={classes.tooltip}
-								kind="hover"
+								buttonLabel="Pourquoi ce modèle ?"
 								title={
 									<>
 										<b>Pourquoi ce modèle ?</b>
@@ -373,7 +373,7 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	titleContainer: {
 		display: 'flex',
 		alignItems: 'center',
-		'.fr-icon-question-line': {
+		'.ri-information-line': {
 			marginLeft: fr.spacing('2v')
 		}
 	}

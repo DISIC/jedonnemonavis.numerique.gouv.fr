@@ -33,7 +33,7 @@ const NoButtonsPanel = (props: Props) => {
 				<div className={fr.cx('fr-col-md-2')}>
 					<Image
 						src="/assets/install_picto.svg"
-						alt="Picto bulles de discussion"
+						alt=""
 						width={120}
 						height={120}
 					/>

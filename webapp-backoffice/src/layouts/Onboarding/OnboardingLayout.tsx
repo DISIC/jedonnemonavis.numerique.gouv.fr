@@ -57,7 +57,6 @@ const OnboardingLayout = ({
 	const router = useRouter();
 	const { data: session } = useSession();
 	const { cx, classes } = useStyles({ isStepperLayout });
-	const mainRef = React.useRef<HTMLElement>(null);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
 
@@ -74,12 +73,6 @@ const OnboardingLayout = ({
 		event.stopPropagation();
 		setAnchorEl(null);
 	};
-
-	React.useEffect(() => {
-		if (mainRef.current) {
-			mainRef.current.focus();
-		}
-	}, []);
 
 	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		[
@@ -210,10 +203,9 @@ const OnboardingLayout = ({
 				/>
 			)}
 			<main
-				ref={mainRef}
 				id="main"
 				role="main"
-				tabIndex={0}
+				tabIndex={-1}
 				className={cx(
 					classes.mainContainer,
 					fr.cx(hideTitle && 'fr-pt-0', hideActions && 'fr-pb-0')
