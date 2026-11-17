@@ -632,9 +632,9 @@ const useStyles = tss.create({
 		...fr.spacing('margin', { rightLeft: '6v' })
 	},
 	shortcutsRow: {
-		// List reset (ul/li) — no bullets, no DSFR list spacing
 		listStyle: 'none',
 		margin: 0,
+		padding: 0,
 		'& > li': {
 			margin: 0,
 			padding: 0
