@@ -360,6 +360,10 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
+		// && beats the DSFR gutter padding on the column
+		'&&': {
+			paddingBottom: fr.spacing('6v')
+		},
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'stretch',
