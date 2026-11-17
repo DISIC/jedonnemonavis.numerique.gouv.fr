@@ -22,7 +22,7 @@ import { Form, FormTemplate, RightAccessStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { keepDisabledContrast } from '@/src/components/dashboard/Form/blocks/sharedStyles';
@@ -124,8 +124,7 @@ const NewForm = (props: Props) => {
 		control,
 		handleSubmit,
 		reset,
-		watch,
-		formState: { errors, submitCount }
+		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
 			title: defaultTitle || selectedFormTemplate?.title || ''
@@ -134,11 +133,8 @@ const NewForm = (props: Props) => {
 
 	const titleInfoId = 'form-title-info';
 	const titleErrorId = 'form-title-error';
-	const titleErrorRef = useRef<HTMLParagraphElement>(null);
-
-	useEffect(() => {
-		if (errors.title) titleErrorRef.current?.focus();
-	}, [submitCount]);
+	// Title shown in <title>, updated when the field loses focus (not on each keystroke)
+	const [committedTitle, setCommittedTitle] = useState<string>();
 
 	const createFormConfig = trpc.formConfig.create.useMutation({
 		onSuccess: () => {
@@ -174,6 +170,7 @@ const NewForm = (props: Props) => {
 		reset({
 			title: defaultTitle || selectedFormTemplate?.title || ''
 		});
+		setCommittedTitle(undefined);
 	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
@@ -364,7 +361,6 @@ const NewForm = (props: Props) => {
 										render={({ field: { onChange, value, name, ref } }) => {
 											return (
 												<div
-													ref={ref}
 													className={fr.cx(
 														'fr-input-group',
 														errors[name] ? 'fr-input-group--error' : undefined
@@ -385,12 +381,17 @@ const NewForm = (props: Props) => {
 													</label>
 													<input
 														id="form-title"
+														// react-hook-form focuses the invalid field on submit
+														ref={ref}
 														className={fr.cx(
 															'fr-input',
 															errors[name] ? 'fr-input--error' : undefined
 														)}
 														type="text"
 														onChange={onChange}
+														onBlur={e =>
+															setCommittedTitle(e.target.value.trim())
+														}
 														value={value || ''}
 														name={name}
 														required
@@ -420,8 +421,6 @@ const NewForm = (props: Props) => {
 														{errors[name] && (
 															<p
 																id={titleErrorId}
-																ref={titleErrorRef}
-																tabIndex={-1}
 																className={fr.cx('fr-error-text')}
 															>
 																{errors[name]?.message}
@@ -498,9 +497,8 @@ const NewForm = (props: Props) => {
 		}
 	})();
 
-	const watchedTitle = watch('title');
 	const headTitle =
-		(formStep === 'CREATE' ? watchedTitle?.trim() : formTitle) ||
+		(formStep === 'CREATE' ? committedTitle ?? defaultTitle : formTitle) ||
 		formTitle ||
 		selectedFormTemplate?.title ||
 		currentStepValues.title;
