@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import React, { KeyboardEvent } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { AdminEntityRightActionType } from './EntityRightsModal';
+import { toHtmlIdSlug } from '@/src/utils/tools';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
@@ -35,6 +36,13 @@ const EntityRightCard = (props: Props) => {
 	const { cx, classes } = useStyles({
 		withOptions: withOptions || false
 	});
+
+	const userFullName = adminEntityRight.user
+		? `${adminEntityRight.user.firstName} ${adminEntityRight.user.lastName}`
+		: adminEntityRight.user_email ?? adminEntityRight.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${adminEntityRight.id}`;
+	const optionsButtonId = `button-options-access-right-${idSuffix}`;
+	const optionsMenuId = `option-menu-access-right-${idSuffix}`;
 
 	return (
 		<>
@@ -79,7 +87,7 @@ const EntityRightCard = (props: Props) => {
 						{withOptions &&
 							(adminEntityRight.user !== null ? (
 								<Button
-									id="button-options-access-right"
+									id={`button-remove-access-right-${idSuffix}`}
 									priority="tertiary"
 									onClick={() => {
 										if (onButtonClick)
@@ -97,10 +105,11 @@ const EntityRightCard = (props: Props) => {
 							) : (
 								<>
 									<Button
-										id="button-options-access-right"
-										aria-controls={menuOpen ? 'option-menu' : undefined}
+										id={optionsButtonId}
+										aria-label={`Options ${userFullName}`}
+										aria-controls={menuOpen ? optionsMenuId : undefined}
 										aria-haspopup="true"
-										aria-expanded={menuOpen ? 'true' : undefined}
+										aria-expanded={menuOpen}
 										priority="tertiary"
 										className={menuOpen ? classes.buttonOptionsOpen : ''}
 										onClick={handleClick}
@@ -116,13 +125,13 @@ const EntityRightCard = (props: Props) => {
 										Options
 									</Button>
 									<Menu
-										id="option-menu"
+										id={optionsMenuId}
 										open={menuOpen}
 										anchorEl={anchorEl}
 										container={menuContainer ?? undefined}
 										onClose={handleClose}
 										MenuListProps={{
-											'aria-labelledby': 'button-options-access-right'
+											'aria-labelledby': optionsButtonId
 										}}
 									>
 										<MenuItem

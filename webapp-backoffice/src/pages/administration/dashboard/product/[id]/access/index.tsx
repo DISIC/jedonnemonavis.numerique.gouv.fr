@@ -1,4 +1,7 @@
-import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightCard';
+import AccessRightCard, {
+	ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX,
+	getAccessRightOptionsIds
+} from '@/src/components/dashboard/AccessRight/AccessRightCard';
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
 import { Loader } from '@/src/components/ui/Loader';
@@ -38,6 +41,14 @@ const modal = createModal({
 	isOpenedByDefault: false
 });
 
+const INVITE_USERS_BUTTON_ID = 'button-invite-users';
+
+type ModalFocusReturn = {
+	onCancelIds: string[];
+	onSuccessIds: string[];
+	submittedAt?: number;
+};
+
 const AccessManagement = (props: Props) => {
 	const { cx, classes } = useStyles();
 
@@ -61,23 +72,28 @@ const AccessManagement = (props: Props) => {
 	const isModalOpen = useIsModalOpen(modal);
 	const { data: session } = useSession();
 
-	const { data: accessRightsResult, isLoading: isLoadingAccessRights } =
-		trpc.accessRight.getList.useQuery(
-			{
-				product_id: product.id,
-				numberPerPage,
-				page: currentPage,
-				isRemoved: carriersRemovedFilter
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
+	const modalFocusReturnRef = React.useRef<ModalFocusReturn | null>(null);
+
+	const {
+		data: accessRightsResult,
+		isLoading: isLoadingAccessRights,
+		dataUpdatedAt: accessRightsUpdatedAt
+	} = trpc.accessRight.getList.useQuery(
+		{
+			product_id: product.id,
+			numberPerPage,
+			page: currentPage,
+			isRemoved: carriersRemovedFilter
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
 				}
 			}
-		);
+		}
+	);
 
 	const {
 		data: accessRights,
@@ -137,9 +153,67 @@ const AccessManagement = (props: Props) => {
 			return;
 		}
 
+		modalFocusReturnRef.current =
+			accessRight && (modalType === 'switch' || modalType === 'remove')
+				? getModalFocusReturn(modalType, accessRight)
+				: null;
+
 		setIsModalSubmitted(false);
 		if (isMounted) modal.open();
 	};
+
+	const getModalFocusReturn = (
+		modalType: 'switch' | 'remove',
+		accessRight: AccessRightWithUsers
+	): ModalFocusReturn => {
+		const { optionsButtonId } = getAccessRightOptionsIds(accessRight);
+		if (modalType === 'switch') {
+			return {
+				onCancelIds: [optionsButtonId],
+				onSuccessIds: [optionsButtonId]
+			};
+		}
+
+		const optionsButtonIds = Array.from(
+			document.querySelectorAll<HTMLElement>(
+				`[id^="${ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX}"]`
+			),
+			button => button.id
+		);
+		const index = optionsButtonIds.indexOf(optionsButtonId);
+
+		return {
+			onCancelIds: [optionsButtonId],
+			onSuccessIds: [
+				...optionsButtonIds.slice(0, Math.max(index, 0)).reverse(),
+				...optionsButtonIds.slice(index + 1),
+				INVITE_USERS_BUTTON_ID
+			]
+		};
+	};
+
+	// Restore focus once the modal is closed. After a submission, wait for the
+	// list to be refetched: a switched card is re-rendered in the other list.
+	React.useEffect(() => {
+		const focusReturn = modalFocusReturnRef.current;
+		if (isModalOpen || !focusReturn) return;
+
+		const isSubmitted = focusReturn.submittedAt !== undefined;
+		if (isSubmitted && accessRightsUpdatedAt < focusReturn.submittedAt!) return;
+
+		const timer = window.setTimeout(() => {
+			const candidateIds = isSubmitted
+				? focusReturn.onSuccessIds
+				: focusReturn.onCancelIds;
+			candidateIds
+				.map(id => document.getElementById(id))
+				.find(element => element !== null)
+				?.focus();
+			modalFocusReturnRef.current = null;
+		}, 0);
+
+		return () => window.clearTimeout(timer);
+	}, [isModalOpen, accessRightsUpdatedAt]);
 
 	const getAlertTitle = () => {
 		const userName = currentAccessRight?.user
@@ -215,6 +289,11 @@ const AccessManagement = (props: Props) => {
 					setIsModalSubmitted={setIsModalSubmitted}
 					currentAccessRight={currentAccessRight}
 					setCurrentAccessRight={setCurrentAccessRight}
+					onSuccess={() => {
+						if (modalFocusReturnRef.current) {
+							modalFocusReturnRef.current.submittedAt = Date.now();
+						}
+					}}
 				/>
 
 				<div
@@ -233,6 +312,7 @@ const AccessManagement = (props: Props) => {
 					<div className={cx(fr.cx('fr-col-md-4'), classes.headerButton)}>
 						{ownRight === 'carrier_admin' && (
 							<Button
+								id={INVITE_USERS_BUTTON_ID}
 								priority="secondary"
 								iconPosition="right"
 								iconId="ri-user-add-line"
@@ -304,20 +384,21 @@ const AccessManagement = (props: Props) => {
 										mais pas de le modifier
 									</p>
 								</div>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (accessRight.status === 'carrier_user') {
-											return (
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessRights
+										.filter(
+											accessRight => accessRight.status === 'carrier_user'
+										)
+										.map(accessRight => (
+											<li key={accessRight.id}>
 												<AccessRightCard
-													key={index}
 													accessRight={accessRight}
 													onButtonClick={handleModalOpening}
 													ownRight={ownRight}
 												/>
-											);
-										}
-									})}
-								</div>
+											</li>
+										))}
+								</ul>
 							</div>
 						)}
 						{accessRights.some(
@@ -333,20 +414,21 @@ const AccessManagement = (props: Props) => {
 										service numérique
 									</p>
 								</div>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (accessRight.status === 'carrier_admin') {
-											return (
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessRights
+										.filter(
+											accessRight => accessRight.status === 'carrier_admin'
+										)
+										.map(accessRight => (
+											<li key={accessRight.id}>
 												<AccessRightCard
-													key={index}
 													accessRight={accessRight}
 													onButtonClick={handleModalOpening}
 													ownRight={ownRight}
 												/>
-											);
-										}
-									})}
-								</div>
+											</li>
+										))}
+								</ul>
 							</div>
 						)}
 						{accessAdminEntityRights.length > 0 && (
@@ -362,18 +444,15 @@ const AccessManagement = (props: Props) => {
 										</p>
 									</div>
 								</div>
-								<div>
-									{accessAdminEntityRights.map(
-										(accessAdminEntityRight, index) => {
-											return (
-												<EntityRightCard
-													key={index}
-													adminEntityRight={accessAdminEntityRight}
-												/>
-											);
-										}
-									)}
-								</div>
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessAdminEntityRights.map(accessAdminEntityRight => (
+										<li key={accessAdminEntityRight.id}>
+											<EntityRightCard
+												adminEntityRight={accessAdminEntityRight}
+											/>
+										</li>
+									))}
+								</ul>
 							</div>
 						)}
 					</div>

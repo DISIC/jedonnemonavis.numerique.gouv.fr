@@ -10,6 +10,7 @@ import { AccessRightModalType } from '@/src/pages/administration/dashboard/produ
 import { push } from '@socialgouv/matomo-next';
 import { AccessRightMenuOptions } from './AccessRightMenuOptions';
 import { RightAccessStatus } from '@prisma/client';
+import { toHtmlIdSlug } from '@/src/utils/tools';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -19,6 +20,22 @@ interface Props {
 	) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
+
+export const ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX =
+	'button-options-access-right-';
+
+export const getAccessRightOptionsIds = (accessRight: AccessRightWithUsers) => {
+	const userFullName = accessRight.user
+		? `${accessRight.user.firstName} ${accessRight.user.lastName}`
+		: accessRight.user_email ?? accessRight.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${accessRight.id}`;
+
+	return {
+		userFullName,
+		optionsButtonId: `${ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
+};
 
 const ProductAccessCard = (props: Props) => {
 	const { accessRight, onButtonClick, ownRight } = props;
@@ -34,6 +51,9 @@ const ProductAccessCard = (props: Props) => {
 	};
 
 	const { cx, classes } = useStyles();
+
+	const { userFullName, optionsButtonId, optionsMenuId } =
+		getAccessRightOptionsIds(accessRight);
 
 	return (
 		<>
@@ -105,10 +125,11 @@ const ProductAccessCard = (props: Props) => {
 						{ownRight === 'carrier_admin' && (
 							<>
 								<Button
-									id="button-options-access-right"
-									aria-controls={menuOpen ? 'option-menu' : undefined}
+									id={optionsButtonId}
+									aria-label={`Options ${userFullName}`}
+									aria-controls={menuOpen ? optionsMenuId : undefined}
 									aria-haspopup="true"
-									aria-expanded={menuOpen ? 'true' : undefined}
+									aria-expanded={menuOpen}
 									priority={'secondary'}
 									className={cx(
 										classes.button,
@@ -128,6 +149,8 @@ const ProductAccessCard = (props: Props) => {
 									open={menuOpen}
 									anchorEl={anchorEl}
 									onClose={handleClose}
+									buttonId={optionsButtonId}
+									menuId={optionsMenuId}
 									accessRight={accessRight}
 									ownRight={ownRight}
 									onButtonClick={onButtonClick}
