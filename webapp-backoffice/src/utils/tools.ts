@@ -274,6 +274,15 @@ export const normalizeString = (str: string): string => {
 		.trim();
 };
 
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[̀-ͯ]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
 export const alternativeString = (str: string): string => {
 	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
 };

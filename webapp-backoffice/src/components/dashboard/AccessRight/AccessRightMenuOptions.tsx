@@ -8,6 +8,8 @@ interface MenuOptionProps {
 	open: boolean;
 	anchorEl: HTMLElement | null;
 	onClose: () => void;
+	buttonId: string;
+	menuId: string;
 	accessRight: AccessRightWithUsers;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	onButtonClick: (
@@ -48,6 +50,8 @@ export const AccessRightMenuOptions = ({
 	open,
 	anchorEl,
 	onClose,
+	buttonId,
+	menuId,
 	accessRight,
 	ownRight,
 	onButtonClick
@@ -70,12 +74,12 @@ export const AccessRightMenuOptions = ({
 
 	return (
 		<Menu
-			id="option-menu"
+			id={menuId}
 			open={open}
 			anchorEl={anchorEl}
 			onClose={onClose}
 			MenuListProps={{
-				'aria-labelledby': 'button-options-access-right'
+				'aria-labelledby': buttonId
 			}}
 		>
 			{menuItems.map(itemKey => {
