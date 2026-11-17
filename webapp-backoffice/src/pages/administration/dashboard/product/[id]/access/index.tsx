@@ -296,9 +296,9 @@ const AccessManagement = (props: Props) => {
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
-									<h2 className={cx(classes.categoryTitle)}>
+									<h3 className={cx(classes.categoryTitle)}>
 										Utilisateurs du service numérique
-									</h2>
+									</h3>
 									<p className={cx(classes.categoryDescription)}>
 										Utilisateurs ayant le droit de voir le service numérique,
 										mais pas de le modifier
@@ -325,9 +325,9 @@ const AccessManagement = (props: Props) => {
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
-									<h2 className={cx(classes.categoryTitle)}>
+									<h3 className={cx(classes.categoryTitle)}>
 										Administrateurs du service numérique
-									</h2>
+									</h3>
 									<p className={cx(classes.categoryDescription)}>
 										Utilisateurs ayant le droit de modifier tout aspect du
 										service numérique
@@ -353,9 +353,9 @@ const AccessManagement = (props: Props) => {
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.entityWrapper)}>
 									<div className={cx(classes.titleContainer)}>
-										<h2 className={cx(classes.categoryTitle)}>
+										<h3 className={cx(classes.categoryTitle)}>
 											Administrateurs de l'organisation
-										</h2>
+										</h3>
 										<p className={cx(classes.categoryDescription)}>
 											Utilisateurs ayant le droit de modifier l'organisation (
 											{entity?.name}) et tous ses services associés.
