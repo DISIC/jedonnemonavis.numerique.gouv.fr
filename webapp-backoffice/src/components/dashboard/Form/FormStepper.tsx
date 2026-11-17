@@ -104,9 +104,7 @@ const useStyles = tss.withName({ FormStepper }).create({
 		padding: fr.spacing('6v'),
 		color: fr.colors.decisions.background.default.grey.default,
 		[fr.breakpoints.down('md')]: {
-			padding: 0,
-			marginInline: `-${fr.spacing('4v')}`,
-			width: `calc(100% + 2 * ${fr.spacing('4v')})`
+			padding: 0
 		}
 	},
 	toggle: {

@@ -380,7 +380,16 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		}
 	},
 	configuratorContainer: {
-		minHeight: '75vh'
+		minHeight: '75vh',
+		[fr.breakpoints.down('md')]: {
+			'&&': {
+				padding: 0,
+				marginInline: `-${fr.spacing('2v')}`,
+				flexBasis: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				width: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				maxWidth: 'none'
+			}
+		}
 	},
 	tooltip: {
 		...fr.typography[18].style

@@ -299,10 +299,6 @@ const useStyles = tss.withName({ FormStepDisplay }).create({
 		gap: fr.spacing('4v'),
 		paddingBlock: fr.spacing('4v'),
 		paddingInline: fr.spacing('4v'),
-		[fr.breakpoints.down('md')]: {
-			marginInline: `-${fr.spacing('4v')}`,
-			width: `calc(100% + 2 * ${fr.spacing('4v')})`
-		},
 		backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
 		h3: {
 			...fr.typography[1].style,
