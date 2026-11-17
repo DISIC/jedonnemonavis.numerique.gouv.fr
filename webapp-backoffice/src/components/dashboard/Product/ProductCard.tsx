@@ -528,7 +528,10 @@ const ProductCard = ({
 												<div className={cx(classes.formStatsWrapper)}>
 													<div className={classes.formStatsContent}>
 														<span
-															className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+															className={cx(
+																fr.cx('fr-mr-2v'),
+																classes.smallText
+															)}
 														>
 															Réponses déposées
 														</span>
