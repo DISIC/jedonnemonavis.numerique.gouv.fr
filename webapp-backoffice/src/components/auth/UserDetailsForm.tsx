@@ -93,7 +93,7 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 		const nextErrors = validate();
 		setErrors(nextErrors);
 		const firstInvalidField = Object.keys(nextErrors)[0];
-		
+
 		if (firstInvalidField) {
 			e.currentTarget
 				.querySelector<HTMLElement>(`[name="${firstInvalidField}"]`)
@@ -209,9 +209,6 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 											}
 											state={errors.customReferralSource ? 'error' : 'default'}
 											stateRelatedMessage={errors.customReferralSource}
-											classes={{
-												message: fr.cx('fr-message', 'fr-message--error')
-											}}
 											nativeInputProps={{
 												onChange: e => {
 													setCustomReferralSource(e.target.value);
