@@ -230,7 +230,7 @@ const ApiKeyHandler = (props: Props) => {
 				<Button
 					priority="secondary"
 					iconId="fr-icon-add-line"
-					className={fr.cx('fr-mt-1w')}
+					className={cx(fr.cx('fr-mt-1w'), classes.fullWidthButton)}
 					iconPosition="right"
 					type="button"
 					aria-label={`${generateKeyLabel} pour ${
@@ -286,6 +286,12 @@ const useStyles = tss.withName({ ApiKeyHandler }).create({
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	fullWidthButton: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	}
 });
 
