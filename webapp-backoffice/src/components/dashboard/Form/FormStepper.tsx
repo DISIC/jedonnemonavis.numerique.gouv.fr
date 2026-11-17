@@ -45,8 +45,6 @@ const FormStepper = (props: Props) => {
 					)}
 				</span>
 			),
-			// `isActive` would force aria-current="page"; set "step" ourselves.
-			// DSFR styles any [aria-current] link as active.
 			linkProps: {
 				href: '#',
 				'aria-current': isCurrent ? 'step' : undefined,
@@ -63,6 +61,8 @@ const FormStepper = (props: Props) => {
 			<SideMenu
 				className={cx(classes.sideMenu)}
 				items={items}
+				title="Étapes du formulaire"
+				classes={{ title: fr.cx('fr-sr-only') }}
 				burgerMenuButtonText="Étapes du formulaire"
 			/>
 		</div>
@@ -79,7 +79,6 @@ const useStyles = tss.withName({ FormStepper }).create({
 		color: textColor
 	},
 	sideMenu: {
-		// Light text and active bar on the dark blue background
 		'.fr-sidemenu__inner': {
 			boxShadow: 'none'
 		},
@@ -90,7 +89,6 @@ const useStyles = tss.withName({ FormStepper }).create({
 		},
 		'.fr-sidemenu__link, .fr-sidemenu__btn': {
 			color: `${textColor} !important`,
-			// 8px active bar + 12px gap before the label
 			paddingLeft: '20px',
 			'&:hover': {
 				backgroundColor: 'transparent !important',
