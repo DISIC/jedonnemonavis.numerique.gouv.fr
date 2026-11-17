@@ -1,6 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -13,7 +12,6 @@ const ReviewTableHeader = (props: Props) => {
 	const { onClick, form } = props;
 
 	const { cx, classes } = useStyles({});
-	const isMobile = useMediaQuery(fr.breakpoints.down('md'));
 
 	const mainBlocks = form.form_template.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -43,12 +41,25 @@ const ReviewTableHeader = (props: Props) => {
 	];
 
 	return (
-		<thead
-			className={isMobile ? fr.cx('fr-sr-only') : cx(classes.lineContainer)}
-		>
+		<thead className={cx(classes.lineContainer)}>
 			<tr className={cx(classes.trContainer)}>
 				{sortList.map((sort, index) => {
 					const isSortable = props.sort.includes(sort.code || sort.label);
+					const isAsc = props.sort.includes('asc');
+					const content = (
+						<span>
+							{sort.label}&nbsp;
+							{isSortable && (
+								<i
+									aria-hidden="true"
+									className={cx(
+										isAsc ? 'ri-arrow-drop-down-fill' : 'ri-arrow-drop-up-fill',
+										classes.thIcon
+									)}
+								></i>
+							)}
+						</span>
+					);
 					return (
 						<th
 							className={cx(
@@ -57,22 +68,22 @@ const ReviewTableHeader = (props: Props) => {
 								classes.thContainer
 							)}
 							key={index}
-							onClick={isSortable ? () => onClick(sort.code) : undefined}
 							scope="col"
+							aria-sort={
+								isSortable ? (isAsc ? 'ascending' : 'descending') : undefined
+							}
 						>
-							<span>
-								{sort.label}&nbsp;
-								{isSortable && (
-									<i
-										className={cx(
-											props.sort.includes('asc')
-												? 'ri-arrow-drop-down-fill'
-												: 'ri-arrow-drop-up-fill',
-											classes.thIcon
-										)}
-									></i>
-								)}
-							</span>
+							{isSortable ? (
+								<button
+									type="button"
+									className={cx(classes.sortButton)}
+									onClick={() => onClick(sort.code)}
+								>
+									{content}
+								</button>
+							) : (
+								content
+							)}
 						</th>
 					);
 				})}
@@ -103,7 +114,15 @@ const useStyles = tss.create({
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		borderRadius: 0,
 		[fr.breakpoints.down('md')]: {
-			border: 'none'
+			position: 'absolute',
+			width: 1,
+			height: 1,
+			padding: 0,
+			margin: -1,
+			overflow: 'hidden',
+			clip: 'rect(0, 0, 0, 0)',
+			whiteSpace: 'nowrap',
+			border: 0
 		}
 	},
 	trContainer: {
@@ -127,6 +146,15 @@ const useStyles = tss.create({
 		fontSize: 12
 	},
 	pointer: {
+		cursor: 'pointer'
+	},
+	sortButton: {
+		padding: 0,
+		border: 'none',
+		background: 'none',
+		font: 'inherit',
+		color: 'inherit',
+		textAlign: 'inherit',
 		cursor: 'pointer'
 	},
 	badge: {
