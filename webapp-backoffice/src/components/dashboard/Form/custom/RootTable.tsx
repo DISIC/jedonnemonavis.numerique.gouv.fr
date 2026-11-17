@@ -53,9 +53,9 @@ const RootTable = (props: Props) => {
 						return (
 							<tr key={childBlock.id}>
 								<td>
-									<label className={cx(classes.childLabel)}>
+									<span className={cx(classes.childLabel)} aria-hidden="true">
 										{childBlock.label}
-									</label>
+									</span>
 								</td>
 								<td colSpan={6}>
 									<fieldset>
