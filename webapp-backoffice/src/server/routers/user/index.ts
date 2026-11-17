@@ -100,7 +100,9 @@ export const userRouter = router({
 
 	me: publicProcedure.input(getMeInputSchema).query(getMeQuery),
 
-	getOtp: rateLimitedProcedure.input(getOtpInputSchema).mutation(getOtpMutation),
+	getOtp: rateLimitedProcedure
+		.input(getOtpInputSchema)
+		.mutation(getOtpMutation),
 
 	initResetPwd: rateLimitedProcedure
 		.input(initResetPwdInputSchema)

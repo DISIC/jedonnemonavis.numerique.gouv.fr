@@ -24,12 +24,7 @@ const InfoTooltip = ({ title, buttonLabel, className }: InfoTooltipProps) => {
 
 	return (
 		<span className={classes.root}>
-			<Tooltip
-				kind="hover"
-				id={tooltipId}
-				className={className}
-				title={title}
-			>
+			<Tooltip kind="hover" id={tooltipId} className={className} title={title}>
 				<button
 					type="button"
 					className={cx(
