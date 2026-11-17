@@ -151,7 +151,9 @@ const FormBlockDisplay = (props: Props) => {
 					}
 				>
 					<div className={cx(classes.headerInfo)}>
-						<h3 id={getQuestionId(block)}>{block.label}</h3>
+						<h3 id={getQuestionId(block)} className={fr.cx('fr-h5')}>
+							{block.label}
+						</h3>
 						{isBlockHidden && (
 							<Badge
 								className={cx(classes.hiddenBadge, fr.cx('fr-ml-2v'))}

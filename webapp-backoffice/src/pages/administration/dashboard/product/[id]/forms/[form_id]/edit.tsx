@@ -312,15 +312,7 @@ const ProductFormPage = (props: Props) => {
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
 					<hr className={fr.cx('fr-hr')} />
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-					<h2 className={fr.cx('fr-mb-0')}>Personnaliser le formulaire</h2>
-				</div>
-				<div
-					className={cx(
-						classes.headerButtons,
-						fr.cx('fr-col-12', 'fr-col-md-4')
-					)}
-				>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-12'))}>
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
