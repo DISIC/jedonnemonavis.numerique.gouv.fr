@@ -25,6 +25,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
+import { keepDisabledContrast } from '@/src/components/dashboard/Form/blocks/sharedStyles';
 import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
 
@@ -530,14 +531,7 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},
-	templateRadios: {
-		'& .fr-radio-rich input[type=radio]:disabled + label': {
-			color: fr.colors.decisions.text.label.grey.default
-		},
-		'& .fr-radio-rich input[type=radio]:disabled + label .fr-hint-text': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
+	templateRadios: keepDisabledContrast('.fr-radio-rich input[type=radio]'),
 	infoContainer: {
 		display: 'flex',
 		justifyContent: 'center',

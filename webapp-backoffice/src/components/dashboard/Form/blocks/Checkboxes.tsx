@@ -6,6 +6,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
+import { hiddenBadgeMobile, keepDisabledContrast } from './sharedStyles';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -181,14 +182,7 @@ const Checkboxes = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Checkboxes }).create({
-	keepContrast: {
-		'& .fr-fieldset input:disabled + label': {
-			color: fr.colors.decisions.text.label.grey.default
-		},
-		'& .fr-fieldset input:disabled + label .fr-hint-text': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
+	keepContrast: keepDisabledContrast(),
 	smallText: {
 		fontSize: '0.8rem',
 		color: fr.colors.decisions.text.disabled.grey.default
@@ -222,12 +216,7 @@ const useStyles = tss.withName({ Checkboxes }).create({
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		},
-		[fr.breakpoints.down('md')]: {
-			display: 'flex',
-			width: 'fit-content',
-			marginLeft: '0 !important',
-			marginTop: fr.spacing('1v')
-		}
+		...hiddenBadgeMobile
 	}
 });
 

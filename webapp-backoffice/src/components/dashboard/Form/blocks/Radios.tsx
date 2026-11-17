@@ -7,6 +7,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { hiddenBadgeMobile, keepDisabledContrast } from './sharedStyles';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -131,14 +132,7 @@ const Radios = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Radios }).create(() => ({
-	keepContrast: {
-		'& .fr-fieldset input:disabled + label': {
-			color: fr.colors.decisions.text.label.grey.default
-		},
-		'& .fr-fieldset input:disabled + label .fr-hint-text': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
+	keepContrast: keepDisabledContrast(),
 	container: {
 		marginTop: fr.spacing('4v'),
 		'.fr-radio-group': {
@@ -159,12 +153,7 @@ const useStyles = tss.withName({ Radios }).create(() => ({
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		},
-		[fr.breakpoints.down('md')]: {
-			display: 'flex',
-			width: 'fit-content',
-			marginLeft: '0 !important',
-			marginTop: fr.spacing('1v')
-		}
+		...hiddenBadgeMobile
 	}
 }));
 
