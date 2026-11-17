@@ -250,14 +250,16 @@ const ProductFormsPage = (props: Props) => {
 														fr.cx('fr-pb-0')
 													)}
 												>
-													<Link
-														href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-														className={cx(classes.productTitle)}
-													>
-														<span>
-															{form.title || form.form_template.title}
-														</span>
-													</Link>
+													<h3 className={cx(classes.productTitleHeading)}>
+														<Link
+															href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+															className={cx(classes.productTitle)}
+														>
+															<span>
+																{form.title || form.form_template.title}
+															</span>
+														</Link>
+													</h3>
 													{form.isTop250 && <DemarcheEssentielleBadge small />}
 													{form.buttons.length > 0 ? (
 														<>
@@ -346,14 +348,16 @@ const ProductFormsPage = (props: Props) => {
 															fr.cx('fr-pb-0')
 														)}
 													>
-														<Link
-															href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-															className={cx(classes.productTitle)}
-														>
-															<span>
-																{form.title || form.form_template.title}
-															</span>
-														</Link>
+														<h4 className={cx(classes.productTitleHeading)}>
+															<Link
+																href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+																className={cx(classes.productTitle)}
+															>
+																<span>
+																	{form.title || form.form_template.title}
+																</span>
+															</Link>
+														</h4>
 														<div
 															className={cx(
 																fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),
@@ -495,6 +499,11 @@ const useStyles = tss
 			flexWrap: 'wrap',
 			flex: 1,
 			gap: fr.spacing('2v')
+		},
+		productTitleHeading: {
+			margin: 0,
+			fontSize: '18px',
+			lineHeight: '1.5rem'
 		},
 		productTitle: {
 			backgroundImage: 'none',
