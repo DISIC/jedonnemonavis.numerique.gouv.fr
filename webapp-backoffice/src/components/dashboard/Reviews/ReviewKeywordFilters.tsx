@@ -4,7 +4,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { push } from '@socialgouv/matomo-next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 
@@ -64,11 +64,12 @@ const ReviewKeywordFilters = (props: Props) => {
 	};
 
 	const { cx, classes } = useStyles();
+	const keywordsTitleId = `keywords-title-${useId().replace(/:/g, '')}`;
 
 	return (
 		<div className={cx(classes.keywordsBox, fr.cx('fr-mb-8v', 'fr-mt-4v'))}>
 			<p className={fr.cx('fr-mb-0')}>
-				<strong id="keywords-title" className={classes.containerTitle}>
+				<strong id={keywordsTitleId} className={classes.containerTitle}>
 					Filtrer par mot récurrent
 				</strong>{' '}
 				<InfoTooltip
@@ -94,7 +95,7 @@ const ReviewKeywordFilters = (props: Props) => {
 					<>
 						<ul
 							className={cx(classes.keywordsList)}
-							aria-labelledby="keywords-title"
+							aria-labelledby={keywordsTitleId}
 						>
 							{keywords.map(keywordObject => {
 								const isSelected =
