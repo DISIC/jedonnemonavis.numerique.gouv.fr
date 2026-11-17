@@ -11,21 +11,11 @@ interface Props {
 	form: FormWithElements;
 }
 
-export const getQuestionId = (block: Block) => {
-	switch (block.type_bloc) {
-		case 'input_text_area':
-			return 'question-commentaire';
-		case 'input_email':
-			return 'question-email';
-		case 'input_text':
-			return `question-${block.id}`;
-		default:
-			return undefined;
-	}
-};
+export const getQuestionId = (block: Pick<Block, 'id'>) =>
+	`question-${block.id}`;
 
-const getInstructionsId = (block: Block) =>
-	block.type_bloc === 'input_email' ? 'consigne-email' : `consigne-${block.id}`;
+export const getInstructionsId = (block: Pick<Block, 'id'>) =>
+	`consigne-${block.id}`;
 
 const TextInput = (props: Props) => {
 	const { block, form } = props;

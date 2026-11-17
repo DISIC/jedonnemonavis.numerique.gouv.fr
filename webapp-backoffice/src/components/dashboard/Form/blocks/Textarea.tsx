@@ -2,6 +2,7 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react';
+import { getInstructionsId, getQuestionId } from './TextInput';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -16,7 +17,7 @@ const Textarea = (props: Props) => {
 		<>
 			{block.upLabel && (
 				<p
-					id="consigne-commentaire"
+					id={getInstructionsId(block)}
 					dangerouslySetInnerHTML={{
 						__html: sanitizeRichHtml(block.upLabel)
 					}}
@@ -30,8 +31,10 @@ const Textarea = (props: Props) => {
 			>
 				<textarea
 					className={fr.cx('fr-input')}
-					aria-labelledby="question-commentaire"
-					aria-describedby={block.upLabel ? 'consigne-commentaire' : undefined}
+					aria-labelledby={getQuestionId(block)}
+					aria-describedby={
+						block.upLabel ? getInstructionsId(block) : undefined
+					}
 				/>
 			</div>
 			{block.downLabel && (
