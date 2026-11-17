@@ -111,7 +111,6 @@ const ReviewTableRow = ({
 				isSelected && classes.containerSelected
 			)}
 			onClick={handleSelect}
-			aria-selected={isSelected}
 		>
 			<td
 				className={cx(
