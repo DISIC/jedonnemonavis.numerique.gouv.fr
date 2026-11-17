@@ -719,7 +719,7 @@ const useStyles = tss.withName({ ProductCard }).create({
 		marginBottom: '1.5rem',
 		transition: 'all 0.2s ease-in-out',
 		':nth-of-type(2), :last-child': {
-			marginBottom: '0.5rem'
+			marginBottom: fr.spacing('3v')
 		},
 		'&:hover h3': {
 			textDecoration: 'underline'
