@@ -173,7 +173,10 @@ const ProductInformationPage = (props: Props) => {
 							priority="secondary"
 							iconId="fr-icon-edit-line"
 							iconPosition="right"
-							nativeButtonProps={editProductModal.buttonProps}
+							nativeButtonProps={{
+								...editProductModal.buttonProps,
+								'aria-label': `Modifier les informations du service numérique ${product.title}`
+							}}
 						>
 							Modifier
 						</Button>
