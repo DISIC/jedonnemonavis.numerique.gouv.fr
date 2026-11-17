@@ -368,7 +368,6 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
-		// Buttons go under the title on mobile, aligned with it
 		[fr.breakpoints.down('md')]: {
 			justifyContent: 'start'
 		},

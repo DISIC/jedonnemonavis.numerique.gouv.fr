@@ -22,7 +22,6 @@ const Textarea = (props: Props) => {
 					}}
 				></p>
 			)}
-			{/* Native field: react-dsfr Input overrides aria-describedby */}
 			<div
 				className={cx(
 					classes.blockTextarea,

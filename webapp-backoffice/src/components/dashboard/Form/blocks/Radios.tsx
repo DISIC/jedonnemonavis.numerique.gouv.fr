@@ -131,7 +131,6 @@ const Radios = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Radios }).create(() => ({
-	// Hidden options keep a disabled input but their label keeps the normal contrast
 	keepContrast: {
 		'& .fr-fieldset input:disabled + label': {
 			color: fr.colors.decisions.text.label.grey.default

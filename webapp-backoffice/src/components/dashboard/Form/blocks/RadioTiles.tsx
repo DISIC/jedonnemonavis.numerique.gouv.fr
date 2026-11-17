@@ -7,7 +7,6 @@ interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	disabled: boolean;
 	nbItems?: number;
-	// Visible legend for the group; defaults to the block label, read by screen readers only
 	legend?: ReactNode;
 	legendClassName?: string;
 }

@@ -113,7 +113,6 @@ const FormConfigurator = (props: Props) => {
 const useStyles = tss.withName({ FormConfigurator }).create({
 	container: {
 		height: '100%',
-		// Row on desktop (fr-grid-row), stacked column on mobile
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			flexWrap: 'nowrap',

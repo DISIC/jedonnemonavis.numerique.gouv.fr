@@ -11,7 +11,6 @@ interface Props {
 	form: FormWithElements;
 }
 
-// Ids linking the question heading (FormBlockDisplay) and the instructions to the text fields
 export const getQuestionId = (block: Block) => {
 	switch (block.type_bloc) {
 		case 'input_text_area':
@@ -49,7 +48,6 @@ const TextInput = (props: Props) => {
 					{block.content}
 				</p>
 			)}
-			{/* Native field: react-dsfr Input overrides aria-describedby */}
 			<div
 				className={cx(classes.blockInput, fr.cx('fr-input-group', 'fr-mb-2v'))}
 			>

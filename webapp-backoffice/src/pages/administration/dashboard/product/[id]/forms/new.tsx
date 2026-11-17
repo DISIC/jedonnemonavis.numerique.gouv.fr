@@ -135,7 +135,6 @@ const NewForm = (props: Props) => {
 	const titleErrorId = 'form-title-error';
 	const titleErrorRef = useRef<HTMLParagraphElement>(null);
 
-	// Move focus to the error message when a submit reveals it
 	useEffect(() => {
 		if (errors.title) titleErrorRef.current?.focus();
 	}, [submitCount]);
@@ -383,7 +382,6 @@ const NewForm = (props: Props) => {
 															de l’équipe
 														</span>
 													</label>
-													{/* Native input: react-dsfr Input overrides aria-describedby */}
 													<input
 														id="form-title"
 														className={fr.cx(
@@ -532,7 +530,6 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},
-	// Only the radio input is greyed out when disabled, the card keeps its regular look
 	templateRadios: {
 		'& .fr-radio-rich input[type=radio]:disabled + label': {
 			color: fr.colors.decisions.text.label.grey.default
