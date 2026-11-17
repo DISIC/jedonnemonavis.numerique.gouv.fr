@@ -47,6 +47,10 @@ const ApiKeyHandler = (props: Props) => {
 
 	const { data: apiKeys } = resultApiKey;
 
+	const generateKeyLabel = `Générer une ${
+		apiKeys.length !== 0 ? 'nouvelle ' : ''
+	}clé API`;
+
 	const createKey = trpc.apiKey.create.useMutation({});
 	const deleteKey = trpc.apiKey.delete.useMutation({});
 
@@ -126,97 +130,99 @@ const ApiKeyHandler = (props: Props) => {
 							</>
 						)}
 					</div>
-					{apiKeys.map((item, index) => (
-						<div
-							className={cx(
-								fr.cx('fr-card', 'fr-mb-3w', 'fr-p-2w'),
-								classes.infoWrapper
-							)}
-							key={index}
-						>
-							<div
-								className={fr.cx(
-									'fr-grid-row',
-									'fr-grid-row--gutters',
-									'fr-grid-row--top',
-									'fr-grid-row--middle'
+					<ul className={fr.cx('fr-raw-list')}>
+						{apiKeys.map(item => (
+							<li
+								className={cx(
+									fr.cx('fr-card', 'fr-mb-3w', 'fr-p-2w'),
+									classes.infoWrapper
 								)}
+								key={item.key}
 							>
 								<div
-									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-6'),
-										classes.keyWrapper
+									className={fr.cx(
+										'fr-grid-row',
+										'fr-grid-row--gutters',
+										'fr-grid-row--top',
+										'fr-grid-row--middle'
 									)}
 								>
-									<b className={fr.cx('fr-hidden-lg')}>Clé : </b>
-									{item.key}
-								</div>
-								<div
-									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-2'),
-										classes.keyWrapper
-									)}
-								>
-									<b className={fr.cx('fr-hidden-lg')}>
-										Dernière utilisation :{' '}
-									</b>
-									<i>
-										{item.api_key_logs[0]
-											? transformDateToFrenchReadable(
-													item.api_key_logs[0].created_at
-														.toISOString()
-														.split('T')[0]
-											  )
-											: 'Aucune'}
-									</i>
-								</div>
-								<div
-									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-4'),
-										classes.actionsWrapper
-									)}
-								>
-									<Button
-										priority="tertiary"
-										size="small"
-										iconId="ri-file-copy-line"
-										iconPosition="right"
-										title={`Copier la clé API « ${item.key} » dans le presse-papier`}
-										onClick={async () => {
-											push(['trackEvent', 'BO - ApiKey', `Copy-Clipboard`]);
-											if ('clipboard' in navigator) {
-												try {
-													await navigator.clipboard.writeText(item.key);
-													setDisplayToast(true);
-												} catch (err) {
-													alert(err);
-												}
-											} else {
-												alert(
-													'Fonctionnalité de presse-papiers non prise en charge'
-												);
-											}
-										}}
+									<div
+										className={cx(
+											fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-6'),
+											classes.keyWrapper
+										)}
 									>
-										{'Copier'}
-									</Button>
-									{canDeleteKey(item.user_id) && (
+										<b className={fr.cx('fr-hidden-lg')}>Clé : </b>
+										{item.key}
+									</div>
+									<div
+										className={cx(
+											fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-2'),
+											classes.keyWrapper
+										)}
+									>
+										<b className={fr.cx('fr-hidden-lg')}>
+											Dernière utilisation :{' '}
+										</b>
+										<i>
+											{item.api_key_logs[0]
+												? transformDateToFrenchReadable(
+														item.api_key_logs[0].created_at
+															.toISOString()
+															.split('T')[0]
+												  )
+												: 'Aucune'}
+										</i>
+									</div>
+									<div
+										className={cx(
+											fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-4'),
+											classes.actionsWrapper
+										)}
+									>
 										<Button
 											priority="tertiary"
 											size="small"
-											iconId="fr-icon-delete-bin-line"
+											iconId="ri-file-copy-line"
 											iconPosition="right"
-											title={`Supprimer la clé API « ${item.key} ».`}
-											className={cx(classes.iconError)}
-											onClick={() => handleDeleteKey(item.key)}
+											aria-label={`Copier la clé API ${item.key} dans le presse-papier`}
+											onClick={async () => {
+												push(['trackEvent', 'BO - ApiKey', `Copy-Clipboard`]);
+												if ('clipboard' in navigator) {
+													try {
+														await navigator.clipboard.writeText(item.key);
+														setDisplayToast(true);
+													} catch (err) {
+														alert(err);
+													}
+												} else {
+													alert(
+														'Fonctionnalité de presse-papiers non prise en charge'
+													);
+												}
+											}}
 										>
-											Supprimer
+											{'Copier'}
 										</Button>
-									)}
+										{canDeleteKey(item.user_id) && (
+											<Button
+												priority="tertiary"
+												size="small"
+												iconId="fr-icon-delete-bin-line"
+												iconPosition="right"
+												aria-label={`Supprimer la clé API ${item.key}`}
+												className={cx(classes.iconError)}
+												onClick={() => handleDeleteKey(item.key)}
+											>
+												Supprimer
+											</Button>
+										)}
+									</div>
 								</div>
-							</div>
-						</div>
-					))}
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 
@@ -227,9 +233,12 @@ const ApiKeyHandler = (props: Props) => {
 					className={fr.cx('fr-mt-1w')}
 					iconPosition="right"
 					type="button"
+					aria-label={`${generateKeyLabel} pour ${
+						product?.title ?? entity?.name
+					}`}
 					onClick={() => handleCreateKey()}
 				>
-					Générer une {apiKeys.length !== 0 ? 'nouvelle ' : ''} clé API
+					{generateKeyLabel}
 				</Button>
 			)}
 		</>
