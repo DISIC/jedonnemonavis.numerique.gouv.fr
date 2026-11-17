@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useRef } from 'react';
 import {
 	Controller,
+	SubmitErrorHandler,
 	SubmitHandler,
 	useFieldArray,
 	useForm
@@ -33,6 +34,13 @@ interface Props {
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 	urls: { value: string }[];
 };
+
+// Fields in display order, used to focus the first one in error on submit
+// (the Controllers don't pass a ref to their inputs, so react-hook-form can't)
+const FIELDS_FOCUS_ORDER: { name: keyof FormValues; selector: string }[] = [
+	{ name: 'title', selector: '#product-form input[name="title"]' },
+	{ name: 'entity_id', selector: '#entity-select-autocomplete' }
+];
 
 const ProductModal = (props: Props) => {
 	const {
@@ -154,6 +162,18 @@ const ProductModal = (props: Props) => {
 		modal.close();
 	};
 
+	const onLocalInvalid: SubmitErrorHandler<FormValues> = formErrors => {
+		const firstFieldInError = FIELDS_FOCUS_ORDER.find(
+			field => formErrors[field.name]
+		);
+		if (!firstFieldInError) return;
+
+		// Wait for the error messages to render before moving the focus
+		setTimeout(() => {
+			document.querySelector<HTMLElement>(firstFieldInError.selector)?.focus();
+		}, 0);
+	};
+
 	useIsModalOpen(modal, {
 		onConceal: () => {
 			reset();
@@ -228,7 +248,7 @@ const ProductModal = (props: Props) => {
 				},
 				{
 					doClosesModal: false,
-					onClick: handleSubmit(onLocalSubmit),
+					onClick: handleSubmit(onLocalSubmit, onLocalInvalid),
 					children:
 						product && product.id
 							? 'Sauvegarder'
