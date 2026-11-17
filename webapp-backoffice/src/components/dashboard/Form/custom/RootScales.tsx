@@ -38,7 +38,7 @@ const RootScales = (props: Props) => {
 
 	return (
 		<div className={cx(classes.container, disabled ? classes.disabled : null)}>
-			<h3>{block.label}</h3>
+			<h3 className={fr.cx('fr-h5')}>{block.label}</h3>
 			<p>
 				Cette question ne s'affiche que si l'utilisateur a coché une des options
 				correspondantes dans la question précédente

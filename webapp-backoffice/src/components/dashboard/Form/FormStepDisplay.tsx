@@ -105,7 +105,7 @@ const FormStepDisplay = (props: Props) => {
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
-						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
+						<h2 className={fr.cx('fr-h2', 'fr-mr-2v')}>{step.title} </h2>
 						{step.description && (
 							<InfoTooltip
 								className={classes.tooltip}
