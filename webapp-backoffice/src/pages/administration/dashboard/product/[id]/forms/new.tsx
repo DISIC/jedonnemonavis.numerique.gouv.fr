@@ -373,10 +373,10 @@ const NewForm = (props: Props) => {
 														className={fr.cx('fr-label')}
 														htmlFor="form-title"
 													>
-														<p className={fr.cx('fr-mb-0')}>
+														<span>
 															Nom du formulaire{' '}
 															<span className={cx(classes.asterisk)}>*</span>
-														</p>
+														</span>
 														<span className={fr.cx('fr-hint-text')}>
 															Visible uniquement par vous et les autres membres
 															de l’équipe
