@@ -90,7 +90,7 @@ export const AccessRightMenuOptions = ({
 				return (
 					<MenuItem
 						key={item.action}
-						style={{ color: '#000091' }}
+						style={{ color: '#000091', whiteSpace: 'normal' }}
 						onClick={() =>
 							handleMenuAction(item.action as AccessRightModalType, item.event)
 						}
