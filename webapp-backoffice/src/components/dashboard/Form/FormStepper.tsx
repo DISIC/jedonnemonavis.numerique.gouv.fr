@@ -21,8 +21,6 @@ const FormStepper = (props: Props) => {
 
 	const collapseId = useId();
 
-	// DSFR SideMenu only renders links: switching steps stays on the page,
-	// so we reuse its markup with a <button> in each list item.
 	return (
 		<div className={cx(classes.container)}>
 			<nav
@@ -103,7 +101,6 @@ const useStyles = tss.withName({ FormStepper }).create({
 		color: fr.colors.decisions.background.default.grey.default,
 	},
 	sideMenu: {
-		// DSFR pulls the sidemenu out by -1rem on mobile: keep it inside the container
 		'&&': {
 			marginLeft: 0,
 			marginRight: 0

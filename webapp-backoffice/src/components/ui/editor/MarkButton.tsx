@@ -43,8 +43,6 @@ const MarkButton = ({
 				'aria-pressed': isActive,
 				onMouseDown: event => event.preventDefault(),
 				onClick: () => {
-					// Keyboard users can reach the toolbar before ever focusing the editor:
-					// place the caret at the end of the text so the mark has a target
 					if (!editor.selection) {
 						Transforms.select(editor, Editor.end(editor, []));
 					}
