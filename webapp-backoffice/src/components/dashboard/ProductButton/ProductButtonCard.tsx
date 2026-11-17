@@ -42,12 +42,7 @@ const ProductButtonCard = (props: Props) => {
 			: button.form.product_id
 	}?button=${button.id}`;
 
-	const srOnlyButtonLabel = (
-		<span className="fr-sr-only">
-			{' '}
-			du lien d'intégration «&nbsp;{button.title}&nbsp;»
-		</span>
-	);
+	const actionLabel = (action: string) => `${button.title} - ${action}`;
 
 	const renderButtonTags = () => {
 		const tags = [];
@@ -164,10 +159,14 @@ const ProductButtonCard = (props: Props) => {
 											push(['trackEvent', 'Gestion boutons', 'Installer']);
 										}}
 										className="fr-mr-md-2v"
+										aria-label={actionLabel(
+											`Copier le ${
+												button.integration_type === 'link' ? 'lien' : 'code'
+											}`
+										)}
 									>
 										Copier le{' '}
 										{button.integration_type === 'link' ? 'lien' : 'code'}
-										{srOnlyButtonLabel}
 									</Button>
 								</li>
 								{ownRight === 'carrier_admin' && (
@@ -181,9 +180,9 @@ const ProductButtonCard = (props: Props) => {
 													onButtonClick('rename', button);
 													push(['trackEvent', 'Gestion boutons', 'Modifier']);
 												}}
+												aria-label={actionLabel('Renommer')}
 											>
 												Renommer
-												{srOnlyButtonLabel}
 											</Button>
 										</li>
 										{session?.user.role.includes('admin') && (
@@ -197,9 +196,9 @@ const ProductButtonCard = (props: Props) => {
 														setDisplayToast(true);
 													}}
 													title={buttonUrl}
+													aria-label={actionLabel("Copier l'URL")}
 												>
 													Copier l'URL
-													{srOnlyButtonLabel}
 												</Button>
 											</li>
 										)}
@@ -208,8 +207,8 @@ const ProductButtonCard = (props: Props) => {
 												priority="secondary"
 												size="small"
 												className={classes.deleteButton}
-												aria-label={`Supprimer le lien d'intégration « ${button.title} »`}
-												title={`Supprimer le lien d'intégration « ${button.title} »`}
+												aria-label={actionLabel('Supprimer')}
+												title="Supprimer"
 												onClick={() => {
 													onButtonClick('delete', button);
 													push(['trackEvent', 'Gestion boutons', 'Supprimer']);
