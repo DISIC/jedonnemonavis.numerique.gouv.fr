@@ -164,7 +164,7 @@ const NewProduct = () => {
 				isEditingStep
 					? 'Modifier un service numérique'
 					: shouldShowStepper
-					? 'Étapier parcours de création'
+					? 'Configurer votre service numérique en 4 étapes'
 					: 'Ajouter un service numérique'
 			}
 			onConfirm={handleSubmit(onLocalSubmit)}
