@@ -24,8 +24,7 @@ import { MaskedText } from './MaskedText';
 
 const highlightSearchTerms = (
 	text: string,
-	search: string,
-	highlightClass: string
+	search: string
 ): React.ReactNode => {
 	if (!search.trim()) return text;
 
@@ -57,9 +56,7 @@ const highlightSearchTerms = (
 		if (!part) return null;
 		const isMatch = idx % 2 === 1;
 		return isMatch ? (
-			<span key={idx} className={highlightClass}>
-				{part}
-			</span>
+			<mark key={idx}>{part}</mark>
 		) : (
 			<React.Fragment key={idx}>{part}</React.Fragment>
 		);
@@ -197,7 +194,7 @@ const ReviewTableRow = ({
 								text={verbatimAnswer.answer_text || ''}
 								renderSegment={(segment, key) => (
 									<React.Fragment key={key}>
-										{highlightSearchTerms(segment, search, classes.highlight)}
+										{highlightSearchTerms(segment, search)}
 									</React.Fragment>
 								)}
 							/>
@@ -295,16 +292,15 @@ const useStyles = tss.create({
 		textOverflow: 'ellipsis',
 		margin: 0
 	},
-	// Classe dédiée plutôt qu'un sélecteur sur tous les `span` descendants :
-	// celui-ci teintait en jaune n'importe quel span posé dans le verbatim,
-	// dont celui que le Tooltip DSFR enroule autour d'une donnée masquée.
-	highlight: {
-		backgroundColor: 'yellow'
-	},
 	contentVerbatim: {
 		...fr.typography[18].style,
 		wordBreak: 'break-word',
-		margin: 0
+		margin: 0,
+		
+		'& mark': {
+			borderBottom: '2px dotted',
+			backgroundColor: 'yellow'
+		}
 	},
 	action: {
 		border: 'none',
