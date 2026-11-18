@@ -114,6 +114,22 @@ const ProductFormsPage = (props: Props) => {
 		return `${rootFormTemplate?.title} ${existingTemplateForms.length + 1}`;
 	}, [product.forms]);
 
+	const activeForms = useMemo(
+		() =>
+			product.forms
+				.filter(f => !f.isDeleted)
+				.sort((a, b) => {
+					const dateA = a.last_review_at
+						? new Date(a.last_review_at).getTime()
+						: 0;
+					const dateB = b.last_review_at
+						? new Date(b.last_review_at).getTime()
+						: 0;
+					return dateB - dateA;
+				}),
+		[product.forms]
+	);
+
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
@@ -200,7 +216,7 @@ const ProductFormsPage = (props: Props) => {
 						</div>
 
 						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
-							{product.forms.filter(f => !f.isDeleted).length === 0 && (
+							{activeForms.length === 0 && (
 								<div className={fr.cx('fr-pb-6v')}>
 									<span
 										className={cx(classes.smallText)}
@@ -211,111 +227,97 @@ const ProductFormsPage = (props: Props) => {
 								</div>
 							)}
 							<ul className={fr.cx('fr-raw-list')}>
-								{product.forms
-									.filter(f => !f.isDeleted)
-									.sort((a, b) => {
-										const dateA = a.last_review_at
-											? new Date(a.last_review_at).getTime()
-											: 0;
-										const dateB = b.last_review_at
-											? new Date(b.last_review_at).getTime()
-											: 0;
-										return dateB - dateA;
-									})
-									.map(form => {
-										const newReviewsCount = getFormNewReviewCount(
-											form.id,
-											form.legacy
-										);
-										return (
-											<li key={form.id}>
+								{activeForms.map(form => {
+									const newReviewsCount = getFormNewReviewCount(
+										form.id,
+										form.legacy
+									);
+									return (
+										<li key={form.id}>
+											<div
+												className={cx(
+													fr.cx(
+														'fr-grid-row',
+														'fr-mb-6v',
+														'fr-p-4v',
+														'fr-grid-row--middle'
+													),
+													classes.formCard
+												)}
+											>
 												<div
 													className={cx(
-														fr.cx(
-															'fr-grid-row',
-															'fr-mb-6v',
-															'fr-p-4v',
-															'fr-grid-row--middle'
-														),
-														classes.formCard
+														classes.topFormCardContainer,
+														fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
 													)}
 												>
 													<div
 														className={cx(
-															classes.topFormCardContainer,
-															fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
+															classes.productTitleContainer,
+															fr.cx('fr-pb-0')
 														)}
 													>
-														<div
-															className={cx(
-																classes.productTitleContainer,
-																fr.cx('fr-pb-0')
-															)}
-														>
-															<h3 className={cx(classes.productTitleHeading)}>
-																<Link
-																	href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-																	className={cx(classes.productTitle)}
-																>
-																	<span>
-																		{form.title || form.form_template.title}
-																	</span>
-																</Link>
-															</h3>
-															{form.isTop250 && (
-																<DemarcheEssentielleBadge small />
-															)}
-															{form.buttons.length > 0 ? (
-																<>
-																	{newReviewsCount > 0 && (
-																		<Badge severity="success" noIcon small>
-																			{newReviewsCount} NOUVELLES RÉPONSES
-																		</Badge>
-																	)}
-																</>
-															) : (
-																<Badge severity="warning" noIcon small>
-																	Configuration à terminer
-																</Badge>
-															)}
-														</div>
-														{form.buttons.length > 0 && (
-															<div className={fr.cx('fr-grid-row')}>
-																<span
-																	className={cx(
-																		fr.cx('fr-mr-2v'),
-																		classes.smallText
-																	)}
-																>
-																	Réponses déposées
+														<h3 className={cx(classes.productTitleHeading)}>
+															<Link
+																href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+																className={cx(classes.productTitle)}
+															>
+																<span>
+																	{form.title || form.form_template.title}
 																</span>
-																<span className={fr.cx('fr-text--bold')}>
-																	{formatNumberWithSpaces(
-																		getFormReviewCount(form.id, form.legacy)
-																	)}
-																</span>
-															</div>
+															</Link>
+														</h3>
+														{form.isTop250 && (
+															<DemarcheEssentielleBadge small />
+														)}
+														{form.buttons.length > 0 ? (
+															<>
+																{newReviewsCount > 0 && (
+																	<Badge severity="success" noIcon small>
+																		{newReviewsCount} NOUVELLES RÉPONSES
+																	</Badge>
+																)}
+															</>
+														) : (
+															<Badge severity="warning" noIcon small>
+																Configuration à terminer
+															</Badge>
 														)}
 													</div>
-													<div className="fr-mt-4v">
-														<span
-															className={cx(
-																fr.cx('fr-mr-2v'),
-																classes.smallText
-															)}
-														>
-															Modifié le
-														</span>
-														<span className={fr.cx('fr-text--bold')}>
-															{formatDateToFrenchString(
-																form.updated_at.toString()
-															)}
-														</span>
-													</div>
+													{form.buttons.length > 0 && (
+														<div className={fr.cx('fr-grid-row')}>
+															<span
+																className={cx(
+																	fr.cx('fr-mr-2v'),
+																	classes.smallText
+																)}
+															>
+																Réponses déposées
+															</span>
+															<span className={fr.cx('fr-text--bold')}>
+																{formatNumberWithSpaces(
+																	getFormReviewCount(form.id, form.legacy)
+																)}
+															</span>
+														</div>
+													)}
 												</div>
-											</li>
-										);
-									})}
+												<div className="fr-mt-4v">
+													<span
+														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+													>
+														Modifié le
+													</span>
+													<span className={fr.cx('fr-text--bold')}>
+														{formatDateToFrenchString(
+															form.updated_at.toString()
+														)}
+													</span>
+												</div>
+											</div>
+										</li>
+									);
+								})}
 							</ul>
 							{product.forms.filter(f => f.isDeleted).length > 0 && (
 								<div className={fr.cx('fr-mt-8v', 'fr-pb-6v')}>
