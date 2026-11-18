@@ -61,7 +61,7 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 			<div className={cx(classes.titleContainer)}>
 				<Image
 					src={`/assets/system_picto.svg`}
-					alt="Generation"
+					alt=""
 					width={120}
 					height={120}
 				/>
@@ -84,7 +84,10 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 				style={{ justifyContent: 'start' }}
 			>
 				<div className={classes.iconContainer}>
-					<i className={cx(fr.cx('ri-question-line', 'fr-icon--lg'))} />
+					<i
+						className={cx(fr.cx('ri-question-line', 'fr-icon--lg'))}
+						aria-hidden="true"
+					/>
 				</div>
 				<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
 					<strong>Le formulaire est générique</strong> afin de garantir une
@@ -116,6 +119,7 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 											'fr-icon--lg'
 										)
 									)}
+									aria-hidden="true"
 								/>
 							</div>
 							<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
