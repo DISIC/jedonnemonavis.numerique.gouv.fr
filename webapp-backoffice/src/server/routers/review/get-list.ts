@@ -133,14 +133,19 @@ export const getReviewListQuery = async ({
 	// Use raw SQL with unaccent() for accent-insensitive search
 	const searchWhereRaw = buildSearchWhereRaw(input.search || '');
 	if (searchWhereRaw) {
-		const dateFilter =
-			!newReviews && input.start_date && input.end_date
-				? Prisma.sql`AND "created_at" >= ${new Date(
-						input.start_date
-				  )}::timestamp AND "created_at" <= ${new Date(
-						input.end_date
-				  )}::timestamp`
-				: Prisma.empty;
+		const dateRange: Prisma.DateTimeFilter =
+			!newReviews && (input.start_date || input.end_date)
+				? getDateWhereFromUTCRange(input.start_date, input.end_date)
+				: {};
+		const dateFilter = Prisma.sql`${
+			dateRange.gte
+				? Prisma.sql`AND "created_at" >= ${dateRange.gte}`
+				: Prisma.empty
+		} ${
+			dateRange.lt
+				? Prisma.sql`AND "created_at" < ${dateRange.lt}`
+				: Prisma.empty
+		}`;
 
 		const matchingReviewIds: { review_id: number }[] = await ctx.prisma
 			.$queryRaw`
