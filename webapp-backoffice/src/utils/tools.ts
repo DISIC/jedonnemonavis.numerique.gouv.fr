@@ -12,7 +12,8 @@ import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]
 import {
 	ArchivedAnswerSnapshot,
 	ButtonWithElements,
-	FormConfigWithChildren
+	FormConfigWithChildren,
+	FormWithElements
 } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 
@@ -687,6 +688,31 @@ export const getHelperFromFormConfig = (
 				kind: fcl.kind
 			})) || []
 	};
+};
+
+type FormStep =
+	FormWithElements['form_template']['form_template_steps'][number];
+
+export const getContactStepState = (
+	step: FormStep,
+	steps: FormStep[],
+	configHelper: FormConfigHelper
+): 'hidden' | 'conditional' | null => {
+	const consentBlock = steps
+		.flatMap(s => s.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	const isContactStep = step.form_template_blocks.some(
+		block => block.field_code === 'contact_email'
+	);
+	if (!consentBlock || !isContactStep) return null;
+
+	const display = configHelper.displays.find(
+		d => d.kind === 'block' && d.parent_id === consentBlock.id
+	);
+	const isConsentHidden = display
+		? display.hidden
+		: consentBlock.isHiddenByDefault;
+	return isConsentHidden ? 'hidden' : 'conditional';
 };
 
 export const getHasConfigChanged = (

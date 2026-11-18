@@ -14,6 +14,7 @@ import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import TextInput, { getQuestionId } from './blocks/TextInput';
+import ContactConsent from './blocks/ContactConsent';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -115,6 +116,8 @@ const FormBlockDisplay = (props: Props) => {
 						onConfigChange={onConfigChange}
 					/>
 				);
+			case 'consent':
+				return <ContactConsent block={block} />;
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
@@ -209,6 +212,11 @@ const FormBlockDisplay = (props: Props) => {
 							<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
 							Cette question est masquée sur le formulaire
 						</p>
+						{block.type_bloc === 'consent' && (
+							<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
+								L’étape Email est également masquée.
+							</p>
+						)}
 					</div>
 				</>
 			)}

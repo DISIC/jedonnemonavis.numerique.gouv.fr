@@ -1,5 +1,6 @@
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getContactStepState } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { useId, useState } from 'react';
@@ -44,9 +45,12 @@ const FormStepper = (props: Props) => {
 					>
 						<ul className={fr.cx('fr-sidemenu__list')}>
 							{steps.map(step => {
-								const isHidden = configHelper.displays.some(
-									d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-								);
+								const isHidden =
+									configHelper.displays.some(
+										d =>
+											d.kind === 'step' && d.parent_id === step.id && d.hidden
+									) ||
+									getContactStepState(step, steps, configHelper) === 'hidden';
 								const isCurrent = step.id === currentStep.id;
 
 								return (

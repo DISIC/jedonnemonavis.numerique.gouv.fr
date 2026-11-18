@@ -23,7 +23,7 @@ import {
 	hasAllRequiredBlockAnswers,
 	getInvalidEmailBlocks,
 	getPersonalDataBlocks,
-	getContactStep,
+	getContactConsent,
 	isStepHidden,
 	omitStepAnswers
 } from '@/src/utils/form-validation';
@@ -101,15 +101,19 @@ export default function AvisPage({
 	const visibleSteps = form.form_template.form_template_steps.filter(
 		step => !isStepHidden(step, formConfig)
 	);
-	const contactStep = getContactStep(visibleSteps, formConfig);
-	const steps = acceptsContact
-		? visibleSteps
-		: visibleSteps.filter(step => step !== contactStep);
+	const contactConsent = getContactConsent(visibleSteps, formConfig);
+	const contactStep = contactConsent?.emailStep;
+	const steps = visibleSteps.filter(
+		step =>
+			step !== contactStep || (contactConsent?.isEnabled && acceptsContact)
+	);
 
 	const currentStep = steps[currentStepIndex];
-	const isContactConsentStep =
-		!!contactStep &&
-		visibleSteps[visibleSteps.indexOf(contactStep) - 1] === currentStep;
+	const consentBlock =
+		contactConsent?.isEnabled &&
+		currentStep.form_template_blocks.includes(contactConsent.block)
+			? contactConsent.block
+			: undefined;
 
 	const handleContactConsentChange = (checked: boolean) => {
 		setAcceptsContact(checked);
@@ -391,18 +395,17 @@ export default function AvisPage({
 									totalSteps={steps.length}
 									isWidget={isWidget}
 									showValidationErrors={showValidationErrors}
-									hidePersonalDataAlert={isContactConsentStep}
+									hidePersonalDataAlert={!!consentBlock}
 								/>
 
-								{isContactConsentStep && (
+								{consentBlock && (
 									<div className={fr.cx('fr-mt-2v', 'fr-mb-10v')}>
 										<Checkbox
 											small={isWidget}
 											className={cx(classes.contactConsent, fr.cx('fr-mb-0'))}
 											options={[
 												{
-													label:
-														"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+													label: consentBlock.label ?? '',
 													nativeInputProps: {
 														checked: acceptsContact,
 														onChange: e =>

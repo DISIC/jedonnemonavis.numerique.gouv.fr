@@ -95,6 +95,13 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							field_code: 'verbatim',
 							position: 0,
 							isRequired: true
+						},
+						{
+							label:
+								"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+							type_bloc: 'consent',
+							position: 1,
+							isHideable: true
 						}
 					]
 				}
@@ -112,7 +119,6 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							type_bloc: 'input_email',
 							field_code: 'contact_email',
 							position: 0,
-							isHideable: true,
 							isRequired: true
 						}
 					]
