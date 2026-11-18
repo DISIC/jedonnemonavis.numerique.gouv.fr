@@ -133,7 +133,6 @@ const NewForm = (props: Props) => {
 
 	const titleInfoId = 'form-title-info';
 	const titleErrorId = 'form-title-error';
-	// Title shown in <title>, updated when the field loses focus (not on each keystroke)
 	const [committedTitle, setCommittedTitle] = useState<string>();
 
 	const createFormConfig = trpc.formConfig.create.useMutation({
@@ -381,7 +380,6 @@ const NewForm = (props: Props) => {
 													</label>
 													<input
 														id="form-title"
-														// react-hook-form focuses the invalid field on submit
 														ref={ref}
 														className={fr.cx(
 															'fr-input',
