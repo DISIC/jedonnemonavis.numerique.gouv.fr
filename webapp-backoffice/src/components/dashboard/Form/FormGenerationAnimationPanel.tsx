@@ -94,13 +94,13 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 					évaluation homogène entre les services numériques.
 				</p>
 			</div>
-			<div className={cx(classes.infosContainer)}>
+			<ul className={cx(fr.cx('fr-raw-list'), classes.infosContainer)}>
 				{infos.map((info, idx) => {
 					const t = computeItemFraction(progress, idx, infos.length);
 					const opacity = t;
 					const translateY = (1 - t) * 8;
 					return (
-						<div
+						<li
 							key={info.id}
 							className={cx(classes.infoContainer)}
 							style={{
@@ -125,10 +125,10 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 							<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
 								{info.text}
 							</p>
-						</div>
+						</li>
 					);
 				})}
-			</div>
+			</ul>
 		</>
 	);
 };
