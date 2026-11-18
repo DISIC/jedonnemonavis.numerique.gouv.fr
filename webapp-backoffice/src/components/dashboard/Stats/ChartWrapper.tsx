@@ -237,6 +237,7 @@ const ChartWrapper = ({
 		return (
 			<div className={cx(classes.tableContainer)}>
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
+					<caption className={fr.cx('fr-sr-only')}>{title}</caption>
 					<thead>
 						<tr>
 							<th scope="col">{tableHeaderLabel}</th>
@@ -348,7 +349,14 @@ const ChartWrapper = ({
 					isFormDashboardType && classes.dashboardChartContainer
 				)}
 			>
-				{view === 'chart' ? children : displayTable()}
+				{view === 'chart' ? (
+					<figure className={fr.cx('fr-m-0')}>
+						{children}
+						<figcaption className={fr.cx('fr-sr-only')}>{title}</figcaption>
+					</figure>
+				) : (
+					displayTable()
+				)}
 			</div>
 		</div>
 	);
