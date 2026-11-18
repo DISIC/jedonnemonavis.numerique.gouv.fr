@@ -40,8 +40,8 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 				</li>
 				<li className={fr.cx('fr-mb-4v')}>
 					<span aria-hidden="true">⭐️</span> Affichez un bouton flottant sur
-					votre site afin que vos usagers trouvent le chemin de votre
-					formulaire “Remontées d’informations” à n’importe quel moment.
+					votre site afin que vos usagers trouvent le chemin de votre formulaire
+					“Remontées d’informations” à n’importe quel moment.
 				</li>
 			</ul>
 			<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>

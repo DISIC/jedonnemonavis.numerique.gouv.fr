@@ -13,7 +13,7 @@ import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
-import TextInput from './blocks/TextInput';
+import TextInput, { getQuestionId } from './blocks/TextInput';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -151,7 +151,9 @@ const FormBlockDisplay = (props: Props) => {
 					}
 				>
 					<div className={cx(classes.headerInfo)}>
-						<h3>{block.label}</h3>
+						<h3 id={getQuestionId(block)} className={fr.cx('fr-h5')}>
+							{block.label}
+						</h3>
 						{isBlockHidden && (
 							<Badge
 								className={cx(classes.hiddenBadge, fr.cx('fr-ml-2v'))}
@@ -248,8 +250,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		color: fr.colors.decisions.text.default.grey.default
 	},
 	header: {
+		gap: fr.spacing('4v'),
 		'& > div:nth-child(2)': {
 			textAlign: 'right'
+		},
+		[fr.breakpoints.up('md')]: {
+			flexWrap: 'nowrap' as const,
+			'& > div': {
+				flexShrink: 1
+			}
 		}
 	},
 	headerInfo: {
@@ -262,7 +271,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		gap: fr.spacing('2v'),
-		flexWrap: 'wrap' as const
+		flexWrap: 'wrap' as const,
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column' as const,
+			alignItems: 'stretch',
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

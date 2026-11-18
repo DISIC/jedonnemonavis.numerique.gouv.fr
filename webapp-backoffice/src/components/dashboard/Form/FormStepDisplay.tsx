@@ -105,7 +105,7 @@ const FormStepDisplay = (props: Props) => {
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
-						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
+						<h2 className={fr.cx('fr-h2', 'fr-mr-2v')}>{step.title} </h2>
 						{step.description && (
 							<InfoTooltip
 								className={classes.tooltip}
@@ -293,10 +293,12 @@ const FormStepDisplay = (props: Props) => {
 const useStyles = tss.withName({ FormStepDisplay }).create({
 	container: {
 		height: '100%',
+		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('6v'),
-		padding: fr.spacing('6v'),
+		gap: fr.spacing('4v'),
+		paddingBlock: fr.spacing('4v'),
+		paddingInline: fr.spacing('4v'),
 		backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
 		h3: {
 			...fr.typography[1].style,
@@ -340,7 +342,18 @@ const useStyles = tss.withName({ FormStepDisplay }).create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		flexWrap: 'wrap',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			'& > *': {
+				width: '100%'
+			},
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	headerInfo: {
 		display: 'flex',
@@ -351,11 +364,27 @@ const useStyles = tss.withName({ FormStepDisplay }).create({
 	},
 	buttonsContainer: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			'& > div:empty': {
+				display: 'none'
+			},
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	badgeContainer: {
 		display: 'flex',
-		alignItems: 'center'
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: fr.spacing('2v')
+		}
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

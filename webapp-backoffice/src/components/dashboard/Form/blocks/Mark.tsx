@@ -26,11 +26,12 @@ const Mark = (props: Props) => {
 							<div className={classes.hintLeft}>{block.downLabel}</div>
 						)}
 						<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
-							{block.content && (
-								<legend>
-									<p className={fr.cx('fr-hint-text')}>{block.content}</p>
-								</legend>
-							)}
+							<legend>
+								<span className={fr.cx('fr-sr-only')}>{block.label}</span>
+								{block.content && (
+									<span className={fr.cx('fr-hint-text')}>{block.content}</span>
+								)}
+							</legend>
 							<ul>
 								{block.options.map(option => (
 									<li key={option.value}>
