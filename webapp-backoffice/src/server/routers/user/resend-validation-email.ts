@@ -36,6 +36,25 @@ export const resendValidationEmailMutation = async ({
 		});
 	}
 
+	// Seul un compte en attente de confirmation d'adresse (jeton en cours) peut en recevoir un nouveau.
+	const [blockingRequest, pendingToken] = await Promise.all([
+		ctx.prisma.userRequest.findFirst({
+			where: { user_id: user.id, status: { in: ['pending', 'refused'] } },
+			select: { id: true }
+		}),
+		ctx.prisma.userValidationToken.findUnique({
+			where: { user_id: user.id },
+			select: { id: true }
+		})
+	]);
+
+	if (blockingRequest || !pendingToken) {
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'User not found'
+		});
+	}
+
 	const token = await generateValidationToken(ctx.prisma, user.id);
 
 	const emailHtml = await renderRegisterEmail({

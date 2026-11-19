@@ -1,23 +1,32 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { tss } from 'tss-react';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	disabled: boolean;
 	nbItems?: number;
+	legend?: ReactNode;
+	legendClassName?: string;
 }
 
 const RadioTiles = (props: Props) => {
-	const { block, disabled, nbItems } = props;
-	const { classes, cx } = useStyles({ nbItems: nbItems });
+	const { block, disabled, nbItems, legend, legendClassName } = props;
+	const { classes, cx } = useStyles({ nbItems: nbItems, hasLegend: !!legend });
 
 	const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
 	return (
 		<div className={classes.container}>
 			<fieldset>
+				{legend ? (
+					<legend className={cx(classes.legend, legendClassName)}>
+						{legend}
+					</legend>
+				) : (
+					<legend className={fr.cx('fr-sr-only')}>{block.label}</legend>
+				)}
 				<ul>
 					{block.options.map(opt => (
 						<li key={opt.id}>
@@ -46,12 +55,16 @@ const RadioTiles = (props: Props) => {
 
 const useStyles = tss
 	.withName({ RadioTiles })
-	.withParams<{ nbItems?: number }>()
-	.create(({ nbItems }) => ({
+	.withParams<{ nbItems?: number; hasLegend?: boolean }>()
+	.create(({ nbItems, hasLegend }) => ({
+		legend: {
+			padding: 0,
+			width: '100%'
+		},
 		container: {
 			display: 'flex',
 			alignItems: 'center',
-			marginTop: fr.spacing('4v'),
+			marginTop: hasLegend ? 0 : fr.spacing('4v'),
 			fieldset: {
 				border: 0,
 				padding: 0,

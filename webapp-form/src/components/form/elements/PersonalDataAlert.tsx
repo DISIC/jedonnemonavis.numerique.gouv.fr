@@ -26,7 +26,7 @@ export const PersonalDataAlert = ({ value }: Props) => {
 	if (matches.length === 0) return null;
 
 	return (
-		<div role="alert" className={fr.cx('fr-mt-2v')}>
+		<div role="alert" className={fr.cx('fr-mt-4v')}>
 			<Alert
 				severity="warning"
 				small

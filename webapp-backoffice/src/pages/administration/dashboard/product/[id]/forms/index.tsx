@@ -114,6 +114,22 @@ const ProductFormsPage = (props: Props) => {
 		return `${rootFormTemplate?.title} ${existingTemplateForms.length + 1}`;
 	}, [product.forms]);
 
+	const activeForms = useMemo(
+		() =>
+			product.forms
+				.filter(f => !f.isDeleted)
+				.sort((a, b) => {
+					const dateA = a.last_review_at
+						? new Date(a.last_review_at).getTime()
+						: 0;
+					const dateB = b.last_review_at
+						? new Date(b.last_review_at).getTime()
+						: 0;
+					return dateB - dateA;
+				}),
+		[product.forms]
+	);
+
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
@@ -143,6 +159,7 @@ const ProductFormsPage = (props: Props) => {
 						<div role="alert">
 							<Alert
 								className={fr.cx('fr-col-12', 'fr-mb-8v')}
+								as="h2"
 								title="Votre formulaire a été créé avec succès !"
 								description={
 									<>
@@ -199,7 +216,7 @@ const ProductFormsPage = (props: Props) => {
 						</div>
 
 						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
-							{product.forms.filter(f => !f.isDeleted).length === 0 && (
+							{activeForms.length === 0 && (
 								<div className={fr.cx('fr-pb-6v')}>
 									<span
 										className={cx(classes.smallText)}
@@ -209,135 +226,29 @@ const ProductFormsPage = (props: Props) => {
 									</span>
 								</div>
 							)}
-							{product.forms
-								.filter(f => !f.isDeleted)
-								.sort((a, b) => {
-									const dateA = a.last_review_at
-										? new Date(a.last_review_at).getTime()
-										: 0;
-									const dateB = b.last_review_at
-										? new Date(b.last_review_at).getTime()
-										: 0;
-									return dateB - dateA;
-								})
-								.map(form => {
+							<ul className={fr.cx('fr-raw-list')}>
+								{activeForms.map(form => {
 									const newReviewsCount = getFormNewReviewCount(
 										form.id,
 										form.legacy
 									);
 									return (
-										<div
-											key={form.id}
-											className={cx(
-												fr.cx(
-													'fr-grid-row',
-													'fr-mb-6v',
-													'fr-p-4v',
-													'fr-grid-row--middle'
-												),
-												classes.formCard
-											)}
-										>
+										<li key={form.id}>
 											<div
-												className={cx(
-													classes.topFormCardContainer,
-													fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
-												)}
-											>
-												<div
-													className={cx(
-														classes.productTitleContainer,
-														fr.cx('fr-pb-0')
-													)}
-												>
-													<Link
-														href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-														className={cx(classes.productTitle)}
-													>
-														<span>
-															{form.title || form.form_template.title}
-														</span>
-													</Link>
-													{form.isTop250 && <DemarcheEssentielleBadge small />}
-													{form.buttons.length > 0 ? (
-														<>
-															{newReviewsCount > 0 && (
-																<Badge severity="success" noIcon small>
-																	{newReviewsCount} NOUVELLES RÉPONSES
-																</Badge>
-															)}
-														</>
-													) : (
-														<Badge severity="warning" noIcon small>
-															Configuration à terminer
-														</Badge>
-													)}
-												</div>
-												{form.buttons.length > 0 && (
-													<div className={fr.cx('fr-grid-row')}>
-														<span
-															className={cx(
-																fr.cx('fr-mr-2v'),
-																classes.smallText
-															)}
-														>
-															Réponses déposées
-														</span>
-														<span className={fr.cx('fr-text--bold')}>
-															{formatNumberWithSpaces(
-																getFormReviewCount(form.id, form.legacy)
-															)}
-														</span>
-													</div>
-												)}
-											</div>
-											<div className="fr-mt-4v">
-												<span
-													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-												>
-													Modifié le
-												</span>
-												<span className={fr.cx('fr-text--bold')}>
-													{formatDateToFrenchString(form.updated_at.toString())}
-												</span>
-											</div>
-										</div>
-									);
-								})}
-							{product.forms.filter(f => f.isDeleted).length > 0 && (
-								<div className={fr.cx('fr-mt-8v', 'fr-pb-6v')}>
-									<h3 className={fr.cx('fr-mb-3v', 'fr-text--md')}>
-										Formulaires fermés
-									</h3>
-									{product.forms
-										.filter(f => !!f.isDeleted)
-										.map(form => (
-											<div
-												key={form.id}
 												className={cx(
 													fr.cx(
 														'fr-grid-row',
-														'fr-mb-4v',
+														'fr-mb-6v',
 														'fr-p-4v',
 														'fr-grid-row--middle'
 													),
 													classes.formCard
 												)}
-												style={{
-													backgroundColor:
-														fr.colors.decisions.background.default.grey.hover
-												}}
 											>
 												<div
 													className={cx(
-														fr.cx(
-															'fr-col',
-															'fr-col-12',
-															'fr-pb-0',
-															form.buttons.length === 0 &&
-																!form.isDeleted &&
-																'fr-mb-6v'
-														)
+														classes.topFormCardContainer,
+														fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
 													)}
 												>
 													<div
@@ -346,86 +257,197 @@ const ProductFormsPage = (props: Props) => {
 															fr.cx('fr-pb-0')
 														)}
 													>
-														<Link
-															href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-															className={cx(classes.productTitle)}
-														>
-															<span>
-																{form.title || form.form_template.title}
-															</span>
-														</Link>
-														<div
-															className={cx(
-																fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),
-																classes.formStatsContent
-															)}
-														>
-															<Badge severity="error" noIcon small>
-																Fermé
+														<h3 className={cx(classes.productTitleHeading)}>
+															<Link
+																href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+																className={cx(classes.productTitle)}
+															>
+																<span>
+																	{form.title || form.form_template.title}
+																</span>
+															</Link>
+														</h3>
+														{form.isTop250 && (
+															<DemarcheEssentielleBadge small />
+														)}
+														{form.buttons.length > 0 ? (
+															<>
+																{newReviewsCount > 0 && (
+																	<Badge severity="success" noIcon small>
+																		{newReviewsCount} NOUVELLES RÉPONSES
+																	</Badge>
+																)}
+															</>
+														) : (
+															<Badge severity="warning" noIcon small>
+																Configuration à terminer
 															</Badge>
-														</div>
+														)}
 													</div>
-													{form.deleted_at && (
-														<div className="fr-mt-4v">
-															<span className={cx(classes.smallText)}>
-																{`Fermé le ${formatDateToFrenchString(
-																	form.deleted_at.toString()
-																)}` +
-																	(form.delete_reason
-																		? ` : ${form.delete_reason}`
-																		: '')}
+													{form.buttons.length > 0 && (
+														<div className={fr.cx('fr-grid-row')}>
+															<span
+																className={cx(
+																	fr.cx('fr-mr-2v'),
+																	classes.smallText
+																)}
+															>
+																Réponses déposées
+															</span>
+															<span className={fr.cx('fr-text--bold')}>
+																{formatNumberWithSpaces(
+																	getFormReviewCount(form.id, form.legacy)
+																)}
 															</span>
 														</div>
 													)}
 												</div>
-
-												{form.buttons.some(b => b.closedButtonLog) && (
-													<div role="status">
-														<Alert
-															severity="error"
-															title="Tentative de dépôt d'avis"
-															description={
-																<>
-																	<small>
-																		Un ou plusieurs boutons “Je Donne Mon Avis”
-																		sont toujours visibles par les usagers. Nous
-																		vous invitons à supprimer le code HTML
-																		correspondant de la page concernée.
-																	</small>
-																	<ul>
-																		{form.buttons
-																			.filter(b => b.closedButtonLog)
-																			.map(b => (
-																				<li key={b.id}>
-																					<small>
-																						Lien d'intégration &laquo;
-																						<b>{b.title}</b>
-																						&raquo; — Dernière
-																						tentative&nbsp;:&nbsp;
-																						{formatDateToFrenchString(
-																							b.closedButtonLog?.updated_at.toString() ||
-																								''
-																						)}
-																						&nbsp; — Nombre total de
-																						tentatives&nbsp;:&nbsp;
-																						{b.closedButtonLog?.count}
-																					</small>
-																				</li>
-																			))}
-																	</ul>
-																</>
-															}
-															closable
-															className={cx(
-																fr.cx('fr-mt-2w'),
-																classes.alertButtonLog
-															)}
-															as="h4"
-														/>
-													</div>
-												)}
+												<div className="fr-mt-4v">
+													<span
+														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+													>
+														Modifié le
+													</span>
+													<span className={fr.cx('fr-text--bold')}>
+														{formatDateToFrenchString(
+															form.updated_at.toString()
+														)}
+													</span>
+												</div>
 											</div>
-										))}
+										</li>
+									);
+								})}
+							</ul>
+							{product.forms.filter(f => f.isDeleted).length > 0 && (
+								<div className={fr.cx('fr-mt-8v', 'fr-pb-6v')}>
+									<h3 className={fr.cx('fr-mb-3v', 'fr-text--md')}>
+										Formulaires fermés
+									</h3>
+									<ul className={fr.cx('fr-raw-list')}>
+										{product.forms
+											.filter(f => !!f.isDeleted)
+											.map(form => (
+												<li key={form.id}>
+													<div
+														className={cx(
+															fr.cx(
+																'fr-grid-row',
+																'fr-mb-4v',
+																'fr-p-4v',
+																'fr-grid-row--middle'
+															),
+															classes.formCard
+														)}
+														style={{
+															backgroundColor:
+																fr.colors.decisions.background.default.grey
+																	.hover
+														}}
+													>
+														<div
+															className={cx(
+																fr.cx(
+																	'fr-col',
+																	'fr-col-12',
+																	'fr-pb-0',
+																	form.buttons.length === 0 &&
+																		!form.isDeleted &&
+																		'fr-mb-6v'
+																)
+															)}
+														>
+															<div
+																className={cx(
+																	classes.productTitleContainer,
+																	fr.cx('fr-pb-0')
+																)}
+															>
+																<h4 className={cx(classes.productTitleHeading)}>
+																	<Link
+																		href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+																		className={cx(classes.productTitle)}
+																	>
+																		<span>
+																			{form.title || form.form_template.title}
+																		</span>
+																	</Link>
+																</h4>
+																<div
+																	className={cx(
+																		fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),
+																		classes.formStatsContent
+																	)}
+																>
+																	<Badge severity="error" noIcon small>
+																		Fermé
+																	</Badge>
+																</div>
+															</div>
+															{form.deleted_at && (
+																<div className="fr-mt-4v">
+																	<span className={cx(classes.smallText)}>
+																		{`Fermé le ${formatDateToFrenchString(
+																			form.deleted_at.toString()
+																		)}` +
+																			(form.delete_reason
+																				? ` : ${form.delete_reason}`
+																				: '')}
+																	</span>
+																</div>
+															)}
+														</div>
+
+														{form.buttons.some(b => b.closedButtonLog) && (
+															<div role="status">
+																<Alert
+																	severity="error"
+																	title="Tentative de dépôt d'avis"
+																	description={
+																		<>
+																			<small>
+																				Un ou plusieurs boutons “Je Donne Mon
+																				Avis” sont toujours visibles par les
+																				usagers. Nous vous invitons à supprimer
+																				le code HTML correspondant de la page
+																				concernée.
+																			</small>
+																			<ul>
+																				{form.buttons
+																					.filter(b => b.closedButtonLog)
+																					.map(b => (
+																						<li key={b.id}>
+																							<small>
+																								Lien d'intégration &laquo;
+																								<b>{b.title}</b>
+																								&raquo; — Dernière
+																								tentative&nbsp;:&nbsp;
+																								{formatDateToFrenchString(
+																									b.closedButtonLog?.updated_at.toString() ||
+																										''
+																								)}
+																								&nbsp; — Nombre total de
+																								tentatives&nbsp;:&nbsp;
+																								{b.closedButtonLog?.count}
+																							</small>
+																						</li>
+																					))}
+																			</ul>
+																		</>
+																	}
+																	closable
+																	className={cx(
+																		fr.cx('fr-mt-2w'),
+																		classes.alertButtonLog
+																	)}
+																	as="h5"
+																/>
+															</div>
+														)}
+													</div>
+												</li>
+											))}
+									</ul>
 								</div>
 							)}
 						</div>
@@ -495,6 +517,11 @@ const useStyles = tss
 			flexWrap: 'wrap',
 			flex: 1,
 			gap: fr.spacing('2v')
+		},
+		productTitleHeading: {
+			margin: 0,
+			fontSize: '18px',
+			lineHeight: '1.5rem'
 		},
 		productTitle: {
 			backgroundImage: 'none',

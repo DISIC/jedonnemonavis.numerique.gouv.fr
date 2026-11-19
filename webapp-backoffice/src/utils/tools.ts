@@ -12,7 +12,8 @@ import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]
 import {
 	ArchivedAnswerSnapshot,
 	ButtonWithElements,
-	FormConfigWithChildren
+	FormConfigWithChildren,
+	FormWithElements
 } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 
@@ -272,6 +273,36 @@ export const normalizeString = (str: string): string => {
 		.replace(/[\u0300-\u036f]/g, '') // strip accents
 		.replace(/[^\w\sÀ-ÿ\u0152\u0153'"]/gi, '') // allow œ/Œ; remove other special characters except letters, numbers, spaces, apostrophes, and quotes
 		.trim();
+};
+
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+export const RIGHT_OPTIONS_BUTTON_ID_PREFIX = 'button-options-access-right-';
+
+export const getRightOptionsIds = (right: {
+	id: number;
+	user: { firstName: string | null; lastName: string | null } | null;
+	user_email: string | null;
+	user_email_invite: string | null;
+}) => {
+	const userFullName = right.user
+		? `${right.user.firstName} ${right.user.lastName}`
+		: right.user_email ?? right.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${right.id}`;
+
+	return {
+		userFullName,
+		idSuffix,
+		optionsButtonId: `${RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
 };
 
 export const alternativeString = (str: string): string => {
@@ -687,6 +718,31 @@ export const getHelperFromFormConfig = (
 				kind: fcl.kind
 			})) || []
 	};
+};
+
+type FormStep =
+	FormWithElements['form_template']['form_template_steps'][number];
+
+export const getContactStepState = (
+	step: FormStep,
+	steps: FormStep[],
+	configHelper: FormConfigHelper
+): 'hidden' | 'conditional' | null => {
+	const consentBlock = steps
+		.flatMap(s => s.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	const isContactStep = step.form_template_blocks.some(
+		block => block.field_code === 'contact_email'
+	);
+	if (!consentBlock || !isContactStep) return null;
+
+	const display = configHelper.displays.find(
+		d => d.kind === 'block' && d.parent_id === consentBlock.id
+	);
+	const isConsentHidden = display
+		? display.hidden
+		: consentBlock.isHiddenByDefault;
+	return isConsentHidden ? 'hidden' : 'conditional';
 };
 
 export const getHasConfigChanged = (

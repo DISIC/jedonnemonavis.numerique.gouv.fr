@@ -70,6 +70,7 @@ async function main() {
 			await Promise.all(getWLDPromises());
 			break;
 		case 'seedDemarchesNumeriques':
+			assertNotProduction();
 			await seed_demarches_numeriques(prisma);
 			break;
 		default:

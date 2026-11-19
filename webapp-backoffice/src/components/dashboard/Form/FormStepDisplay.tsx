@@ -4,10 +4,11 @@ import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
+import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { FormConfigKind } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
+import { getContactStepState } from '@/src/utils/tools';
 import RootScales from './custom/RootScales';
 import RootYesNo from './custom/RootYesNo';
 import FormBlockDisplay from './FormBlockDisplay';
@@ -78,6 +79,14 @@ const FormStepDisplay = (props: Props) => {
 		});
 	}, [isHidden]);
 
+	const contactStepState = getContactStepState(
+		step,
+		form.form_template.form_template_steps,
+		configHelper
+	);
+	const isHiddenByConsent = contactStepState === 'hidden';
+	const isDisplayedHidden = isHidden || isHiddenByConsent;
+
 	const displayPublishButton = () => {
 		if (isExternalPublish) {
 			return <div />;
@@ -99,17 +108,17 @@ const FormStepDisplay = (props: Props) => {
 		<div
 			className={cx(
 				classes.container,
-				isHidden ? classes.containerHidden : null
+				isDisplayedHidden ? classes.containerHidden : null
 			)}
 		>
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
-						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
+						<h2 className={fr.cx('fr-h2', 'fr-mr-2v')}>{step.title} </h2>
 						{step.description && (
-							<Tooltip
+							<InfoTooltip
 								className={classes.tooltip}
-								kind="hover"
+								buttonLabel="Pourquoi cette étape ?"
 								title={
 									<>
 										<b>Pourquoi cette étape ?</b>
@@ -128,12 +137,12 @@ const FormStepDisplay = (props: Props) => {
 						)}
 					</div>
 					<div className={cx(classes.badgeContainer)}>
-						{!step.isHideable && (
+						{!step.isHideable && !contactStepState && (
 							<Badge severity="info" noIcon small className={fr.cx('fr-mr-2v')}>
 								Étape obligatoire
 							</Badge>
 						)}
-						{isHidden && (
+						{isDisplayedHidden && (
 							<Badge
 								className={cx(classes.hiddenBadge, fr.cx('fr-mr-2v'))}
 								small
@@ -142,7 +151,7 @@ const FormStepDisplay = (props: Props) => {
 								étape masquée
 							</Badge>
 						)}
-						{!isHidden && isStepModified(step.id) && (
+						{!isDisplayedHidden && isStepModified(step.id) && (
 							<Badge
 								className={cx(classes.modifiedBadge, fr.cx('fr-mr-2v'))}
 								small
@@ -165,29 +174,32 @@ const FormStepDisplay = (props: Props) => {
 						)}
 					</div>
 				</div>
-				{isHidden && (
+				{isDisplayedHidden && (
 					<>
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
-							{isHidden && (
-								<p
-									className={cx(
-										classes.disabledAlertMessage,
-										fr.cx('fr-mr-2v', 'fr-mb-0')
-									)}
-								>
-									<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
-								</p>
-							)}
+							<p
+								className={cx(
+									classes.disabledAlertMessage,
+									fr.cx('fr-mr-2v', 'fr-mb-0')
+								)}
+							>
+								<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
+							</p>
 							<p className={fr.cx('fr-mb-0')}>
-								{`${
-									isHidden
-										? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.'
-										: "Cette étape n'est pas masquable."
-								}`}
+								{isHiddenByConsent
+									? 'Cette étape est masquée car la case « J’accepte d’être recontacté » est masquée à l’étape Commentaire.'
+									: 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.'}
 							</p>
 						</div>
 					</>
+				)}
+				{contactStepState === 'conditional' && (
+					<p className={fr.cx('fr-mt-4v', 'fr-mb-0')}>
+						<span className={fr.cx('ri-information-line', 'fr-mr-1v')} />
+						Cette étape ne s’affiche que si l’usager coche la case « J’accepte
+						d’être recontacté » à l’étape Commentaire.
+					</p>
 				)}
 			</div>
 			{step.form_template_blocks.map(block => {
@@ -293,10 +305,12 @@ const FormStepDisplay = (props: Props) => {
 const useStyles = tss.withName({ FormStepDisplay }).create({
 	container: {
 		height: '100%',
+		width: '100%',
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('6v'),
-		padding: fr.spacing('6v'),
+		gap: fr.spacing('4v'),
+		paddingBlock: fr.spacing('4v'),
+		paddingInline: fr.spacing('4v'),
 		backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
 		h3: {
 			...fr.typography[1].style,
@@ -340,7 +354,18 @@ const useStyles = tss.withName({ FormStepDisplay }).create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		flexWrap: 'wrap',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			'& > *': {
+				width: '100%'
+			},
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	headerInfo: {
 		display: 'flex',
@@ -351,11 +376,27 @@ const useStyles = tss.withName({ FormStepDisplay }).create({
 	},
 	buttonsContainer: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			'& > div:empty': {
+				display: 'none'
+			},
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	badgeContainer: {
 		display: 'flex',
-		alignItems: 'center'
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: fr.spacing('2v')
+		}
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

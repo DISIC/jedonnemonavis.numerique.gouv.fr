@@ -318,7 +318,7 @@ const NewAccess = ({ product }: Props) => {
 					stateRelatedMessage={
 						userToInvite.errorStatus == 409
 							? "L'utilisateur avec cet email a déja accès à ce service numérique ou à l'oganisation à laquelle appartient ce service numérique."
-							: 'Veuillez saisir une adresse email valide.'
+							: 'Veuillez saisir une adresse email valide. Format attendu : nom@domaine.fr'
 					}
 					hintText="Format attendu : nom@domaine.fr"
 					nativeInputProps={{

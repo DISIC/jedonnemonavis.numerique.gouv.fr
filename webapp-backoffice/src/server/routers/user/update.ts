@@ -87,6 +87,13 @@ export const updateUserMutation = async ({
 			data: dataToUpdate
 		});
 
+		// Un compte désactivé par un administrateur ne doit pas pouvoir se réactiver par lien de validation.
+		if (isAdmin && active === false) {
+			await ctx.prisma.userValidationToken.deleteMany({
+				where: { user_id: id }
+			});
+		}
+
 		return { data: omitPassword(updatedUser) };
 	}
 
