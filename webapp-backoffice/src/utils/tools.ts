@@ -275,6 +275,36 @@ export const normalizeString = (str: string): string => {
 		.trim();
 };
 
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+export const RIGHT_OPTIONS_BUTTON_ID_PREFIX = 'button-options-access-right-';
+
+export const getRightOptionsIds = (right: {
+	id: number;
+	user: { firstName: string | null; lastName: string | null } | null;
+	user_email: string | null;
+	user_email_invite: string | null;
+}) => {
+	const userFullName = right.user
+		? `${right.user.firstName} ${right.user.lastName}`
+		: right.user_email ?? right.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${right.id}`;
+
+	return {
+		userFullName,
+		idSuffix,
+		optionsButtonId: `${RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
+};
+
 export const alternativeString = (str: string): string => {
 	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
 };

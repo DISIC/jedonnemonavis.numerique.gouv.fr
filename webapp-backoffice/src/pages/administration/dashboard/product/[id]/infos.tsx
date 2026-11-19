@@ -173,7 +173,10 @@ const ProductInformationPage = (props: Props) => {
 							priority="secondary"
 							iconId="fr-icon-edit-line"
 							iconPosition="right"
-							nativeButtonProps={editProductModal.buttonProps}
+							nativeButtonProps={{
+								...editProductModal.buttonProps,
+								'aria-label': `Modifier les informations du service numérique ${product.title}`
+							}}
 						>
 							Modifier
 						</Button>
@@ -189,8 +192,7 @@ const ProductInformationPage = (props: Props) => {
 						type="button"
 						className={classes.copyBtn}
 						nativeButtonProps={{
-							title: `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
-							'aria-label': `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier dans le presse-papier l’identifiant du service numérique ${product.title}`,
 							onClick: () => {
 								navigator.clipboard.writeText(product.id.toString());
 								setDisplayToast(true);
@@ -241,6 +243,7 @@ const ProductInformationPage = (props: Props) => {
 							iconPosition="right"
 							priority="tertiary"
 							className={classes.buttonError}
+							aria-label={`Supprimer ce service numérique ${product.title}`}
 							onClick={() => {
 								if (hasLockedForm) {
 									setStatusProductState({
@@ -270,7 +273,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start'
+		}
 	},
 	column: {
 		display: 'flex',
@@ -289,7 +296,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 		boxShadow: 'none'
 	},
 	buttonError: {
-		color: fr.colors.decisions.text.default.error.default
+		color: fr.colors.decisions.text.default.error.default,
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	}
 });
 

@@ -10,6 +10,7 @@ import { AccessRightModalType } from '@/src/pages/administration/dashboard/produ
 import { push } from '@socialgouv/matomo-next';
 import { AccessRightMenuOptions } from './AccessRightMenuOptions';
 import { RightAccessStatus } from '@prisma/client';
+import { getRightOptionsIds } from '@/src/utils/tools';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -34,6 +35,9 @@ const ProductAccessCard = (props: Props) => {
 	};
 
 	const { cx, classes } = useStyles();
+
+	const { userFullName, optionsButtonId, optionsMenuId } =
+		getRightOptionsIds(accessRight);
 
 	return (
 		<>
@@ -105,10 +109,11 @@ const ProductAccessCard = (props: Props) => {
 						{ownRight === 'carrier_admin' && (
 							<>
 								<Button
-									id="button-options-access-right"
-									aria-controls={menuOpen ? 'option-menu' : undefined}
+									id={optionsButtonId}
+									aria-label={`Options ${userFullName}`}
+									aria-controls={menuOpen ? optionsMenuId : undefined}
 									aria-haspopup="true"
-									aria-expanded={menuOpen ? 'true' : undefined}
+									aria-expanded={menuOpen}
 									priority={'secondary'}
 									className={cx(
 										classes.button,
@@ -128,6 +133,8 @@ const ProductAccessCard = (props: Props) => {
 									open={menuOpen}
 									anchorEl={anchorEl}
 									onClose={handleClose}
+									buttonId={optionsButtonId}
+									menuId={optionsMenuId}
 									accessRight={accessRight}
 									ownRight={ownRight}
 									onButtonClick={onButtonClick}
