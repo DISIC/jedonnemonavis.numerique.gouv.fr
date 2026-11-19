@@ -1,14 +1,15 @@
-import AccessRightCard, {
-	ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX,
-	getAccessRightOptionsIds
-} from '@/src/components/dashboard/AccessRight/AccessRightCard';
+import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightCard';
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
-import { getNbPages } from '@/src/utils/tools';
+import {
+	getNbPages,
+	getRightOptionsIds,
+	RIGHT_OPTIONS_BUTTON_ID_PREFIX
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -166,7 +167,7 @@ const AccessManagement = (props: Props) => {
 		modalType: 'switch' | 'remove',
 		accessRight: AccessRightWithUsers
 	): ModalFocusReturn => {
-		const { optionsButtonId } = getAccessRightOptionsIds(accessRight);
+		const { optionsButtonId } = getRightOptionsIds(accessRight);
 		if (modalType === 'switch') {
 			return {
 				onCancelIds: [optionsButtonId],
@@ -176,7 +177,7 @@ const AccessManagement = (props: Props) => {
 
 		const optionsButtonIds = Array.from(
 			document.querySelectorAll<HTMLElement>(
-				`[id^="${ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX}"]`
+				`[id^="${RIGHT_OPTIONS_BUTTON_ID_PREFIX}"]`
 			),
 			button => button.id
 		);
@@ -192,14 +193,13 @@ const AccessManagement = (props: Props) => {
 		};
 	};
 
-	// Restore focus once the modal is closed. After a submission, wait for the
-	// list to be refetched: a switched card is re-rendered in the other list.
 	React.useEffect(() => {
 		const focusReturn = modalFocusReturnRef.current;
 		if (isModalOpen || !focusReturn) return;
 
-		const isSubmitted = focusReturn.submittedAt !== undefined;
-		if (isSubmitted && accessRightsUpdatedAt < focusReturn.submittedAt!) return;
+		const { submittedAt } = focusReturn;
+		const isSubmitted = submittedAt !== undefined;
+		if (isSubmitted && accessRightsUpdatedAt < submittedAt) return;
 
 		const timer = window.setTimeout(() => {
 			const candidateIds = isSubmitted

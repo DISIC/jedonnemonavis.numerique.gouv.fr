@@ -25,12 +25,9 @@ type FormValues = Omit<Entity, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 	urls: { value: string }[];
 };
 
-// Fields in display order, used to focus the first one in error on submit
-// (the Controllers don't pass a ref to their inputs, so react-hook-form can't)
 const FIELDS_FOCUS_ORDER: (keyof FormValues)[] = ['name', 'acronym'];
 
 const focusField = (name: keyof FormValues) => {
-	// Wait for the error messages to render before moving the focus
 	setTimeout(() => {
 		document
 			.querySelector<HTMLInputElement>(`#entity-form input[name="${name}"]`)

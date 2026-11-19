@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import React, { KeyboardEvent } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { AdminEntityRightActionType } from './EntityRightsModal';
-import { toHtmlIdSlug } from '@/src/utils/tools';
+import { getRightOptionsIds } from '@/src/utils/tools';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
@@ -37,12 +37,8 @@ const EntityRightCard = (props: Props) => {
 		withOptions: withOptions || false
 	});
 
-	const userFullName = adminEntityRight.user
-		? `${adminEntityRight.user.firstName} ${adminEntityRight.user.lastName}`
-		: adminEntityRight.user_email ?? adminEntityRight.user_email_invite ?? '';
-	const idSuffix = `${toHtmlIdSlug(userFullName)}-${adminEntityRight.id}`;
-	const optionsButtonId = `button-options-access-right-${idSuffix}`;
-	const optionsMenuId = `option-menu-access-right-${idSuffix}`;
+	const { userFullName, idSuffix, optionsButtonId, optionsMenuId } =
+		getRightOptionsIds(adminEntityRight);
 
 	return (
 		<>

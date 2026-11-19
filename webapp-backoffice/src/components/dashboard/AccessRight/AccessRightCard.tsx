@@ -10,7 +10,7 @@ import { AccessRightModalType } from '@/src/pages/administration/dashboard/produ
 import { push } from '@socialgouv/matomo-next';
 import { AccessRightMenuOptions } from './AccessRightMenuOptions';
 import { RightAccessStatus } from '@prisma/client';
-import { toHtmlIdSlug } from '@/src/utils/tools';
+import { getRightOptionsIds } from '@/src/utils/tools';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -20,22 +20,6 @@ interface Props {
 	) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
-
-export const ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX =
-	'button-options-access-right-';
-
-export const getAccessRightOptionsIds = (accessRight: AccessRightWithUsers) => {
-	const userFullName = accessRight.user
-		? `${accessRight.user.firstName} ${accessRight.user.lastName}`
-		: accessRight.user_email ?? accessRight.user_email_invite ?? '';
-	const idSuffix = `${toHtmlIdSlug(userFullName)}-${accessRight.id}`;
-
-	return {
-		userFullName,
-		optionsButtonId: `${ACCESS_RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
-		optionsMenuId: `option-menu-access-right-${idSuffix}`
-	};
-};
 
 const ProductAccessCard = (props: Props) => {
 	const { accessRight, onButtonClick, ownRight } = props;
@@ -53,7 +37,7 @@ const ProductAccessCard = (props: Props) => {
 	const { cx, classes } = useStyles();
 
 	const { userFullName, optionsButtonId, optionsMenuId } =
-		getAccessRightOptionsIds(accessRight);
+		getRightOptionsIds(accessRight);
 
 	return (
 		<>

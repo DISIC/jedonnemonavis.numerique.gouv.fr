@@ -35,8 +35,6 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 	urls: { value: string }[];
 };
 
-// Fields in display order, used to focus the first one in error on submit
-// (the Controllers don't pass a ref to their inputs, so react-hook-form can't)
 const FIELDS_FOCUS_ORDER: { name: keyof FormValues; selector: string }[] = [
 	{ name: 'title', selector: '#product-form input[name="title"]' },
 	{ name: 'entity_id', selector: '#entity-select-autocomplete' }
@@ -168,7 +166,6 @@ const ProductModal = (props: Props) => {
 		);
 		if (!firstFieldInError) return;
 
-		// Wait for the error messages to render before moving the focus
 		setTimeout(() => {
 			document.querySelector<HTMLElement>(firstFieldInError.selector)?.focus();
 		}, 0);
