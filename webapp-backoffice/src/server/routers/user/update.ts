@@ -1,15 +1,8 @@
 import type { Context } from '@/src/server/trpc';
-import { renderRegisterEmail } from '@/src/utils/emails';
-import { sendMail } from '@/src/utils/mailer';
 import { NotificationFrequency, UserRole } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import {
-	assertAdminOrOwn,
-	checkUserDomain,
-	generateValidationToken,
-	omitPassword
-} from './utils';
+import { assertAdminOrOwn, checkUserDomain, omitPassword } from './utils';
 
 export const updateUserInputSchema = z.object({
 	id: z.number(),
@@ -57,6 +50,14 @@ export const updateUserMutation = async ({
 	}
 
 	if (dataToUpdate.email) {
+		// La connexion se fait uniquement via ProConnect : il n'y a plus de mail de
+		// confirmation, seul un administrateur peut donc changer une adresse.
+		if (!isAdmin)
+			throw new TRPCError({
+				code: 'FORBIDDEN',
+				message: 'Email can only be changed by an administrator'
+			});
+
 		const userHasConflict = await ctx.prisma.user.findUnique({
 			where: {
 				email: dataToUpdate.email
@@ -78,65 +79,10 @@ export const updateUserMutation = async ({
 			});
 	}
 
-	// Hors administrateur, une nouvelle adresse doit être confirmée par e-mail.
-	const requiresEmailValidation = !isAdmin && !!dataToUpdate.email;
-
-	if (!requiresEmailValidation) {
-		const updatedUser = await ctx.prisma.user.update({
-			where: { id },
-			data: dataToUpdate
-		});
-
-		// Un compte désactivé par un administrateur ne doit pas pouvoir se réactiver par lien de validation.
-		if (isAdmin && active === false) {
-			await ctx.prisma.userValidationToken.deleteMany({
-				where: { user_id: id }
-			});
-		}
-
-		return { data: omitPassword(updatedUser) };
-	}
-
-	const newEmail = dataToUpdate.email as string;
-	const token = await generateValidationToken(ctx.prisma, id);
-	const discardToken = () =>
-		ctx.prisma.userValidationToken.deleteMany({
-			where: { user_id: id, token }
-		});
-
-	const emailHtml = await renderRegisterEmail({
-		token,
-		baseUrl: process.env.NODEMAILER_BASEURL
+	const updatedUser = await ctx.prisma.user.update({
+		where: { id },
+		data: dataToUpdate
 	});
-
-	const sent = await sendMail(
-		'Confirmez votre email',
-		newEmail,
-		emailHtml,
-		`Cliquez sur ce lien pour valider votre compte : ${
-			process.env.NODEMAILER_BASEURL
-		}/register/validate?${new URLSearchParams({ token })}`
-	);
-
-	if (!sent) {
-		await discardToken();
-
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Unable to send validation email'
-		});
-	}
-
-	let updatedUser;
-	try {
-		updatedUser = await ctx.prisma.user.update({
-			where: { id },
-			data: { ...dataToUpdate, active: false }
-		});
-	} catch (error) {
-		await discardToken();
-		throw error;
-	}
 
 	return { data: omitPassword(updatedUser) };
 };

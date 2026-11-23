@@ -23,6 +23,11 @@ const nextConfig = {
 			{ source: '/v2/_next/static/:path*', destination: '/_next/static/:path*' }
 		];
 	},
+	async redirects() {
+		return ['/register/:path*', '/login/otp', '/reset-password/:path*'].map(
+			source => ({ source, destination: '/login', permanent: true })
+		);
+	},
 	async headers() {
 		return [
 			{

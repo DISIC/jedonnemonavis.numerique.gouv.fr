@@ -44,7 +44,7 @@ const SettingsTab = ({
 	const [isCopied, setIsCopied] = useState(false);
 	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] = useState(false);
 
-	const { data: meData } = trpc.user.me.useQuery({});
+	const { data: meData } = trpc.user.me.useQuery();
 	const currentUser = meData?.data;
 	const alertsPaused = currentUser?.alerts_enabled === false;
 
