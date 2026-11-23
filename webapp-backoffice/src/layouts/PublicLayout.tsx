@@ -506,6 +506,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
+					className={cx(classes.footer)}
 					accessibility="non compliant"
 					accessibilityLinkProps={{
 						href: '/public/accessibility'
@@ -545,6 +546,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 const useStyles = tss.withName({ PublicLayout }).create(() => ({
 	logo: {
 		maxHeight: fr.spacing('11v')
+	},
+	footer: {
+		paddingBottom: fr.spacing('10v')
 	},
 	firstItem: {
 		display: 'flex',

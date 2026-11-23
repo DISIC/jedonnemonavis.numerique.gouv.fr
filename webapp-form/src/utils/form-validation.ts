@@ -48,17 +48,30 @@ export function isStepHidden(step: Step, formConfig?: FormConfig): boolean {
 	);
 }
 
-export function getContactStep(
+export type ContactConsent = {
+	block: Block;
+	isEnabled: boolean;
+	emailStep?: Step;
+};
+
+export function getContactConsent(
 	steps: Step[],
 	formConfig?: FormConfig
-): Step | undefined {
-	return steps.slice(1).find(step => {
-		const blocks = getVisibleBlocks(step.form_template_blocks, formConfig);
-		return (
-			blocks.length > 0 &&
-			blocks.every(block => block.field_code === CONTACT_EMAIL_FIELD_CODE)
-		);
-	});
+): ContactConsent | undefined {
+	const block = steps
+		.flatMap(step => step.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	if (!block) return undefined;
+
+	return {
+		block,
+		isEnabled: !isBlockHidden(block, formConfig),
+		emailStep: steps.find(step =>
+			step.form_template_blocks.some(
+				block => block.field_code === CONTACT_EMAIL_FIELD_CODE
+			)
+		)
+	};
 }
 
 export function omitStepAnswers(answers: FormAnswers, step: Step): FormAnswers {

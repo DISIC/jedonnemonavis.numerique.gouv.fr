@@ -29,7 +29,7 @@ const RootYesNo = (props: Props) => {
 
 	return (
 		<div className={cx(classes.container, disabled ? classes.disabled : null)}>
-			<h3>{block.label}</h3>
+			<h3 className={fr.cx('fr-h5')}>{block.label}</h3>
 			<p>
 				Cette question ne s'affiche que si l'utilisateur a coché une des options
 				correspondantes dans la question précédente
@@ -37,29 +37,28 @@ const RootYesNo = (props: Props) => {
 			{step.form_template_blocks.slice(2, 6).map(childBlock => {
 				const isParentHidden = getIsParentHidden(childBlock);
 				return (
-					<div
-						key={childBlock.id}
-						className={cx(
-							classes.childContainer,
-							isParentHidden ? classes.parentHidden : null
-						)}
-					>
-						<label className={cx(classes.childLabel)}>
-							{childBlock.label}{' '}
-							{!disabled && isParentHidden && (
-								<Badge
-									className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
-									small
-								>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-									option parente masquée
-								</Badge>
-							)}
-						</label>
+					<div key={childBlock.id} className={cx(classes.childContainer)}>
 						<RadioTiles
 							block={childBlock}
 							disabled={disabled || isParentHidden}
 							nbItems={2}
+							legendClassName={classes.childLabel}
+							legend={
+								<>
+									<span className={fr.cx('fr-sr-only')}>{block.label} </span>
+									{childBlock.label}{' '}
+									{!disabled && isParentHidden && (
+										<Badge
+											as="span"
+											className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
+											small
+										>
+											<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+											option parente masquée
+										</Badge>
+									)}
+								</>
+							}
 						/>
 					</div>
 				);
@@ -88,17 +87,12 @@ const useStyles = tss.withName({ RootYesNo }).create({
 	childLabel: {
 		display: 'block',
 		color: fr.colors.decisions.text.default.grey.default,
-		marginBottom: fr.spacing('3v')
+		marginBottom: fr.spacing('7v')
 	},
 	disabled: {
 		p: {
 			marginTop: fr.spacing('4v')
 		},
-		'*': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
-	parentHidden: {
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
 		}

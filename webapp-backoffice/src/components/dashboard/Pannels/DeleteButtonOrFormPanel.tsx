@@ -12,7 +12,7 @@ const DeleteButtonOrFormPanel = ({ isForForm }: { isForForm?: boolean }) => {
 			>
 				<Image
 					src="/assets/install_picto.svg"
-					alt="Picto bulles de discussion"
+					alt=""
 					width={120}
 					height={120}
 				/>

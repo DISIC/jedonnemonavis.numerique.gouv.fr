@@ -18,13 +18,13 @@ export const JdmaDnCreatorInviteEmail = ({
 		<JdmaLayout baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
 			<Text style={paragraph}>
-				Votre démarche «&nbsp;<strong>{demarcheName}</strong>&nbsp;» a été créée sur
-				Démarches Numériques. Un formulaire de satisfaction «&nbsp;
+				Votre démarche «&nbsp;<strong>{demarcheName}</strong>&nbsp;» a été créée
+				sur Démarches Numériques. Un formulaire de satisfaction «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>
-				&nbsp;» a automatiquement été mis en place pour recueillir l&apos;avis des
-				usagers à la fin de votre démarche.
+				&nbsp;» a automatiquement été mis en place pour recueillir l&apos;avis
+				des usagers à la fin de votre démarche.
 			</Text>
 			<Text style={paragraph}>
 				Pour suivre les résultats et gérer ce formulaire, connectez-vous avec
@@ -34,8 +34,8 @@ export const JdmaDnCreatorInviteEmail = ({
 				{link}
 			</Link>
 			<Text style={paragraph}>
-				Vous n&apos;avez aucune configuration à réaliser&nbsp;: le formulaire est déjà
-				actif.
+				Vous n&apos;avez aucune configuration à réaliser&nbsp;: le formulaire
+				est déjà actif.
 			</Text>
 		</JdmaLayout>
 	);

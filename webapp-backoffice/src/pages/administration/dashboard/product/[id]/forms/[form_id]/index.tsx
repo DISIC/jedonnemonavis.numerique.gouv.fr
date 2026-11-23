@@ -55,6 +55,7 @@ const ProductFormPage = (props: Props) => {
 
 	const [modalType, setModalType] = useState<ButtonModalType>();
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
+	const [buttonModalOpenCount, setButtonModalOpenCount] = useState(0);
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
 	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
@@ -125,6 +126,7 @@ const ProductFormPage = (props: Props) => {
 	) => {
 		setCurrentButton(button);
 		setModalType(modalType);
+		setButtonModalOpenCount(count => count + 1);
 		buttonModal.open();
 	};
 
@@ -166,6 +168,7 @@ const ProductFormPage = (props: Props) => {
 				form={form}
 				formTemplateButtons={formTemplate.data?.data?.form_template_buttons}
 				modal={buttonModal}
+				openCount={buttonModalOpenCount}
 				modalType={modalType}
 				button={currentButton}
 				onButtonMutation={onButtonMutation}

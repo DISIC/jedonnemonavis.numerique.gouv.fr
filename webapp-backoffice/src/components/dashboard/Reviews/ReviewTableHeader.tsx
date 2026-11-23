@@ -42,49 +42,51 @@ const ReviewTableHeader = (props: Props) => {
 
 	return (
 		<thead className={cx(classes.lineContainer)}>
-			<tr
-				className={cx(
-					classes.trContainer,
-					fr.cx('fr-hidden', 'fr-unhidden-md')
-				)}
-			>
+			<tr className={cx(classes.trContainer)}>
 				{sortList.map((sort, index) => {
 					const isSortable = props.sort.includes(sort.code || sort.label);
+					const isAsc = props.sort.includes('asc');
+					const content = (
+						<span>
+							{sort.label}&nbsp;
+							{isSortable && (
+								<i
+									aria-hidden="true"
+									className={cx(
+										isAsc ? 'ri-arrow-drop-down-fill' : 'ri-arrow-drop-up-fill',
+										classes.thIcon
+									)}
+								></i>
+							)}
+						</span>
+					);
 					return (
 						<th
 							className={cx(
 								classes.badgeVerbatim,
 								isSortable ? classes.pointer : '',
-								fr.cx('fr-hidden', 'fr-unhidden-md'),
 								classes.thContainer
 							)}
 							key={index}
-							onClick={isSortable ? () => onClick(sort.code) : undefined}
 							scope="col"
+							aria-sort={
+								isSortable ? (isAsc ? 'ascending' : 'descending') : undefined
+							}
 						>
-							<span>
-								{sort.label}&nbsp;
-								{isSortable && (
-									<i
-										className={cx(
-											props.sort.includes('asc')
-												? 'ri-arrow-drop-down-fill'
-												: 'ri-arrow-drop-up-fill',
-											classes.thIcon
-										)}
-									></i>
-								)}
-							</span>
+							{isSortable ? (
+								<button
+									type="button"
+									className={cx(classes.sortButton)}
+									onClick={() => onClick(sort.code)}
+								>
+									{content}
+								</button>
+							) : (
+								content
+							)}
 						</th>
 					);
 				})}
-				{new Array(2).fill(0).map((i, index) => (
-					<th
-						className={cx(classes.badgeVerbatim)}
-						key={`fake_div_${index}`}
-						aria-hidden="true"
-					></th>
-				))}
 				<th
 					className={cx(
 						classes.badgeVerbatim,
@@ -112,7 +114,15 @@ const useStyles = tss.create({
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		borderRadius: 0,
 		[fr.breakpoints.down('md')]: {
-			border: 'none'
+			position: 'absolute',
+			width: 1,
+			height: 1,
+			padding: 0,
+			margin: -1,
+			overflow: 'hidden',
+			clip: 'rect(0, 0, 0, 0)',
+			whiteSpace: 'nowrap',
+			border: 0
 		}
 	},
 	trContainer: {
@@ -127,9 +137,6 @@ const useStyles = tss.create({
 		lineHeight: 1,
 		span: {
 			position: 'relative'
-		},
-		[fr.breakpoints.down('md')]: {
-			display: 'none'
 		}
 	},
 	thIcon: {
@@ -139,6 +146,15 @@ const useStyles = tss.create({
 		fontSize: 12
 	},
 	pointer: {
+		cursor: 'pointer'
+	},
+	sortButton: {
+		padding: 0,
+		border: 'none',
+		background: 'none',
+		font: 'inherit',
+		color: 'inherit',
+		textAlign: 'inherit',
 		cursor: 'pointer'
 	},
 	badge: {
@@ -165,6 +181,7 @@ const useStyles = tss.create({
 		flex: '0 0 calc(100% / 6);'
 	},
 	actionHeader: {
+		marginLeft: 'auto',
 		paddingRight: fr.spacing('4v'),
 		[fr.breakpoints.down('lg')]: {
 			paddingRight: 0
