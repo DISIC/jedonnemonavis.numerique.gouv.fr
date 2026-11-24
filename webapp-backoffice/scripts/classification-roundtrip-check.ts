@@ -58,7 +58,8 @@ async function main() {
 					review_id: review.id,
 					review_created_at: review.created_at
 				}
-			}
+			},
+			include: { facets: true }
 		});
 		if (cls) break;
 		await sleep(500);
@@ -69,8 +70,9 @@ async function main() {
 		console.log(
 			JSON.stringify(
 				{
-					predicted_code: cls.predicted_code,
-					predicted_score: cls.predicted_score,
+					polarite: cls.polarite,
+					confiance: cls.confiance,
+					facets: cls.facets.map(f => `${f.axis}:${f.code}`),
 					model_name: cls.model_name,
 					status: cls.status
 				},

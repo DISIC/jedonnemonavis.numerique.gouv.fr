@@ -172,31 +172,11 @@ const ReviewsTab = (props: Props) => {
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
 	const isTableFetching = isFetchingReviews && !isLoadingReviews;
 
-	// Classification catalogue → resolve a review's class code to its problématique label
-	// AND its parent thème label (so the badge can show "Thème › Problématique").
+	// Classification referential → resolve a facet code to its label (for the chips on each row).
 	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
-	const categoryInfo = (() => {
-		const cats = catalogueData?.data ?? [];
-		const themeLabelById = new Map<number, string>(
-			cats.filter(c => c.level === 1).map(c => [c.id, c.label] as const)
-		);
-		return new Map<string, { label: string; themeLabel: string }>(
-			cats
-				.filter(c => c.level === 2)
-				.map(
-					c =>
-						[
-							c.code,
-							{
-								label: c.label,
-								themeLabel: c.parent_id
-									? themeLabelById.get(c.parent_id) ?? ''
-									: ''
-							}
-						] as const
-				)
-		);
-	})();
+	const categoryInfo = new Map<string, string>(
+		(catalogueData?.data ?? []).map(f => [f.code, f.label] as const)
+	);
 
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);

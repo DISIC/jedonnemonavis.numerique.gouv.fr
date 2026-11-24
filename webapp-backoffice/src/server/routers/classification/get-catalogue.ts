@@ -1,23 +1,24 @@
 import type { Context } from '@/src/server/trpc';
 
 /**
- * Returns the active classification catalogue (themes + problématiques) for the UI:
- * code → label resolution when displaying a review's class, the correction dropdown, and
- * the category filter. Flat list with parent_id so the client can build the tree.
+ * Returns the active facet referential for the UI: code → label resolution, the correction
+ * editor and the facet filters. Flat list of facets (objet / thematique_site) with `product_id`
+ * (null = global, typically the site themes) so the client can scope objects per product.
+ * Polarity is a fixed enum (positif / negatif), not stored here.
  */
 export const getCatalogueQuery = async ({ ctx }: { ctx: Context }) => {
-	const categories = await ctx.prisma.classificationCategory.findMany({
+	const facets = await ctx.prisma.classificationFacet.findMany({
 		where: { active: true },
-		orderBy: [{ level: 'asc' }, { parent_id: 'asc' }, { position: 'asc' }],
+		orderBy: [{ axis: 'asc' }, { product_id: 'asc' }, { position: 'asc' }],
 		select: {
 			id: true,
+			axis: true,
 			code: true,
 			label: true,
 			description: true,
-			level: true,
-			parent_id: true
+			product_id: true
 		}
 	});
 
-	return { data: categories };
+	return { data: facets };
 };

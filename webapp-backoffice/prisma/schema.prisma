@@ -74,6 +74,18 @@ enum ClassificationStatus {
   failed
 }
 
+/// Axes de la catégorisation à facettes (la polarité est un enum séparé : Polarite).
+enum FacetAxis {
+  objet
+  thematique_site
+}
+
+/// Polarité d'un avis (multi-valeur) : [] = neutre, [positif, negatif] = mitigé.
+enum Polarite {
+  positif
+  negatif
+}
+
 enum StatusExport {
   idle
   processing
@@ -389,6 +401,7 @@ model Product {
   api_keys        ApiKey[]
   Export          Export[]
   UserEvent       UserEvent[]
+  classification_facets ClassificationFacet[]
 }
 
 model AdminEntityRight {
@@ -500,55 +513,74 @@ model Answer {
 /// Frozen for v1 but stored in DB so it can evolve under human control without a redeploy.
 /// `code` (not label) is the stable identifier injected into the LLM prompt and stored on
 /// ReviewClassification + denormalised into Elasticsearch.
-model ClassificationCategory {
-  id          Int                      @id @default(autoincrement())
-  level       Int // 1 = thème, 2 = problématique
-  code        String                   @unique
+/// Référentiel de facettes (axes objet / thématique site). La polarité n'est pas stockée ici
+/// (enum fixe Polarite). `code` est unique PAR AXE et sert dans les prompts, en base et en ES.
+model ClassificationFacet {
+  id          Int                         @id @default(autoincrement())
+  axis        FacetAxis
+  code        String
   label       String
-  description String? // helps the LLM disambiguate; not necessarily shown to users
-  parent      ClassificationCategory?  @relation("CategoryTree", fields: [parent_id], references: [id])
-  parent_id   Int?
-  children    ClassificationCategory[] @relation("CategoryTree")
-  active      Boolean                  @default(true)
-  position    Int                      @default(0)
-  created_at  DateTime                 @default(now())
-  updated_at  DateTime                 @updatedAt
+  description String? // aide la désambiguïsation par le LLM
+  // Portée : null = facette GLOBALE (typiquement les thématiques site, communes à tous) ;
+  // renseigné = facette SPÉCIFIQUE à un produit (typiquement les objets métier).
+  product     Product?                    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id  Int?
+  active      Boolean                     @default(true)
+  position    Int                         @default(0)
+  created_at  DateTime                    @default(now())
+  updated_at  DateTime                    @updatedAt
+  assignments ReviewClassificationFacet[]
 
-  @@index([parent_id])
-  @@index([level, active])
+  @@unique([product_id, axis, code])
+  @@index([product_id, axis, active])
 }
 
-/// One current classification per review verbatim. Stores both the LLM prediction and the
-/// human-validated value (validation loop) — this doubles as a quality metric and as the
-/// training set for a future fine-tuned FR model. Postgres is the source of truth; the
-/// resulting class is denormalised into the `jdma-answers` Elasticsearch index for stats.
+/// Une classification courante par verbatim d'avis — modèle à 3 facettes. La polarité (multi)
+/// est portée ici ; les objets et thématiques (multi-label) sont dans ReviewClassificationFacet.
+/// Postgres = source de vérité ; dénormalisé dans l'index Elasticsearch `jdma-answers` (stats).
 model ReviewClassification {
   id                Int      @id @default(autoincrement())
   review            Review   @relation(fields: [review_id, review_created_at], references: [id, created_at], onDelete: Cascade)
   review_id         Int
   review_created_at DateTime
 
-  // LLM prediction. *_code values are ClassificationCategory.code (denormalised on purpose:
-  // robust to catalogue label changes, and mirrors the ES keyword field).
-  predicted_code  String
-  predicted_score Float
-  model_name      String // e.g. "Ministral-3-8B" — traceability + A/B on model choice
-  prompt_version  String // versions the (prompt + catalogue) pair used for this prediction
+  // Facette polarité (axe C) : [] = neutre, [positif, negatif] = mitigé.
+  polarite  Polarite[]
+  pourquoi  String? // justification citant le texte (axe preuve)
+  confiance Float? // confiance globale du modèle, 0..1
 
-  // Human validation loop
-  validated_code String?
-  validatedBy    User?     @relation(fields: [validated_by], references: [id], onDelete: SetNull)
-  validated_by   Int?
-  validated_at   DateTime?
+  model_name     String // ex. "openweight-medium" — traçabilité + A/B modèle
+  prompt_version String // versionne le couple (prompt + référentiel)
+
+  // Boucle de validation humaine
+  validatedBy  User?     @relation(fields: [validated_by], references: [id], onDelete: SetNull)
+  validated_by Int?
+  validated_at DateTime?
 
   status     ClassificationStatus @default(predicted)
   created_at DateTime             @default(now())
   updated_at DateTime             @updatedAt
 
+  facets ReviewClassificationFacet[]
+
   @@unique([review_id, review_created_at])
-  @@index([predicted_code])
-  @@index([validated_code])
   @@index([status])
+}
+
+/// Facettes objet / thématique rattachées à une classification (multi-label). `axis` et `code`
+/// sont dénormalisés (robustes aux changements de libellé, et miroir des champs keyword ES).
+model ReviewClassificationFacet {
+  id                Int                  @id @default(autoincrement())
+  classification    ReviewClassification @relation(fields: [classification_id], references: [id], onDelete: Cascade)
+  classification_id Int
+  facet             ClassificationFacet  @relation(fields: [facet_id], references: [id], onDelete: Cascade)
+  facet_id          Int
+  axis              FacetAxis
+  code              String
+  source            ClassificationStatus @default(predicted) // predicted | validated | corrected
+
+  @@unique([classification_id, facet_id])
+  @@index([axis, code])
 }
 
 model Export {

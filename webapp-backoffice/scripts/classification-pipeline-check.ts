@@ -53,15 +53,18 @@ async function main() {
 				review_id: review.id,
 				review_created_at: review.created_at
 			}
-		}
+		},
+		include: { facets: true }
 	});
 
 	console.log('\nReviewClassification row:');
 	console.log(
 		JSON.stringify(
 			{
-				predicted_code: classification?.predicted_code,
-				predicted_score: classification?.predicted_score,
+				polarite: classification?.polarite,
+				confiance: classification?.confiance,
+				pourquoi: classification?.pourquoi,
+				facets: classification?.facets.map(f => `${f.axis}:${f.code}`),
 				model_name: classification?.model_name,
 				prompt_version: classification?.prompt_version,
 				status: classification?.status

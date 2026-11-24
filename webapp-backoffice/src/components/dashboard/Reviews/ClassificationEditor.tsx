@@ -1,18 +1,19 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import Select from '@codegouvfr/react-dsfr/Select';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
+type Pol = 'positif' | 'negatif';
+
 /**
- * Verbatim classification: shows the current class (validated value taking precedence over
- * the LLM prediction + its confidence) and lets a user validate/correct it via
- * `classification.validate`. On success the review list is invalidated so the badge updates.
+ * Verbatim classification à FACETTES : affiche/édite les objets, les thématiques site et la
+ * polarité (multi-valeur) et enregistre le tout via `classification.validate` (source=validated).
+ * L'état initial reflète la validation si elle existe, sinon la prédiction IA.
  *
- * Mount with `key={review.id}` so the selected code resets when navigating between reviews.
+ * Monter avec `key={review.id}` pour réinitialiser la sélection en changeant d'avis.
  */
 const ClassificationEditor = ({
 	review
@@ -23,15 +24,31 @@ const ClassificationEditor = ({
 	const utils = trpc.useUtils();
 
 	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
-	const categories = catalogueData?.data ?? [];
-	const themes = categories.filter(c => c.level === 1);
-	const labelByCode = new Map(categories.map(c => [c.code, c.label] as const));
+	const facetsRef = catalogueData?.data ?? [];
+	const objetsRef = facetsRef.filter(
+		f => f.axis === 'objet' && (f.product_id == null || f.product_id === review.product_id)
+	);
+	const themesRef = facetsRef.filter(f => f.axis === 'thematique_site');
 
 	const classification = review.classification;
-	const validatedCode = classification?.validated_code ?? '';
-	const predictedCode = classification?.predicted_code ?? '';
-	// Default selection: the validated value if it exists, otherwise the IA prediction.
-	const [code, setCode] = useState(validatedCode || predictedCode);
+	const assigned = classification?.facets ?? [];
+	const hasValidated = assigned.some(f => f.source === 'validated');
+	const effective = assigned.filter(f =>
+		hasValidated ? f.source === 'validated' : f.source === 'predicted'
+	);
+
+	const codesForAxis = (axis: 'objet' | 'thematique_site') =>
+		effective
+			.filter(f => f.axis === axis)
+			.map(f => f.code)
+			.filter((c): c is string => !!c);
+	const [selObjets, setSelObjets] = useState<string[]>(codesForAxis('objet'));
+	const [selThemes, setSelThemes] = useState<string[]>(
+		codesForAxis('thematique_site')
+	);
+	const [selPol, setSelPol] = useState<Pol[]>(
+		(classification?.polarite as Pol[] | undefined) ?? []
+	);
 
 	const validate = trpc.classification.validate.useMutation({
 		onSuccess: () => {
@@ -39,108 +56,92 @@ const ClassificationEditor = ({
 		}
 	});
 
-	// Can save when a category is selected and it differs from the already-validated one.
-	// This covers BOTH confirming the IA prediction as-is (validatedCode empty) AND correcting.
-	const canSave = code !== '' && code !== validatedCode;
-	const isConfirmingPrediction =
-		!classification?.validated_code && code === predictedCode;
+	const toggle =
+		(list: string[], set: (v: string[]) => void) => (code: string) =>
+			set(list.includes(code) ? list.filter(c => c !== code) : [...list, code]);
+	const togglePol = (p: Pol) =>
+		setSelPol(selPol.includes(p) ? selPol.filter(x => x !== p) : [...selPol, p]);
 
 	const handleSave = () => {
 		if (review.id === undefined || !review.created_at) return;
 		validate.mutate({
 			review_id: review.id,
 			review_created_at: new Date(review.created_at).toISOString(),
-			validated_code: code
+			objets: selObjets,
+			thematiques: selThemes,
+			polarite: selPol
 		});
 	};
 
 	return (
 		<div className={cx(classes.section)}>
-			<span className={fr.cx('fr-text--sm', 'fr-mb-2v')}>
-				Catégorie (classification IA)
+			<span className={fr.cx('fr-text--sm', 'fr-text--bold', 'fr-mb-0')}>
+				Classification IA (facettes){' '}
+				{classification?.status === 'validated' || classification?.status === 'corrected'
+					? '— validée'
+					: classification
+					? "— prédiction à valider/corriger"
+					: '— non classé'}
 			</span>
-
-			{classification ? (
-				<div className={cx(classes.current)}>
-					{classification.validated_code ? (
-						<Badge noIcon severity="success" small>
-							✓ Validé : {labelByCode.get(classification.validated_code) ??
-								classification.validated_code}
-						</Badge>
-					) : (
-						<Badge
-							noIcon
-							severity={
-								(classification.predicted_score ?? 1) < 0.5 ? 'warning' : 'info'
-							}
-							small
-						>
-							Prédit :{' '}
-							{labelByCode.get(classification.predicted_code ?? '') ??
-								classification.predicted_code}{' '}
-							({((classification.predicted_score ?? 0) * 100).toFixed(0)}%)
-						</Badge>
-					)}
-				</div>
-			) : (
-				<p className={fr.cx('fr-text--sm', 'fr-mb-2v')}>
-					Pas encore classé.
+			{classification?.pourquoi ? (
+				<p className={cx(classes.pourquoi, fr.cx('fr-text--xs', 'fr-mb-0'))}>
+					{classification.pourquoi}
 				</p>
+			) : null}
+
+			<Checkbox
+				legend="Polarité"
+				orientation="horizontal"
+				small
+				options={(['positif', 'negatif'] as Pol[]).map(p => ({
+					label: p,
+					nativeInputProps: {
+						checked: selPol.includes(p),
+						onChange: () => togglePol(p)
+					}
+				}))}
+			/>
+
+			{objetsRef.length > 0 && (
+				<Checkbox
+					legend="Produits / objets"
+					small
+					options={objetsRef.map(f => ({
+						label: f.label,
+						nativeInputProps: {
+							checked: selObjets.includes(f.code),
+							onChange: () => toggle(selObjets, setSelObjets)(f.code)
+						}
+					}))}
+				/>
 			)}
 
-			{!classification?.validated_code && classification && (
-				<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-					Prédiction de l'IA non validée — confirmez-la ou corrigez-la.
-				</p>
-			)}
-
-			<Select
-				label=""
-				nativeSelectProps={{
-					value: code,
-					onChange: e => setCode(e.target.value),
-					'aria-label': 'Choisir la catégorie'
-				}}
-			>
-				<option value="" disabled>
-					Choisir une catégorie…
-				</option>
-				{themes.map(theme => (
-					<optgroup key={theme.id} label={theme.label}>
-						{categories
-							.filter(c => c.parent_id === theme.id)
-							.map(c => (
-								<option key={c.id} value={c.code}>
-									{c.label}
-								</option>
-							))}
-					</optgroup>
-				))}
-			</Select>
+			<Checkbox
+				legend="Thématiques site"
+				small
+				options={themesRef.map(f => ({
+					label: f.label,
+					nativeInputProps: {
+						checked: selThemes.includes(f.code),
+						onChange: () => toggle(selThemes, setSelThemes)(f.code)
+					}
+				}))}
+			/>
 
 			<Button
 				size="small"
 				priority="secondary"
-				disabled={!canSave || validate.isLoading}
+				disabled={validate.isLoading}
 				onClick={handleSave}
 			>
-				{validate.isLoading
-					? 'Enregistrement…'
-					: isConfirmingPrediction
-					? "Valider la prédiction de l'IA"
-					: 'Valider cette catégorie'}
+				{validate.isLoading ? 'Enregistrement…' : 'Valider la classification'}
 			</Button>
 
 			{validate.isSuccess && (
-				<p className={cx(classes.feedback, fr.cx('fr-text--sm'))}>
-					Catégorie validée.
-				</p>
+				<p className={cx(classes.feedback, fr.cx('fr-text--sm'))}>Classification validée.</p>
 			)}
 			{validate.isError && (
-				<p
-					className={cx(classes.feedbackError, fr.cx('fr-text--sm'))}
-					role="alert"
-				>
+				<p className={cx(classes.feedbackError, fr.cx('fr-text--sm'))} role="alert">
 					Erreur : {validate.error.message}
 				</p>
 			)}
@@ -157,10 +158,9 @@ const useStyles = tss.withName('ClassificationEditor').create(() => ({
 		padding: fr.spacing('4v'),
 		marginTop: fr.spacing('4v')
 	},
-	current: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		gap: fr.spacing('1v')
+	pourquoi: {
+		fontStyle: 'italic',
+		color: fr.colors.decisions.text.mention.grey.default
 	},
 	feedback: {
 		color: fr.colors.decisions.text.default.success.default,

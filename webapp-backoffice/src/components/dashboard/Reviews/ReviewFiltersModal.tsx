@@ -84,9 +84,17 @@ const ReviewFiltersModal = (props: Props) => {
 	};
 
 	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
-	const themes = (catalogueData?.data ?? []).filter(c => c.level === 1);
-	const childrenOfTheme = (themeId: number) =>
-		(catalogueData?.data ?? []).filter(c => c.parent_id === themeId);
+	const facets = catalogueData?.data ?? [];
+	const objetFacets = facets.filter(
+		f =>
+			f.axis === 'objet' &&
+			(f.product_id == null || f.product_id === form.product_id)
+	);
+	const thematiqueFacets = facets.filter(f => f.axis === 'thematique_site');
+	const facetGroups = [
+		{ title: 'Produits / objets', items: objetFacets },
+		{ title: 'Thématiques site', items: thematiqueFacets }
+	].filter(g => g.items.length > 0);
 	const toggleClass = (code: string) => {
 		setTmpFilters(prev => {
 			const current = prev.classes ?? [];
@@ -228,18 +236,18 @@ const ReviewFiltersModal = (props: Props) => {
 				);
 			})}
 
-			{themes.length > 0 && (
+			{facetGroups.length > 0 && (
 				<>
 					{filterableBlocks.length > 0 && (
 						<hr className={cx(classes.separator)} />
 					)}
 					<div className={cx(classes.section)}>
-						<p className={cx(classes.subtitle)}>Catégorie (classification IA)</p>
-						{themes.map(theme => (
-							<div key={theme.id} className={fr.cx('fr-mb-2w')}>
-								<p className={fr.cx('fr-text--sm', 'fr-mb-1v')}>{theme.label}</p>
+						<p className={cx(classes.subtitle)}>Classification IA (facettes)</p>
+						{facetGroups.map(group => (
+							<div key={group.title} className={fr.cx('fr-mb-2w')}>
+								<p className={fr.cx('fr-text--sm', 'fr-mb-1v')}>{group.title}</p>
 								<Checkbox
-									options={childrenOfTheme(theme.id).map(c => ({
+									options={group.items.map(c => ({
 										label: c.label,
 										nativeInputProps: {
 											name: `classe-${c.code}`,

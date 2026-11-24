@@ -13,14 +13,16 @@
 
 ## 0. TL;DR
 
-On classe chaque verbatim selon un **catalogue fermé, hiérarchique (thème → problématique)
-défini par JDMA**, via un appel **chat Albert** (compatible OpenAI, sortie JSON structurée).
-Le résultat (`classe`, `score`, niveau de confiance) est :
+On classe chaque verbatim selon un **référentiel à facettes défini par JDMA** — trois axes
+indépendants : **objets** (spécifiques au produit), **thématiques site** (globales) et
+**polarité** (positif/negatif, multi-valeur) — via un appel **chat Albert** (compatible
+OpenAI, sortie JSON structurée), avec `pourquoi` + `confiance`. Le résultat est :
 
-1. **écrit dans Postgres** dans une nouvelle table `ReviewClassification` (source de vérité +
-   boucle de validation humaine : classe prédite vs classe validée) ;
-2. **dénormalisé dans Elastic**, sur l'index `jdma-answers` existant, pour alimenter les
-   stats Kibana et l'exploration par catégorie.
+1. **écrit dans Postgres** : `ReviewClassification` (transverse : polarité, confiance,
+   justification, statut) + `ReviewClassificationFacet` (une ligne par facette assignée,
+   `source = predicted | validated`) — source de vérité + boucle de validation humaine ;
+2. **dénormalisé dans Elastic**, sur l'index `jdma-answers` existant (`objets`, `thematiques`,
+   `polarite`…), pour alimenter les stats Kibana et l'exploration par facette.
 
 Deux chemins d'alimentation, **un seul worker** :
 
@@ -62,10 +64,10 @@ d'avis. Même garantie que pour les alertes.
 - Chaque `Answer` est **déjà indexée dans Elastic** : `index: 'jdma-answers'`, document de
   type `ElkAnswer` (`webapp-form/src/utils/types.ts:157`), id = `answer.id`.
 
-Conséquence : ajouter `classe` / `classe_score` / `classe_path` à l'index `jdma-answers`
+Conséquence : ajouter `objets` / `thematiques` / `polarite` à l'index `jdma-answers`
 revient à **enrichir un mapping existant**, pas à créer un index parallèle. Les stats
 agrègent déjà cet index par `term`/`range` (cf. `answer/utils.ts` `queryCountByFieldCode`),
-donc une agrégation `terms` sur `classe` s'y insère sans nouvelle plomberie.
+donc une agrégation `terms` sur `thematiques` ou `objets` s'y insère sans nouvelle plomberie.
 
 ### 1.3 L'infra worker/queue existe (feature alertes)
 
@@ -93,47 +95,66 @@ les composants de filtres existants** (`ReviewFilterTags`, `ReviewKeywordFilters
 
 ---
 
-## 2. Le catalogue de classes
+## 2. Le référentiel de classes — modèle à FACETTES
 
-Décisions issues du brief, à matérialiser :
+> **Évolution depuis le brief initial** (retour PO DGFiP, cf. `docs/clustering-progress.md`) :
+> on abandonne la **classe unique hiérarchique** (`thème → problématique`) au profit de
+> **trois axes indépendants** (« facettes »). Un verbatim porte **0..n valeurs par axe** —
+> c'est plus fidèle au réel (un même avis parle souvent de plusieurs choses) et ça évite le
+> fourre-tout « Autre » et les classements forcés.
 
-- **Figé en v1**, **défini par JDMA** (pas découvert automatiquement).
-- **Hiérarchique, 2 niveaux** : `thème → problématique`. C'est ce qui alimentera la future
-  « vue en arbre ».
-- Prévoir une classe **`Autre / inclassable`** + **conserver le score de confiance** (sert au
-  futur clustering du bucket « Autre » et à la priorisation de la validation humaine).
+- **Axe A — Objet(s)** : de QUOI parle l'usager. **Spécifique au produit** (ex. impôts :
+  « déclaration de revenus », « prélèvement à la source »…). Découvert hors-ligne par le
+  pipeline de clustering (`analysis/verbatim-clustering/`) et **importé par produit**.
+- **Axe B — Thématique(s) site** : nature de la difficulté sur l'**outil** (connexion, bugs,
+  clarté, complexité ressentie…). **Globales** — partagées par tous les produits.
+- **Axe C — Polarité** : `positif` / `negatif`, **multi-valeur** (`[]` = neutre,
+  `[positif, negatif]` = mitigé). Enum figé, **pas de table**.
+- Chaque classification porte aussi `pourquoi` (justification citant le texte) et `confiance`
+  (0..1) — aide à prioriser la validation humaine.
 
-### Où vit le catalogue ?
+### Où vit le référentiel ?
 
-Recommandation : **en base** (table `ClassificationCategory`), pas en dur dans le code.
-Raisons :
+**En base** (table `ClassificationFacet`), avec un **scope produit** porté par `product_id` :
 
-- Le brief prévoit que le catalogue **évolue sous contrôle humain** (promotion de clusters
-  découverts plus tard). Une table le permet sans redéploiement.
-- Le prompt de classification doit lister les classes : on génère la portion « catalogue » du
-  prompt depuis la base → une seule source de vérité.
-- L'UI de validation/exploration a besoin de lire l'arbre des catégories.
+- `product_id` **non nul** = facette propre à un produit → les **objets** ;
+- `product_id` **nul** = facette **globale** → les **thématiques site**.
+
+Le prompt liste le référentiel du produit concerné (objets du produit + thématiques globales) ;
+l'UI de validation et les filtres le lisent via `classification.getCatalogue`.
 
 ```prisma
-model ClassificationCategory {
-  id          Int                      @id @default(autoincrement())
-  level       Int                      // 1 = thème, 2 = problématique
-  code        String                   @unique // identifiant stable injecté dans le prompt
+enum FacetAxis {
+  objet
+  thematique_site
+}
+
+model ClassificationFacet {
+  id          Int       @id @default(autoincrement())
+  axis        FacetAxis // objet (spécifique produit) | thematique_site (global)
+  code        String    // identifiant stable injecté dans le prompt
   label       String
-  description String?                  // aide la désambiguïsation par le LLM
-  parent      ClassificationCategory?  @relation("CategoryTree", fields: [parent_id], references: [id])
-  parent_id   Int?
-  children    ClassificationCategory[] @relation("CategoryTree")
-  active      Boolean                  @default(true)
-  created_at  DateTime                 @default(now())
+  description String?   // aide la désambiguïsation par le LLM
+  product_id  Int?      // null = global (thématiques) ; non nul = objets d'un produit
+  product     Product?  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  active      Boolean   @default(true)
+  position    Int       @default(0)
+  assignments ReviewClassificationFacet[]
+  created_at  DateTime  @default(now())
+
+  @@unique([product_id, axis, code])
+  @@index([product_id, axis, active])
 }
 ```
 
 > Le **`code`** (pas le label) est ce qu'on demande au LLM de renvoyer et ce qu'on stocke :
-> robuste aux reformulations de libellé, et stable dans le temps pour les stats.
+> robuste aux reformulations de libellé, et stable dans le temps pour les stats. On retire
+> une facette avec `active = false` plutôt que de la supprimer.
 
-Le contenu exact du catalogue v1 est un **livrable métier de JDMA** (hors code). On le
-chargera via un seed dédié (`prisma/seed-classification-catalog.ts`) versionné.
+**Seed vs import** : les **thématiques site** (globales) sont versionnées dans un seed dédié
+(`prisma/seeds/classification-catalog.ts`, idempotent). Les **objets** (par produit) sont
+**importés depuis les catalogues de clustering** (avec `product_id` non nul) et ne sont pas
+dans le seed.
 
 ---
 
@@ -143,8 +164,9 @@ Décision clé : **double stockage assumé**, chacun pour ce qu'il fait de mieux
 
 ### 3.1 Postgres = source de vérité + boucle de validation
 
-Nouvelle table, une ligne par avis classé (la classification porte sur **le verbatim de
-l'avis**, donc on l'attache à `Review`, pas à chaque `Answer`) :
+Une ligne `ReviewClassification` par avis classé (la classification porte sur **le verbatim de
+l'avis**, donc on l'attache à `Review`), + une table de liaison
+`ReviewClassificationFacet` (une ligne par facette assignée, sur n'importe quel axe) :
 
 ```prisma
 model ReviewClassification {
@@ -153,55 +175,72 @@ model ReviewClassification {
   review_id         Int
   review_created_at DateTime
 
-  // Prédiction LLM
-  predicted_code    String   // code de ClassificationCategory (niveau 2)
-  predicted_score   Float    // confiance renvoyée/dérivée
-  model_name        String   // ex. "Mistral-Small-3.2-24B" — traçabilité
-  prompt_version    String   // versionne le couple (prompt + catalogue)
+  // Résultat transverse (les facettes objet/thématique sont dans la table de liaison)
+  polarite       Polarite[] // [] = neutre, [positif, negatif] = mitigé
+  pourquoi       String?    // justification citant le texte
+  confiance      Float?     // confiance LLM (0..1)
+  model_name     String     // modèle Albert utilisé — traçabilité
+  prompt_version String     // versionne le couple (prompt + référentiel)
 
-  // Validation humaine (boucle de qualité — brief §"Boucle de validation humaine")
-  validated_code    String?  // null tant que non revu
-  validated_by      Int?     // User.id
-  validated_at      DateTime?
+  // Validation humaine (boucle de qualité)
+  validated_by   Int?
+  validated_at   DateTime?
 
-  status            ClassificationStatus @default(predicted) // predicted | validated | corrected | failed
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  status         ClassificationStatus @default(predicted) // predicted | validated | corrected | failed
+  facets         ReviewClassificationFacet[]
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
   @@unique([review_id, review_created_at]) // une classif courante par avis
-  @@index([predicted_code])
   @@index([status])
+}
+
+model ReviewClassificationFacet {
+  id                Int                  @id @default(autoincrement())
+  classification    ReviewClassification @relation(fields: [classification_id], references: [id], onDelete: Cascade)
+  classification_id Int
+  facet             ClassificationFacet  @relation(fields: [facet_id], references: [id], onDelete: Cascade)
+  facet_id          Int
+  axis              FacetAxis            // dénormalisé pour requêter sans jointure
+  code              String               // idem
+  source            ClassificationStatus @default(predicted) // predicted | validated
+
+  @@unique([classification_id, facet_id])
+  @@index([axis, code])
 }
 ```
 
-Pourquoi stocker **prédit ET validé** dans la même ligne : c'est exactement le jeu
-d'entraînement du futur « plan B » (petit modèle FR type CamemBERT/SetFit) et la mesure de
-qualité (taux de correction). Le brief l'exige.
+Pourquoi garder les lignes `predicted` **ET** `validated` côte à côte : la correction humaine
+devient à la fois une **mesure de qualité** (taux de correction) et le **jeu d'entraînement**
+d'un futur « plan B » (petit modèle FR type CamemBERT/SetFit). La validation remplace les
+lignes `source = 'validated'` sans toucher aux lignes `predicted`.
 
 ### 3.2 Elastic = lecture analytique (stats + exploration)
 
-On **dénormalise** la classe courante (validée si dispo, sinon prédite) sur les documents
-`jdma-answers` du verbatim concerné. Champs ajoutés au mapping :
+On **dénormalise** les facettes courantes (validées si dispo, sinon prédites) sur les documents
+`jdma-answers` du verbatim concerné. Champs ajoutés au mapping (cf.
+`scripts/es-classification-mapping.ts`) :
 
 ```jsonc
 {
-  "classe":        { "type": "keyword" },   // code niveau 2 → agrégation Kibana
-  "classe_theme":  { "type": "keyword" },   // code niveau 1 → vue en arbre / drill-down
-  "classe_score":  { "type": "float" },
-  "classe_source": { "type": "keyword" }    // "predicted" | "validated"
+  "objets":        { "type": "keyword" },  // codes objets (axe A), multi-valeur
+  "thematiques":   { "type": "keyword" },  // codes thématiques site (axe B), multi-valeur
+  "polarite":      { "type": "keyword" },  // ['positif'] / ['negatif'] / les deux / []
+  "pourquoi":      { "type": "text" },
+  "confiance":     { "type": "float" },
+  "classe_source": { "type": "keyword" }   // "predicted" | "validated"
 }
 ```
 
 > Important : on n'écrit **pas** un index séparé. On reste sur `jdma-answers`, ce qui :
 > (a) évite une jointure côté lecture, (b) permet le filtrage hybride futur
-> (classe + similarité quand la vectorisation arrivera), (c) réutilise toute la couche
+> (facettes + similarité quand la vectorisation arrivera), (c) réutilise toute la couche
 > stats existante.
 
-**Cohérence des deux stores** : Postgres est maître. Toute écriture de classe (prédiction
-worker, correction humaine) écrit Postgres puis met à jour Elastic dans la foulée — même
-pattern que `createOrUpdateAnswers` qui écrit Prisma puis `elkClient.index/update`. En cas
-d'échec ES, on log et on pourra réindexer depuis Postgres (le script de backfill sert aussi
-de filet de réindexation).
+**Cohérence des deux stores** : Postgres est maître. Toute écriture (prédiction worker,
+correction humaine) écrit Postgres puis met à jour Elastic dans la foulée — même pattern que
+`createOrUpdateAnswers`. En cas d'échec ES, on log et on réindexe depuis Postgres (le script de
+backfill sert aussi de filet de réindexation).
 
 ---
 
@@ -224,9 +263,9 @@ Responsabilités du module :
 - **Rate limiting / retry** aligné sur les quotas (voir §7) : la queue BullMQ porte déjà
   `attempts: 3` + backoff exponentiel ; on ajoute un limiteur de débit applicatif pour ne pas
   dépasser 100 req/min.
-- Modèle par défaut : commencer par **`small` (Ministral-3-8B)** et vérifier qu'il suffit pour
-  un catalogue hiérarchique d'une vingtaine de classes ; sinon basculer `medium`
-  (Mistral-Small-3.2-24B). Le `model_name` est stocké par classification → A/B mesurable.
+- Modèle par défaut : le référentiel à facettes (multi-label sur 3 axes) est plus exigeant que
+  du mono-label ; on démarre donc sur **`openweight-medium`** (cf. `albert.ts`), `small` en
+  repli si le débit prime. Le `model_name` est stocké par classification → A/B mesurable.
 
 ### Variables d'environnement (à ajouter aux `.env.example`)
 
@@ -352,20 +391,22 @@ Albert. → à demander dès l'atelier (§9). En dev/local, on tournera contre u
 
 Priorité décroissante — on ne livre pas tout d'un coup :
 
-1. **Affichage de la classe** dans la liste des avis (`Form/tabs/reviews.tsx`,
-   `ReviewTableRow.tsx`) : une colonne/tag « catégorie » à côté du verbatim.
-2. **Correction humaine** : sur la ligne d'un avis, un sélecteur permettant de valider/corriger
-   la classe → écrit `validated_code` dans `ReviewClassification` + réindexe ES. C'est la
-   boucle de validation du brief. Procédure tRPC `classification.validate` (protégée, droits
-   d'accès au produit comme les autres routes review).
-3. **Exploration par catégorie** : filtre par classe dans l'onglet avis, en **réutilisant** la
-   mécanique de filtres existante (`ReviewKeywordFilters` / `ReviewFilterTags`).
-4. **Stats Kibana** : agrégation `terms` sur `classe` / `classe_theme` (dashboards gérés côté
-   Kibana, pas de code applicatif — juste le champ exposé dans `jdma-answers`).
+1. **Affichage des facettes** dans la liste des avis (`Form/tabs/reviews.tsx`,
+   `ReviewTableRow.tsx`) : des tags (objets + thématiques + polarité) à côté du verbatim.
+2. **Correction humaine** : sur un avis, l'éditeur `ClassificationEditor` permet de
+   valider/corriger les facettes (objets + thématiques en multi-sélection, polarité) → écrit
+   des lignes `source = 'validated'` dans `ReviewClassificationFacet` + met à jour la polarité
+   + réindexe ES. Procédure tRPC `classification.validate` (protégée, droits d'accès au produit
+   comme les autres routes review).
+3. **Exploration par facette** : filtre par code de facette dans l'onglet avis, en
+   **réutilisant** la mécanique de filtres existante (`ReviewFiltersModal` / `ReviewFilterTags`,
+   via `input.classes` → `facets.some(code in …)`).
+4. **Stats Kibana** : agrégation `terms` sur `objets` / `thematiques` / `polarite` (dashboards
+   gérés côté Kibana, pas de code applicatif — juste les champs exposés dans `jdma-answers`).
 
-La **vue en arbre** complète (thème → problématique → verbatims) est un livrable de confort
-qui vient après ; le modèle de données (catalogue 2 niveaux + `classe_theme` dans ES) la rend
-possible sans refonte.
+Un **axe de drill-down** (objet × thématique, ou thématique × polarité) est un livrable de
+confort qui vient après ; le modèle à facettes dénormalisées dans ES le rend possible sans
+refonte.
 
 ---
 
@@ -378,9 +419,9 @@ Reprises du brief, à confirmer avant de figer le client (§4) et le backfill (�
 2. **Sortie multi-items fiable** (classer N verbatims en une requête) — indispensable au débit
    du backfill.
 3. **Passage en prod + relèvement éventuel du RPM** pour absorber les pics 60–80/min : délais ?
-4. **Le `small` suffit-il** pour un catalogue hiérarchique d'une vingtaine de classes, ou
-   faut-il `medium` ? (on instrumente `model_name` pour trancher sur données réelles).
-5. **Comportement sur verbatims très courts / ironie** : taux de « Autre » attendu ?
+4. **Le `small` suffit-il** pour le multi-label à 3 facettes, ou faut-il `medium` ? (on
+   instrumente `model_name` pour trancher sur données réelles).
+5. **Comportement sur verbatims très courts / ironie** : taux de facettes vides attendu ?
 6. **Endpoint batch asynchrone** (`/v1/batches`) + quota dédié soutenu pour le backfill 16 M ?
 
 Déjà tranché par la doc Albert (ne pas reposer) : gratuité État, accès par formulaire, quotas
@@ -404,13 +445,15 @@ La clé va dans `ALBERT_API_KEY` (backoffice uniquement, jamais committée).
 
 ## 11. Ordre de travail proposé
 
-1. **Catalogue v1** (métier JDMA) — bloquant pour tout le reste. Table + seed.
+1. **Référentiel v1** : thématiques site globales (seed) + import des objets par produit
+   depuis le clustering. Table `ClassificationFacet`.
 2. **Spike client Albert** : `albert.ts` + script qui classe 10 verbatims réels → valide
-   format de sortie, prompt, choix de modèle. (Tier expérimentation suffit.)
-3. **Schéma Prisma** : `ClassificationCategory` + `ReviewClassification` (mirroir dans les
-   **deux** `schema.prisma`, migration, `prisma generate` dans les 2 apps — cf. CLAUDE.md).
-4. **Mapping Elastic** : ajout des champs `classe*` sur `jdma-answers` (+ migration ES /
-   réindexation au besoin).
+   format de sortie (3 facettes), prompt, choix de modèle. (Tier expérimentation suffit.)
+3. **Schéma Prisma** : `ClassificationFacet` + `ReviewClassification` +
+   `ReviewClassificationFacet` (schéma partagé via symlink `webapp-form` → `webapp-backoffice`,
+   migration, `prisma generate` dans les 2 apps — cf. CLAUDE.md).
+4. **Mapping Elastic** : ajout des champs `objets` / `thematiques` / `polarite` / `pourquoi` /
+   `confiance` / `classe_source` sur `jdma-answers` (`yarn es:classify-mapping`).
 5. **Worker temps réel** : queue + producteur (`webapp-form`) + worker (`webapp-backoffice`) +
    branchement dans les deux chemins de `createReview`.
 6. **UI** : affichage classe → correction humaine → filtre par catégorie.

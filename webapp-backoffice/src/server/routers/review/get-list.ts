@@ -127,15 +127,12 @@ export const getReviewListQuery = async ({
 		!!form?.legacy
 	);
 
-	// Filter by classification: match reviews whose EFFECTIVE class (validated if present,
-	// otherwise predicted) is in the selected set.
+	// Filter by classification: match reviews that carry at least one facet (objet or thématique)
+	// whose code is in the selected set (predicted or validated).
 	if (input.classes && input.classes.length > 0) {
 		where.classification = {
 			is: {
-				OR: [
-					{ validated_code: { in: input.classes } },
-					{ validated_code: null, predicted_code: { in: input.classes } }
-				]
+				facets: { some: { code: { in: input.classes } } }
 			}
 		};
 	}
@@ -191,7 +188,7 @@ export const getReviewListQuery = async ({
 				take: numberPerPage,
 				skip: (page - 1) * numberPerPage,
 				include: {
-					classification: true,
+					classification: { include: { facets: true } },
 					answers: shouldIncludeAnswers
 						? {
 								include: {

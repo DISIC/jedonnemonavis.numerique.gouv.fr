@@ -71,7 +71,7 @@ const ReviewTableRow = ({
 	review: ReviewPartialWithRelations;
 	search: string;
 	form: FormWithElements;
-	categoryInfo?: Map<string, { label: string; themeLabel: string }>;
+	categoryInfo?: Map<string, string>;
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	rowRef?: (el: HTMLTableRowElement | null) => void;
@@ -80,26 +80,25 @@ const ReviewTableRow = ({
 
 	const formTemplate = form.form_template;
 
-	// Verbatim classification (validated value takes precedence over the LLM prediction).
+	// Verbatim classification — FACETS. Show the human-validated set if any, else the prediction.
 	const classification = review.classification;
-	const classCode =
-		classification?.validated_code ?? classification?.predicted_code ?? null;
-	const classMeta = classCode ? categoryInfo?.get(classCode) : undefined;
-	// Show "Thème › Problématique" (fall back to the raw code if not in the catalogue).
-	const classLabel = classCode
-		? classMeta
-			? classMeta.themeLabel
-				? `${classMeta.themeLabel} › ${classMeta.label}`
-				: classMeta.label
-			: classCode
-		: null;
-	const isValidatedClass = !!classification?.validated_code;
-	const isLowConfidence =
-		!isValidatedClass && (classification?.predicted_score ?? 1) < 0.5;
+	const allFacets = classification?.facets ?? [];
+	const isValidatedClass = allFacets.some(f => f.source === 'validated');
+	const effectiveFacets = allFacets.filter(f =>
+		isValidatedClass ? f.source === 'validated' : f.source === 'predicted'
+	);
+	// De-duplicate codes (objet + thématique share the chip list) and resolve labels.
+	const facetChips = Array.from(
+		new Map(
+			effectiveFacets
+				.map(f => f.code)
+				.filter((c): c is string => !!c)
+				.map(code => [code, categoryInfo?.get(code) ?? code] as const)
+		).entries()
+	);
+	const polarite = (classification?.polarite as string[] | undefined) ?? [];
 	const classSeverity = isValidatedClass
 		? ('success' as const)
-		: isLowConfidence
-		? ('warning' as const)
 		: ('info' as const);
 
 	const mainBlocks = formTemplate.form_template_steps
@@ -231,15 +230,30 @@ const ReviewTableRow = ({
 							? highlightSearchTerms(verbatimAnswer.answer_text || '', search)
 							: '-'}
 					</p>
-					{classLabel && (
-						<Badge
-							className={cx(classes.classBadge)}
-							noIcon={true}
-							severity={classSeverity}
-							small
-						>
-							{isValidatedClass ? `✓ ${classLabel}` : classLabel}
-						</Badge>
+					{(facetChips.length > 0 || polarite.length > 0) && (
+						<div className={cx(classes.classBadges)}>
+							{polarite.map(p => (
+								<Badge
+									key={`pol-${p}`}
+									noIcon={true}
+									severity={p === 'positif' ? 'success' : 'error'}
+									small
+								>
+									{p}
+								</Badge>
+							))}
+							{facetChips.map(([code, label]) => (
+								<Badge
+									key={code}
+									className={cx(classes.classBadge)}
+									noIcon={true}
+									severity={classSeverity}
+									small
+								>
+									{isValidatedClass ? `✓ ${label}` : label}
+								</Badge>
+							))}
+						</div>
 					)}
 				</td>
 			)}
@@ -346,8 +360,13 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		gap: '0.25rem'
 	},
+	classBadges: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: fr.spacing('1v'),
+		marginTop: fr.spacing('1v')
+	},
 	classBadge: {
-		marginTop: fr.spacing('1v'),
 		fontSize: 12
 	}
 });

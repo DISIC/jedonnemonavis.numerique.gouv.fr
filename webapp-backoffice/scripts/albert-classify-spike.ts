@@ -2,72 +2,78 @@ import { PrismaClient } from '@prisma/client';
 import {
 	classifyVerbatim,
 	isAlbertConfigured,
-	type ClassificationCategoryLite
+	type FacetReferential
 } from '../src/lib/albert';
 
 const prisma = new PrismaClient();
 
 /**
- * Spike: classify a handful of representative verbatims end-to-end against the seeded
- * catalogue, to validate the Albert client, the structured output, and the prompt before
- * building the realtime worker. Run: `yarn tsx scripts/albert-classify-spike.ts`
- * (or add an npm script). Requires ALBERT_* env vars + a seeded ClassificationCategory table.
+ * Spike: classify a handful of representative verbatims end-to-end against the seeded facet
+ * referential, to validate the Albert client, the structured (3-facet) output and the prompt
+ * before running the batch worker. Run: `yarn tsx scripts/albert-classify-spike.ts`.
+ * Requires ALBERT_* env vars + a seeded ClassificationFacet table (`yarn db:seed-classification`).
+ *
+ * Optionally scope objets to a product: `SPIKE_PRODUCT_ID=3059 yarn tsx scripts/albert-classify-spike.ts`.
+ * Without it, only the global site themes (objets stay empty) are offered.
  */
 
-// Representative samples (with the category we'd intuitively expect).
+// Representative samples with the site theme(s) we'd intuitively expect.
 const SAMPLES: { text: string; expected: string }[] = [
 	{
 		text: 'Impossible de me connecter avec FranceConnect, ça plante systématiquement.',
-		expected: 'auth_franceconnect'
+		expected: 'auth_connexion'
 	},
 	{
 		text: "Le site est extrêmement lent, j'ai attendu plusieurs minutes pour charger une page.",
-		expected: 'tech_lenteur'
+		expected: 'bugs_lags'
 	},
 	{
 		text: "Je ne comprends rien aux consignes, c'est rempli de jargon administratif.",
-		expected: 'clarte_jargon / clarte_instructions'
+		expected: 'clarte_infos'
 	},
 	{
 		text: 'Démarche simple et rapide, merci beaucoup !',
-		expected: 'satisfaction_simple_rapide / satisfaction_positif'
+		expected: 'satisfaction'
 	},
 	{
 		text: 'Impossible de téléverser mon justificatif de domicile, le format est refusé.',
-		expected: 'documents_televersement'
+		expected: 'documents_pj'
 	},
 	{
 		text: 'Formulaire interminable, beaucoup trop de champs à remplir.',
-		expected: 'ux_formulaire_complexe'
+		expected: 'navigation_ergonomie / complexite_charge'
 	},
 	{
 		text: "Personne pour m'aider, aucun numéro de téléphone ni contact.",
-		expected: 'support_manque_aide'
+		expected: 'support_contact'
 	},
-	{ text: 'azerty azerty', expected: 'autre_inclassable (bruit)' },
-	{
-		text: "Bonjour Madame, Monsieur, c'est aide est demandé dans le cadre d'études en CAP couvreur zingueur au sein des compagnons du devoir De Brignais, le montant des charges de scolarité étant très élevé, je souhaite savoir si je peux bénéficier d'une aide pour poursuivre les études? Très cordialement",
-		expected: 'sollicitation_demande_aide / sollicitation_question'
-	},
-	{
-		text: 'Bonjour, Je vous prie de me permettre de bénéficier de votre aide au complémentaire de santé. Cordialement Hawa CONDE',
-		expected: 'sollicitation_demande_aide / sollicitation_question'
-	}
+	{ text: 'azerty azerty', expected: '(bruit — aucune thématique)' }
 ];
 
-async function loadCatalogue(): Promise<ClassificationCategoryLite[]> {
-	const cats = await prisma.classificationCategory.findMany({
-		where: { level: 2, active: true },
-		include: { parent: true },
-		orderBy: [{ parent_id: 'asc' }, { position: 'asc' }]
+async function loadReferential(
+	productId: number | null
+): Promise<FacetReferential> {
+	const facets = await prisma.classificationFacet.findMany({
+		where: {
+			active: true,
+			OR: [
+				{ axis: 'thematique_site' },
+				...(productId !== null
+					? [{ axis: 'objet' as const, product_id: productId }]
+					: [])
+			]
+		},
+		orderBy: [{ axis: 'asc' }, { position: 'asc' }],
+		select: { axis: true, code: true, label: true, description: true }
 	});
-	return cats.map(c => ({
-		code: c.code,
-		label: c.label,
-		description: c.description,
-		theme_code: c.parent?.code ?? '',
-		theme_label: c.parent?.label ?? ''
-	}));
+	return {
+		objets: facets
+			.filter(f => f.axis === 'objet')
+			.map(f => ({ code: f.code, label: f.label, description: f.description ?? undefined })),
+		thematiques: facets
+			.filter(f => f.axis === 'thematique_site')
+			.map(f => ({ code: f.code, label: f.label, description: f.description ?? undefined }))
+	};
 }
 
 async function main() {
@@ -78,30 +84,41 @@ async function main() {
 		process.exit(1);
 	}
 
-	const categories = await loadCatalogue();
-	if (categories.length === 0) {
+	const productId = process.env.SPIKE_PRODUCT_ID
+		? parseInt(process.env.SPIKE_PRODUCT_ID, 10)
+		: null;
+	const ref = await loadReferential(productId);
+	if (ref.thematiques.length === 0) {
 		console.error(
-			'No level-2 categories found. Run `yarn db:seed-classification` first.'
+			'No active site themes found. Run `yarn db:seed-classification` first.'
 		);
 		process.exit(1);
 	}
 
 	console.log(
-		`Catalogue: ${categories.length} problématiques · modèle: ${process.env.ALBERT_CHAT_MODEL || 'openweight-small'}\n`
+		`Référentiel: ${ref.objets.length} objets · ${ref.thematiques.length} thématiques · modèle: ${
+			process.env.ALBERT_CHAT_MODEL || 'openweight-medium'
+		}\n`
 	);
 
 	let okCount = 0;
 	for (const sample of SAMPLES) {
 		const started = Date.now();
 		try {
-			const result = await classifyVerbatim(sample.text, categories);
+			const result = await classifyVerbatim(sample.text, ref);
 			const ms = Date.now() - started;
-			const hit = sample.expected.includes(result.code) ? '✓' : '≈';
-			if (sample.expected.includes(result.code)) okCount++;
-			console.log(`[${hit}] "${sample.text}"`);
+			const hit = result.thematiques.some(code => sample.expected.includes(code));
+			if (hit) okCount++;
+			console.log(`[${hit ? '✓' : '≈'}] "${sample.text}"`);
 			console.log(
-				`     → ${result.code}  (score ${result.score.toFixed(2)}, ${ms} ms)  | attendu: ${sample.expected}\n`
+				`     → objets: [${result.objets.join(', ')}] · thématiques: [${result.thematiques.join(
+					', '
+				)}] · polarité: [${result.polarite.join(', ')}] (conf ${result.confiance.toFixed(
+					2
+				)}, ${ms} ms)  | attendu: ${sample.expected}`
 			);
+			if (result.pourquoi) console.log(`       « ${result.pourquoi} »`);
+			console.log('');
 		} catch (err) {
 			console.log(`[✗] "${sample.text}"`);
 			console.log(`     → ERREUR: ${(err as Error).message}\n`);
@@ -109,7 +126,7 @@ async function main() {
 	}
 
 	console.log(
-		`Résultat: ${okCount}/${SAMPLES.length} dans la catégorie attendue (indicatif, le "bon" code peut varier sur les cas ambigus).`
+		`Résultat: ${okCount}/${SAMPLES.length} avec la thématique attendue (indicatif, les cas ambigus peuvent varier).`
 	);
 }
 

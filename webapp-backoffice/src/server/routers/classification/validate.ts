@@ -2,22 +2,23 @@ import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { checkRightToProceed } from '../product';
-import { writeAnswerClasse } from '@/src/server/services/classification/es';
+import { writeAnswerFacets } from '@/src/server/services/classification/es';
 
 export const validateClassificationInputSchema = z.object({
 	review_id: z.number(),
 	review_created_at: z.string(), // ISO string (Review has a composite [id, created_at] key)
-	validated_code: z.string()
+	objets: z.array(z.string()).default([]),
+	thematiques: z.array(z.string()).default([]),
+	polarite: z.array(z.enum(['positif', 'negatif'])).default([])
 });
 
 /**
- * Human validation/correction of a verbatim's class. Stores `validated_code` alongside the
- * LLM prediction (the validation loop = quality metric + future training set), and re-writes
- * the class into Elasticsearch as `classe_source: 'validated'`.
+ * Human validation/correction of a verbatim's FACETS. Stores the human set as facet rows with
+ * `source = 'validated'` (kept alongside the `predicted` rows — the validation loop doubles as a
+ * quality metric + future training set), updates polarity, and re-denormalises the validated
+ * facets into Elasticsearch (`classe_source: 'validated'`).
  *
- * If no prediction exists yet (manual-first classification), a row is created with the
- * validated code mirrored into the prediction fields (model_name 'manual') so the NOT NULL
- * columns hold; `status` then distinguishes the case.
+ * Works manual-first too: if no prediction exists yet, a row is created (model_name 'manual').
  */
 export const validateClassificationMutation = async ({
 	ctx,
@@ -44,73 +45,106 @@ export const validateClassificationMutation = async ({
 		authorizeCarrierUser: true
 	});
 
-	// The validated code must be an active level-2 problématique.
-	const category = await ctx.prisma.classificationCategory.findUnique({
-		where: { code: input.validated_code },
-		include: { parent: true }
+	// Resolve + validate the submitted facet codes against this product's active referential
+	// (product-specific facets + global ones). Builds (axis, code) -> facet_id.
+	const refFacets = await ctx.prisma.classificationFacet.findMany({
+		where: { active: true, OR: [{ product_id: review.product_id }, { product_id: null }] },
+		select: { id: true, axis: true, code: true }
 	});
-	if (!category || category.level !== 2 || !category.active) {
+	const idByKey = new Map(refFacets.map(f => [`${f.axis}:${f.code}`, f.id] as const));
+
+	const wanted: { axis: 'objet' | 'thematique_site'; code: string }[] = [
+		...input.objets.map(code => ({ axis: 'objet' as const, code })),
+		...input.thematiques.map(code => ({ axis: 'thematique_site' as const, code }))
+	];
+	const resolved = wanted.map(w => ({ ...w, facet_id: idByKey.get(`${w.axis}:${w.code}`) }));
+	const unknown = resolved.filter(r => r.facet_id == null);
+	if (unknown.length > 0) {
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
-			message: `Invalid or inactive category code: ${input.validated_code}`
+			message: `Unknown facet code(s): ${unknown.map(u => `${u.axis}:${u.code}`).join(', ')}`
 		});
 	}
-	const themeCode = category.parent?.code ?? '';
 
 	const userId = parseInt(ctx.session!.user.id);
 
+	// corrected if the validated set differs from the current prediction, else validated.
 	const existing = await ctx.prisma.reviewClassification.findUnique({
 		where: {
 			review_id_review_created_at: {
 				review_id: input.review_id,
 				review_created_at: createdAt
 			}
-		}
+		},
+		include: { facets: { where: { source: 'predicted' } } }
 	});
+	const predictedSet = new Set(existing?.facets.map(f => `${f.axis}:${f.code}`) ?? []);
+	const wantedSet = new Set(wanted.map(w => `${w.axis}:${w.code}`));
+	const samePolarite =
+		new Set(existing?.polarite ?? []).size === input.polarite.length &&
+		input.polarite.every(p => existing?.polarite.includes(p));
+	const sameFacets =
+		predictedSet.size === wantedSet.size && [...wantedSet].every(k => predictedSet.has(k));
+	const status = existing && sameFacets && samePolarite ? 'validated' : 'corrected';
 
-	const status =
-		existing && existing.predicted_code === input.validated_code
-			? 'validated'
-			: 'corrected';
-
-	const saved = await ctx.prisma.reviewClassification.upsert({
-		where: {
-			review_id_review_created_at: {
+	const saved = await ctx.prisma.$transaction(async tx => {
+		const rc = await tx.reviewClassification.upsert({
+			where: {
+				review_id_review_created_at: {
+					review_id: input.review_id,
+					review_created_at: createdAt
+				}
+			},
+			update: {
+				polarite: input.polarite,
+				validated_by: userId,
+				validated_at: new Date(),
+				status
+			},
+			create: {
 				review_id: input.review_id,
-				review_created_at: createdAt
-			}
-		},
-		update: {
-			validated_code: input.validated_code,
-			validated_by: userId,
-			validated_at: new Date(),
-			status
-		},
-		create: {
-			review_id: input.review_id,
-			review_created_at: createdAt,
-			predicted_code: input.validated_code,
-			predicted_score: 0,
-			model_name: 'manual',
-			prompt_version: 'manual',
-			validated_code: input.validated_code,
-			validated_by: userId,
-			validated_at: new Date(),
-			status: 'validated'
+				review_created_at: createdAt,
+				polarite: input.polarite,
+				model_name: 'manual',
+				prompt_version: 'manual',
+				validated_by: userId,
+				validated_at: new Date(),
+				status: 'validated'
+			},
+			select: { id: true }
+		});
+
+		// Replace the previously-validated facets with the new human set (keep predicted rows).
+		await tx.reviewClassificationFacet.deleteMany({
+			where: { classification_id: rc.id, source: 'validated' }
+		});
+		if (resolved.length > 0) {
+			await tx.reviewClassificationFacet.createMany({
+				data: resolved.map(r => ({
+					classification_id: rc.id,
+					facet_id: r.facet_id!,
+					axis: r.axis,
+					code: r.code,
+					source: 'validated' as const
+				}))
+			});
 		}
+		return rc;
 	});
 
-	// Re-denormalise the (now validated) class into Elasticsearch. Best-effort.
+	// Re-denormalise the (now validated) facets into Elasticsearch. Best-effort.
 	const verbatim = await ctx.prisma.answer.findFirst({
 		where: { review_id: input.review_id, field_code: 'verbatim' },
 		orderBy: { created_at: 'desc' },
 		select: { id: true }
 	});
 	if (verbatim) {
-		await writeAnswerClasse(verbatim.id, {
-			classe: input.validated_code,
-			classe_theme: themeCode,
-			classe_score: 1,
+		await writeAnswerFacets(verbatim.id, {
+			objets: input.objets,
+			thematiques: input.thematiques,
+			polarite: input.polarite,
+			pourquoi: '',
+			confiance: 1,
 			classe_source: 'validated'
 		});
 	}

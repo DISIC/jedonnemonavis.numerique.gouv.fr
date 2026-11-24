@@ -4,10 +4,10 @@ import { seedClassificationCatalog } from '../prisma/seeds/classification-catalo
 const prisma = new PrismaClient();
 
 async function main() {
-	console.log('[seed:classification] Seeding classification catalogue…');
-	const { themes, problematiques } = await seedClassificationCatalog(prisma);
+	console.log('[seed:classification] Seeding facet referential…');
+	const { objets, thematiques } = await seedClassificationCatalog(prisma);
 	console.log(
-		`[seed:classification] Done — ${themes} thèmes, ${problematiques} problématiques upserted.`
+		`[seed:classification] Done — ${thematiques} thématiques site (global) upserted, ${objets} objets (product-specific objets are imported separately).`
 	);
 }
 

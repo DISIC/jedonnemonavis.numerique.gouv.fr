@@ -1,23 +1,26 @@
 import elk, { JDMA_ANSWERS_INDEX } from '@/src/lib/elk';
 
-export type AnswerClasseFields = {
-	classe: string; // level-2 problématique code
-	classe_theme: string; // level-1 thème code
-	classe_score: number;
+/** Facettes dénormalisées sur le document `jdma-answers` du verbatim (stats Kibana). */
+export type AnswerFacetFields = {
+	objets: string[]; // codes d'objets (axe A)
+	thematiques: string[]; // codes de thématiques site (axe B)
+	polarite: string[]; // [] = neutre, ['positif','negatif'] = mitigé
+	pourquoi: string;
+	confiance: number;
 	classe_source: 'predicted' | 'validated';
 };
 
 /**
- * Best-effort denormalisation of a verbatim's class onto its `jdma-answers` document, for
- * Kibana stats and category exploration. Postgres remains the source of truth — a missing
- * or unreachable Elasticsearch must never fail the caller, so failures are logged and
- * swallowed (the backfill/reindex path is the safety net).
+ * Best-effort denormalisation of a verbatim's facets onto its `jdma-answers` document, for
+ * Kibana stats and facet exploration. Postgres remains the source of truth — a missing or
+ * unreachable Elasticsearch must never fail the caller, so failures are logged and swallowed
+ * (the backfill/reindex path is the safety net).
  *
  * `answerId` is the verbatim Answer.id, which is the ES document id in `jdma-answers`.
  */
-export async function writeAnswerClasse(
+export async function writeAnswerFacets(
 	answerId: number,
-	fields: AnswerClasseFields
+	fields: AnswerFacetFields
 ): Promise<void> {
 	if (!elk) return;
 

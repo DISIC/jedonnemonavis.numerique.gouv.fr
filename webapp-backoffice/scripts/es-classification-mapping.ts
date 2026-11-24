@@ -10,10 +10,12 @@ import elk, { JDMA_ANSWERS_INDEX } from '../src/lib/elk';
  * the worker; historical docs get them at backfill time.
  */
 const PROPERTIES = {
-	classe: { type: 'keyword' as const },
-	classe_theme: { type: 'keyword' as const },
-	classe_score: { type: 'float' as const },
-	classe_source: { type: 'keyword' as const }
+	objets: { type: 'keyword' as const }, // codes d'objets (axe A), multi-valeur
+	thematiques: { type: 'keyword' as const }, // codes de thématiques site (axe B), multi-valeur
+	polarite: { type: 'keyword' as const }, // ['positif'] / ['negatif'] / les deux / []
+	pourquoi: { type: 'text' as const },
+	confiance: { type: 'float' as const },
+	classe_source: { type: 'keyword' as const } // 'predicted' | 'validated'
 };
 
 async function main() {
@@ -36,7 +38,7 @@ async function main() {
 	});
 
 	console.log(
-		`[es:classify-mapping] Mapping updated on "${JDMA_ANSWERS_INDEX}": classe, classe_theme, classe_score, classe_source.`
+		`[es:classify-mapping] Mapping updated on "${JDMA_ANSWERS_INDEX}": objets, thematiques, polarite, pourquoi, confiance, classe_source.`
 	);
 }
 

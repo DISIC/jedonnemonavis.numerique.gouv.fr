@@ -5,41 +5,58 @@
  * wrapper around `POST /v1/chat/completions` for classification, with structured output
  * enforced via `response_format: { type: 'json_schema' }`.
  *
+ * Modèle à 3 FACETTES (aligné sur le pipeline offline `analysis/verbatim-clustering`) :
+ *   - AXE A — objets    : de QUOI parle l'usager (spécifique au produit) — 0..n
+ *   - AXE B — thématiques site : nature de la difficulté sur l'outil — 0..n
+ *   - AXE C — polarité  : positif / negatif (multi : []=neutre, [pos,neg]=mitigé)
+ *   + `pourquoi` (justification citant le texte) et `confiance` (0..1).
+ *
  * Config (env, backoffice only — the form app never calls Albert directly):
  *   ALBERT_API_BASE_URL  e.g. https://albert.api.etalab.gouv.fr/v1
  *   ALBERT_API_KEY       bearer token
- *   ALBERT_CHAT_MODEL    model id/alias, default "openweight-small" (Ministral-3-8B)
+ *   ALBERT_CHAT_MODEL    model id/alias, default "openweight-medium"
  */
 
 const BASE_URL = process.env.ALBERT_API_BASE_URL;
 const API_KEY = process.env.ALBERT_API_KEY;
-const DEFAULT_MODEL = process.env.ALBERT_CHAT_MODEL || 'openweight-small';
+const DEFAULT_MODEL = process.env.ALBERT_CHAT_MODEL || 'openweight-medium';
 
 /**
  * Bumped whenever the prompt or the structured-output contract changes. Stored on each
  * ReviewClassification so predictions can be tied back to the exact prompt that produced them.
  */
-export const CLASSIFICATION_PROMPT_VERSION = 'classif-v3';
+export const CLASSIFICATION_PROMPT_VERSION = 'facets-v1';
 
 export function isAlbertConfigured(): boolean {
 	return Boolean(BASE_URL && API_KEY);
 }
 
-export type ClassificationCategoryLite = {
+export type Polarite = 'positif' | 'negatif';
+
+/** A single facet of the referential (one axis entry), in the shape the prompt needs. */
+export type FacetLite = {
 	code: string;
 	label: string;
 	description?: string | null;
-	/** Parent theme (level-1) stable code — denormalised into ES as `classe_theme`. */
-	theme_code: string;
-	/** Parent theme (level-1) human label — used in the prompt for disambiguation. */
-	theme_label: string;
+};
+
+/** The active facet referential for a product: objects (product-specific) + site themes. */
+export type FacetReferential = {
+	objets: FacetLite[];
+	thematiques: FacetLite[];
 };
 
 export type ClassificationResult = {
-	/** ClassificationCategory.code chosen by the model (guaranteed to be one of the catalogue codes). */
-	code: string;
+	/** Objet codes chosen (subset of referential objet codes). */
+	objets: string[];
+	/** Thématique site codes chosen (subset of referential thematique codes). */
+	thematiques: string[];
+	/** Polarity: [] = neutre, [positif, negatif] = mitigé. */
+	polarite: Polarite[];
+	/** One-sentence justification quoting the verbatim. */
+	pourquoi: string;
 	/** Model-reported confidence in [0, 1]. */
-	score: number;
+	confiance: number;
 	/** The model id/alias actually used. */
 	model: string;
 	/** The prompt/contract version used. */
@@ -48,66 +65,71 @@ export type ClassificationResult = {
 
 type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
-function buildCatalogueBlock(categories: ClassificationCategoryLite[]): string {
-	return categories
-		.map(c => {
-			const desc = c.description ? ` — ${c.description}` : '';
-			return `- ${c.code} (${c.theme_label} › ${c.label})${desc}`;
-		})
+function block(facets: FacetLite[]): string {
+	return facets
+		.map(f => `- ${f.code} : ${f.label}${f.description ? ` — ${f.description}` : ''}`)
 		.join('\n');
 }
 
-function buildSystemPrompt(categories: ClassificationCategoryLite[]): string {
+function buildSystemPrompt(ref: FacetReferential, demarcheLabel?: string): string {
+	const ctx = demarcheLabel ? ` (${demarcheLabel})` : '';
 	return [
-		"Tu es un classifieur de verbatims d'usagers sur des démarches administratives en ligne.",
-		"Le commentaire est censé être un RETOUR D'EXPÉRIENCE sur l'utilisation de la démarche",
-		'en ligne : ce qui a bien ou mal fonctionné pour l\'usager. Tu dois le ranger dans',
-		'EXACTEMENT une seule catégorie du catalogue ci-dessous, en renvoyant son code.',
+		`Tu classes le verbatim d'un usager sur une démarche administrative en ligne${ctx} selon`,
+		'TROIS axes INDÉPENDANTS. Fonde-toi UNIQUEMENT sur le texte, n\'invente rien. Réponds via',
+		'le format structuré.',
 		'',
-		'Catalogue des catégories (code (thème › problématique) — description) :',
-		buildCatalogueBlock(categories),
+		'AXE A — OBJET(S) : le produit / la rubrique EXPLICITEMENT nommé(e). 0, 1 ou plusieurs.',
+		'VIDE si le verbatim ne vise aucun objet précis (ressenti général, jugement global).',
+		'AXE B — THÉMATIQUE(S) SITE (0 à 3) : la nature de la difficulté rencontrée sur l\'OUTIL en',
+		'ligne. Tague une difficulté dès qu\'elle est CLAIREMENT exprimée, MÊME sans viser un écran',
+		'précis (un jugement global de complexité/lourdeur → complexite_charge s\'il existe). Ne mets',
+		'pas toutes les thématiques : choisis la/les plus pertinentes. VIDE UNIQUEMENT si le verbatim',
+		'NE PARLE PAS de l\'outil : montant/coût de la démarche, fiscalité, politique, remerciement',
+		'pur, ou question de droit/réglementation.',
+		'AXE C — POLARITÉ (0 à 2) : positif si satisfaction exprimée, negatif si insatisfaction ;',
+		'LES DEUX si mitigé ; VIDE si aucun sentiment (constat factuel, question).',
 		'',
-		'Règles :',
-		'- Choisis le code le plus pertinent. Un seul.',
-		"- SOLLICITATIONS : si le commentaire n'est pas un retour d'expérience mais une DEMANDE",
-		"  DIRECTE adressée à l'administration, classe-le dans le thème « Sollicitation directe »",
-		'  (sollicitation_*), PAS dans « autre_inclassable » : demande d\'aide/prestation',
-		'  (sollicitation_demande_aide), question attendant une réponse (sollicitation_question),',
-		'  suivi/réclamation de dossier (sollicitation_suivi_dossier) — MÊME si le texte contient',
-		"  « aide », « support » ou « contact ».",
-		'- Les problématiques d\'« Accompagnement et support » désignent une PLAINTE sur le manque',
-		"  d'aide, de contact ou sur les délais DU SERVICE — PAS un usager qui sollicite une aide",
-		'  (ça, c\'est une sollicitation).',
-		'- « autre_inclassable » : seulement pour un commentaire vide, du charabia, ou un',
-		"  hors-sujet qui n'est NI un retour sur la démarche NI une sollicitation, ou trop court /",
-		'  ambigu pour décider.',
-		'- « score » exprime ta confiance dans [0,1] (1 = certain, 0 = très incertain). Mets un',
-		'  score bas quand tu hésites.',
-		'- Réponds UNIQUEMENT via le format structuré demandé, sans texte additionnel.'
+		'pourquoi : 1 phrase citant le texte. confiance : 0 à 1.',
+		'',
+		'OBJETS disponibles :',
+		block(ref.objets) || '(aucun)',
+		'',
+		'THÉMATIQUES SITE disponibles :',
+		block(ref.thematiques) || '(aucune)'
 	].join('\n');
 }
 
-function buildResponseFormat(categories: ClassificationCategoryLite[]) {
+function buildResponseFormat(ref: FacetReferential) {
+	const objCodes = ref.objets.map(f => f.code);
+	const themeCodes = ref.thematiques.map(f => f.code);
 	return {
 		type: 'json_schema',
 		json_schema: {
-			name: 'verbatim_classification',
+			name: 'facettes_avis',
 			strict: true,
 			schema: {
 				type: 'object',
 				additionalProperties: false,
 				properties: {
-					code: {
-						type: 'string',
-						enum: categories.map(c => c.code),
-						description: 'Code de la catégorie choisie'
+					objets: {
+						type: 'array',
+						items: { type: 'string', enum: objCodes },
+						description: '0, 1 ou plusieurs objets (vide si aucun objet précis)'
 					},
-					score: {
-						type: 'number',
-						description: 'Confiance dans [0,1]'
-					}
+					thematiques: {
+						type: 'array',
+						items: { type: 'string', enum: themeCodes },
+						description: '0 à 3 thématiques site (vide si ressenti global)'
+					},
+					polarite: {
+						type: 'array',
+						items: { type: 'string', enum: ['positif', 'negatif'] },
+						description: '[] = neutre, [positif, negatif] = mitigé'
+					},
+					pourquoi: { type: 'string', description: 'Justification citant le texte' },
+					confiance: { type: 'number', description: 'Confiance dans [0,1]' }
 				},
-				required: ['code', 'score']
+				required: ['objets', 'thematiques', 'polarite', 'pourquoi', 'confiance']
 			}
 		}
 	};
@@ -115,17 +137,19 @@ function buildResponseFormat(categories: ClassificationCategoryLite[]) {
 
 export type ClassifyOptions = {
 	model?: string;
+	/** Optional factual label of the démarche, injected in the prompt for finer labels. */
+	demarcheLabel?: string;
 	/** AbortSignal for timeout/cancellation. */
 	signal?: AbortSignal;
 };
 
 /**
- * Classify a single verbatim against the provided catalogue. Throws on transport/HTTP
+ * Classify a single verbatim against the provided facet referential. Throws on transport/HTTP
  * errors or on an unparseable response so the caller (worker) can retry.
  */
 export async function classifyVerbatim(
 	text: string,
-	categories: ClassificationCategoryLite[],
+	ref: FacetReferential,
 	opts: ClassifyOptions = {}
 ): Promise<ClassificationResult> {
 	if (!BASE_URL || !API_KEY) {
@@ -133,14 +157,14 @@ export async function classifyVerbatim(
 			'Albert is not configured (set ALBERT_API_BASE_URL and ALBERT_API_KEY).'
 		);
 	}
-	if (categories.length === 0) {
-		throw new Error('classifyVerbatim called with an empty catalogue.');
+	if (ref.objets.length === 0 && ref.thematiques.length === 0) {
+		throw new Error('classifyVerbatim called with an empty referential.');
 	}
 
 	const model = opts.model || DEFAULT_MODEL;
 	const messages: ChatMessage[] = [
-		{ role: 'system', content: buildSystemPrompt(categories) },
-		{ role: 'user', content: text }
+		{ role: 'system', content: buildSystemPrompt(ref, opts.demarcheLabel) },
+		{ role: 'user', content: `Verbatim :\n${text.slice(0, 1500)}` }
 	];
 
 	const res = await fetch(`${BASE_URL}/chat/completions`, {
@@ -153,7 +177,7 @@ export async function classifyVerbatim(
 			model,
 			messages,
 			temperature: 0,
-			response_format: buildResponseFormat(categories)
+			response_format: buildResponseFormat(ref)
 		}),
 		signal: opts.signal
 	});
@@ -173,30 +197,37 @@ export async function classifyVerbatim(
 		throw new Error('Albert response had no message content.');
 	}
 
-	let parsed: { code?: unknown; score?: unknown };
+	let parsed: {
+		objets?: unknown;
+		thematiques?: unknown;
+		polarite?: unknown;
+		pourquoi?: unknown;
+		confiance?: unknown;
+	};
 	try {
 		parsed = JSON.parse(content);
 	} catch {
 		throw new Error(`Albert returned non-JSON content: ${content.slice(0, 500)}`);
 	}
 
-	const code = typeof parsed.code === 'string' ? parsed.code : null;
-	const score = typeof parsed.score === 'number' ? parsed.score : null;
-	if (!code || score === null) {
-		throw new Error(
-			`Albert returned an unexpected shape: ${JSON.stringify(parsed).slice(0, 500)}`
-		);
-	}
+	const objCodes = new Set(ref.objets.map(f => f.code));
+	const themeCodes = new Set(ref.thematiques.map(f => f.code));
+	const asCodes = (v: unknown, valid: Set<string>): string[] =>
+		Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string' && valid.has(x)))] : [];
+	const asPolarite = (v: unknown): Polarite[] =>
+		Array.isArray(v)
+			? [...new Set(v.filter((x): x is Polarite => x === 'positif' || x === 'negatif'))]
+			: [];
 
-	// Defensive: the json_schema enum should already guarantee this, but never trust the wire.
-	const validCodes = new Set(categories.map(c => c.code));
-	if (!validCodes.has(code)) {
-		throw new Error(`Albert returned an out-of-catalogue code: "${code}".`);
-	}
+	const confiance =
+		typeof parsed.confiance === 'number' ? Math.max(0, Math.min(1, parsed.confiance)) : 0;
 
 	return {
-		code,
-		score: Math.max(0, Math.min(1, score)),
+		objets: asCodes(parsed.objets, objCodes),
+		thematiques: asCodes(parsed.thematiques, themeCodes),
+		polarite: asPolarite(parsed.polarite),
+		pourquoi: typeof parsed.pourquoi === 'string' ? parsed.pourquoi : '',
+		confiance,
 		model,
 		prompt_version: CLASSIFICATION_PROMPT_VERSION
 	};
