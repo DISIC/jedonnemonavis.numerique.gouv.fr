@@ -49,3 +49,8 @@ export function displayViolationsTable(
 
 	if (!withDetails) cy.task('log', '---\n');
 }
+
+export function generateUniqueEmail() {
+	const randomPart = Math.random().toString().slice(2, 12);
+	return `e2e-jdma-test${randomPart}${Date.now()}@beta.gouv.fr`;
+}

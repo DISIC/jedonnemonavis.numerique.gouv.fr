@@ -3,7 +3,6 @@ import { sendMail } from '@/src/utils/mailer';
 import { renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { generateInviteToken } from '../helpers';
 import { checkEntityRight } from '../entity/utils';
 
 export const resendAdminEntityRightEmailInputSchema = z.object({
@@ -37,12 +36,8 @@ export const resendAdminEntityRightEmailMutation = async ({
 		entity_id: pendingInvite.entity_id
 	});
 
-	const token = await generateInviteToken(ctx.prisma, user_email);
-
 	const emailHtml = await renderUserInviteEmail({
 		inviterName: contextUser.name || "Quelqu'un",
-		recipientEmail: user_email.toLowerCase(),
-		inviteToken: token,
 		entityName: entity.name,
 		baseUrl: process.env.NODEMAILER_BASEURL
 	});
@@ -51,11 +46,6 @@ export const resendAdminEntityRightEmailMutation = async ({
 		'Invitation à rejoindre « Je donne mon avis »',
 		user_email.toLowerCase(),
 		emailHtml,
-		`Cliquez sur ce lien pour créer votre compte : ${
-			process.env.NODEMAILER_BASEURL
-		}/register?${new URLSearchParams({
-			email: user_email.toLowerCase(),
-			inviteToken: token
-		})}`
+		`Connectez-vous avec ProConnect pour y accéder : ${process.env.NODEMAILER_BASEURL}/login`
 	);
 };

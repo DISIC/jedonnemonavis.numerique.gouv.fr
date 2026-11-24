@@ -38,6 +38,14 @@ const ProductButtonCard = (props: Props) => {
 		isClosed: !!button.deleted_at
 	});
 
+	const buttonUrl = `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+		button.form.form_template.slug !== 'root'
+			? `avis/${button.form.id}`
+			: button.form.product_id
+	}?button=${button.id}`;
+
+	const actionLabel = (action: string) => `${button.title} - ${action}`;
+
 	const renderButtonTags = () => {
 		const tags = [];
 
@@ -142,9 +150,9 @@ const ProductButtonCard = (props: Props) => {
 					</div>
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-						<div className={cx(classes.actionsContainer)}>
-							{!button.isDeleted && (
-								<>
+						{!button.isDeleted && (
+							<ul className={cx(classes.actionsContainer)}>
+								<li>
 									<Button
 										priority="secondary"
 										size="small"
@@ -153,12 +161,19 @@ const ProductButtonCard = (props: Props) => {
 											push(['trackEvent', 'Gestion boutons', 'Installer']);
 										}}
 										className="fr-mr-md-2v"
+										aria-label={actionLabel(
+											`Copier le ${
+												button.integration_type === 'link' ? 'lien' : 'code'
+											}`
+										)}
 									>
 										Copier le{' '}
 										{button.integration_type === 'link' ? 'lien' : 'code'}
 									</Button>
-									{ownRight === 'carrier_admin' && (
-										<>
+								</li>
+								{ownRight === 'carrier_admin' && (
+									<>
+										<li>
 											<Button
 												priority="secondary"
 												size="small"
@@ -167,42 +182,34 @@ const ProductButtonCard = (props: Props) => {
 													onButtonClick('rename', button);
 													push(['trackEvent', 'Gestion boutons', 'Modifier']);
 												}}
+												aria-label={actionLabel('Renommer')}
 											>
 												Renommer
 											</Button>
-											{session?.user.role.includes('admin') && (
+										</li>
+										{session?.user.role.includes('admin') && (
+											<li>
 												<Button
 													priority="secondary"
 													size="small"
 													className="fr-mr-md-2v"
 													onClick={() => {
-														navigator.clipboard.writeText(
-															`${
-																process.env.NEXT_PUBLIC_FORM_APP_URL
-															}/Demarches/${
-																button.form.form_template.slug !== 'root'
-																	? `avis/${button.form.id}`
-																	: button.form.product_id
-															}?button=${button.id}`
-														);
+														navigator.clipboard.writeText(buttonUrl);
 														setDisplayToast(true);
 													}}
-													title={`${
-														process.env.NEXT_PUBLIC_FORM_APP_URL
-													}/Demarches/${
-														button.form.form_template.slug !== 'root'
-															? `avis/${button.form.id}`
-															: button.form.product_id
-													}?button=${button.id}`}
+													title={buttonUrl}
+													aria-label={actionLabel("Copier l'URL")}
 												>
 													Copier l'URL
 												</Button>
-											)}
+											</li>
+										)}
+										<li>
 											<Button
 												priority="secondary"
 												size="small"
 												className={classes.deleteButton}
-												aria-label="Supprimer"
+												aria-label={actionLabel('Supprimer')}
 												title="Supprimer"
 												onClick={() => {
 													onButtonClick('delete', button);
@@ -219,11 +226,11 @@ const ProductButtonCard = (props: Props) => {
 													)}
 												/>
 											</Button>
-										</>
-									)}
-								</>
-							)}
-						</div>
+										</li>
+									</>
+								)}
+							</ul>
+						)}
 					</div>
 				</div>
 
@@ -268,6 +275,12 @@ const useStyles = tss
 			fontWeight: 'bold'
 		},
 		actionsContainer: {
+			listStyle: 'none',
+			margin: 0,
+			padding: 0,
+			li: {
+				padding: 0
+			},
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
@@ -281,6 +294,9 @@ const useStyles = tss
 				flexDirection: 'column',
 				justifyContent: 'flex-start',
 				gap: fr.spacing('4v'),
+				li: {
+					width: '100%'
+				},
 				button: {
 					width: '100%',
 					justifyContent: 'center'

@@ -6,6 +6,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
+import { hiddenBadgeMobile, keepDisabledContrast } from './sharedStyles';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -101,7 +102,13 @@ const Checkboxes = (props: Props) => {
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<div className={cx(fr.cx('fr-col-12'), classes.checkboxContainer)}>
+			<div
+				className={cx(
+					fr.cx('fr-col-12'),
+					classes.checkboxContainer,
+					!disabled && classes.keepContrast
+				)}
+			>
 				<>
 					<Checkbox
 						legend={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
@@ -175,6 +182,7 @@ const Checkboxes = (props: Props) => {
 };
 
 const useStyles = tss.withName({ Checkboxes }).create({
+	keepContrast: keepDisabledContrast(),
 	smallText: {
 		fontSize: '0.8rem',
 		color: fr.colors.decisions.text.disabled.grey.default
@@ -192,13 +200,23 @@ const useStyles = tss.withName({ Checkboxes }).create({
 					top: '1.05rem !important'
 				}
 			}
+		},
+		[fr.breakpoints.down('md')]: {
+			'.fr-checkbox-group input[type=checkbox] + label': {
+				flexWrap: 'nowrap',
+				gap: fr.spacing('2v'),
+				'.fr-btn': {
+					flexShrink: 0
+				}
+			}
 		}
 	},
 	hiddenBadge: {
 		color: fr.colors.decisions.text.actionHigh.grey.default,
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
-		}
+		},
+		...hiddenBadgeMobile
 	}
 });
 

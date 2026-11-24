@@ -126,11 +126,10 @@ const scrubSensitiveValues = (value: any): any => {
 
 // Auth middleware
 const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
-	const user = await ctx.prisma.user.findUnique({
-		where: {
-			email: ctx.session?.user?.email as string
-		}
-	});
+	const sessionEmail = ctx.session?.user?.email;
+	const user = sessionEmail
+		? await ctx.prisma.user.findUnique({ where: { email: sessionEmail } })
+		: null;
 
 	if (meta?.authRequired && (!ctx.session?.user || !user)) {
 		throw new TRPCError({
@@ -248,8 +247,9 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						form_id = input.json.form_id;
 					}
 
-					const shouldLogEvent =
-						'shouldLogEvent' in input?.json ? input.json.shouldLogEvent : true;
+					const shouldLogEvent = !(
+						query === 'button.delete' && input?.json?.shouldLogEvent === false
+					);
 
 					if (user && action && shouldLogEvent) {
 						await ctx.prisma.userEvent.create({
@@ -386,8 +386,6 @@ export const middleware = t.middleware;
 // Unprotected procedure
 export const publicProcedure = t.procedure;
 
-// Les procédures publiques touchant à l'authentification (énumération de
-// comptes, envoi d'OTP, réinitialisation de mot de passe) sont limitées par IP.
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 20;
 

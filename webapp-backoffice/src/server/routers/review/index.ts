@@ -10,15 +10,6 @@ import {
 	countReviewsQuery
 } from './count-reviews';
 import {
-	exportReviewDataInputSchema,
-	exportReviewDataMutation
-} from './export-data';
-import {
-	getProgressionExportInputSchema,
-	getProgressionExportOutputSchema,
-	getProgressionExportQuery
-} from './get-progression-export';
-import {
 	getCountsByFormInputSchema,
 	getCountsByFormOutputSchema,
 	getCountsByFormQuery
@@ -39,15 +30,6 @@ export const reviewRouter = router({
 		.input(countReviewsInputSchema)
 		.output(countReviewsOutputSchema)
 		.query(countReviewsQuery),
-
-	exportData: protectedProcedure
-		.input(exportReviewDataInputSchema)
-		.mutation(exportReviewDataMutation),
-
-	getProgressionExport: protectedProcedure
-		.input(getProgressionExportInputSchema)
-		.output(getProgressionExportOutputSchema)
-		.query(getProgressionExportQuery),
 
 	getCountsByForm: protectedProcedure
 		.input(getCountsByFormInputSchema)

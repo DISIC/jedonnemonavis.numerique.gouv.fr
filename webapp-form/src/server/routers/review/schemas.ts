@@ -7,6 +7,14 @@ import { z } from 'zod';
 export const MAX_ANSWER_TEXT_LENGTH = 15000;
 export const MAX_ANSWERS = 200;
 
+const boundedArray = <T extends z.ZodTypeAny>(item: T, max: number) =>
+	z
+		.custom<z.input<T>[]>(
+			value => Array.isArray(value) && value.length <= max,
+			{ message: `Array must contain at most ${max} element(s)` }
+		)
+		.pipe(z.array(item));
+
 export const reviewInputSchema = z.object({
 	product_id: z.number().int(),
 	button_id: z.number().int(),
@@ -38,7 +46,7 @@ export const reviewAnswerInputSchema = answerScalarsSchema.extend({
 	child_answers: z
 		.object({
 			createMany: z.object({
-				data: z.array(answerScalarsSchema).max(MAX_ANSWERS)
+				data: boundedArray(answerScalarsSchema, MAX_ANSWERS)
 			})
 		})
 		.optional()
@@ -46,9 +54,10 @@ export const reviewAnswerInputSchema = answerScalarsSchema.extend({
 
 export type ReviewAnswerInput = z.infer<typeof reviewAnswerInputSchema>;
 
-export const reviewAnswersInputSchema = z
-	.array(reviewAnswerInputSchema)
-	.max(MAX_ANSWERS);
+export const reviewAnswersInputSchema = boundedArray(
+	reviewAnswerInputSchema,
+	MAX_ANSWERS
+);
 
 export const dynamicAnswerInputSchema = z.object({
 	block_id: z.number().int(),
@@ -58,6 +67,7 @@ export const dynamicAnswerInputSchema = z.object({
 
 export type DynamicAnswerInput = z.infer<typeof dynamicAnswerInputSchema>;
 
-export const dynamicAnswersInputSchema = z
-	.array(dynamicAnswerInputSchema)
-	.max(MAX_ANSWERS);
+export const dynamicAnswersInputSchema = boundedArray(
+	dynamicAnswerInputSchema,
+	MAX_ANSWERS
+);

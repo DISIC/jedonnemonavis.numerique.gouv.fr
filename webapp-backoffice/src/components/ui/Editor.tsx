@@ -2,14 +2,15 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { deserialize, serialize } from '@/src/utils/slate';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { BaseEditor, createEditor, Descendant, Node, Text } from 'slate';
 import { withHistory } from 'slate-history';
 import { Editable, Slate, withReact } from 'slate-react';
 import { tss } from 'tss-react';
 import Element from './editor/Element';
 import Leaf from './editor/Leaf';
-import MarkButton from './editor/MarkButton';
+import MarkButton, { toggleMark } from './editor/MarkButton';
+import { getQuestionId } from '../dashboard/Form/blocks/TextInput';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 interface Props {
@@ -39,6 +40,7 @@ const Editor = (props: Props) => {
 		props;
 
 	const { classes, cx } = useStyles();
+	const hintId = useId();
 
 	const [value, setValue] = useState<Descendant[]>([]);
 	const [hasConfig, setHasConfig] = useState(false);
@@ -111,19 +113,23 @@ const Editor = (props: Props) => {
 				setValue(value);
 			}}
 		>
-			<div className={classes.toolbar}>
+			<div
+				className={classes.toolbar}
+				role="group"
+				aria-label="Mise en forme du texte"
+			>
 				<MarkButton
 					format="bold"
 					icon="ri-bold"
-					title="Appliquer le style gras"
+					title="Appliquer le style gras (Ctrl+B)"
 				/>
 				<MarkButton
 					format="italic"
 					icon="ri-italic"
-					title="Appliquer le style italic"
+					title="Appliquer le style italique (Ctrl+I)"
 				/>
 			</div>
-			<p className={fr.cx('fr-hint-text', 'fr-mb-2v')}>
+			<p id={hintId} className={fr.cx('fr-hint-text', 'fr-mb-2v')}>
 				Maximum {MAX_LENGTH} caractères
 			</p>
 			<Editable
@@ -132,6 +138,16 @@ const Editor = (props: Props) => {
 				maxLength={250}
 				renderLeaf={renderLeaf}
 				placeholder="Entrez du texte..."
+				aria-labelledby={getQuestionId(block)}
+				aria-describedby={hintId}
+				onKeyDown={event => {
+					if (!(event.ctrlKey || event.metaKey)) return;
+					const key = event.key.toLowerCase();
+					if (key === 'b' || key === 'i') {
+						event.preventDefault();
+						toggleMark(editor, key === 'b' ? 'bold' : 'italic');
+					}
+				}}
 			/>
 			{hasReachedMaxLength ? (
 				<div className={fr.cx('fr-error-text')}>
@@ -198,11 +214,22 @@ const useStyles = tss.withName({ MarkButton }).create({
 	submit: {
 		marginTop: fr.spacing('4v'),
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	rightButtonsWrapper: {
 		display: 'flex',
-		gap: fr.spacing('4v')
+		gap: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column'
+		}
 	},
 	nbCharsHint: {
 		textAlign: 'right',

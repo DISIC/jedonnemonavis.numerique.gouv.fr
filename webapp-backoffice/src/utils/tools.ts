@@ -13,7 +13,8 @@ import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]
 import {
 	ArchivedAnswerSnapshot,
 	ButtonWithElements,
-	FormConfigWithChildren
+	FormConfigWithChildren,
+	FormWithElements
 } from '../types/prismaTypesExtended';
 
 export function isValidDate(dateString: string) {
@@ -66,7 +67,7 @@ type FormatDateOptions = {
 	withHour?: boolean;
 	hourOnly?: boolean;
 	hourFormat?: HourFormat;
-	monthFormat?: 'default' | 'literal';
+	monthFormat?: 'default' | 'literal' | 'short';
 };
 
 function formatHourPart(date: Date, format: HourFormat): string {
@@ -107,7 +108,9 @@ export function formatDateToFrenchString(
 
 	const datePart = new Intl.DateTimeFormat('fr-FR', {
 		year: 'numeric',
-		month: monthFormat === 'literal' ? 'long' : 'numeric',
+		month: ({ default: 'numeric', literal: 'long', short: 'short' } as const)[
+			monthFormat
+		],
 		day: 'numeric'
 	}).format(date);
 
@@ -370,6 +373,36 @@ export const normalizeString = (str: string): string => {
 		.replace(/[\u0300-\u036f]/g, '') // strip accents
 		.replace(/[^\w\sÀ-ÿ\u0152\u0153'"]/gi, '') // allow œ/Œ; remove other special characters except letters, numbers, spaces, apostrophes, and quotes
 		.trim();
+};
+
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+export const RIGHT_OPTIONS_BUTTON_ID_PREFIX = 'button-options-access-right-';
+
+export const getRightOptionsIds = (right: {
+	id: number;
+	user: { firstName: string | null; lastName: string | null } | null;
+	user_email: string | null;
+	user_email_invite: string | null;
+}) => {
+	const userFullName = right.user
+		? `${right.user.firstName} ${right.user.lastName}`
+		: right.user_email ?? right.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${right.id}`;
+
+	return {
+		userFullName,
+		idSuffix,
+		optionsButtonId: `${RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
 };
 
 export const alternativeString = (str: string): string => {
@@ -787,6 +820,31 @@ export const getHelperFromFormConfig = (
 	};
 };
 
+type FormStep =
+	FormWithElements['form_template']['form_template_steps'][number];
+
+export const getContactStepState = (
+	step: FormStep,
+	steps: FormStep[],
+	configHelper: FormConfigHelper
+): 'hidden' | 'conditional' | null => {
+	const consentBlock = steps
+		.flatMap(s => s.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	const isContactStep = step.form_template_blocks.some(
+		block => block.field_code === 'contact_email'
+	);
+	if (!consentBlock || !isContactStep) return null;
+
+	const display = configHelper.displays.find(
+		d => d.kind === 'block' && d.parent_id === consentBlock.id
+	);
+	const isConsentHidden = display
+		? display.hidden
+		: consentBlock.isHiddenByDefault;
+	return isConsentHidden ? 'hidden' : 'conditional';
+};
+
 export const getHasConfigChanged = (
 	firstConfig: FormConfigHelper,
 	secondConfig: FormConfigHelper
@@ -887,18 +945,7 @@ export function computeItemFraction(
 	return Math.max(0, Math.min(1, raw));
 }
 
-export const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-export const regexAtLeastOneNumber = /\d/;
-export const getMissingPasswordRequirements = (password: string): string[] => {
-	const missing: string[] = [];
-
-	if (password.length < 12) missing.push('12 caractères');
-	if (!regexAtLeastOneSpecialCharacter.test(password))
-		missing.push('1 caractère spécial');
-	if (!regexAtLeastOneNumber.test(password)) missing.push('1 chiffre');
-
-	return missing;
-};
+export const isHttpUrl = (url: string): boolean => /^https?:\/\//i.test(url);
 
 export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	const defaultUrl = '/administration/dashboard/products';
@@ -912,7 +959,19 @@ export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	if (rawCallback.startsWith('//')) {
 		return defaultUrl;
 	}
-	return rawCallback;
+	if (/[\x00-\x1f\x7f\\]/.test(rawCallback)) {
+		return defaultUrl;
+	}
+	const base = 'http://localhost';
+	try {
+		const url = new URL(rawCallback, base);
+		if (url.origin !== base || url.pathname.startsWith('//')) {
+			return defaultUrl;
+		}
+		return `${url.pathname}${url.search}${url.hash}`;
+	} catch {
+		return defaultUrl;
+	}
 };
 
 export const getButtonCode = ({

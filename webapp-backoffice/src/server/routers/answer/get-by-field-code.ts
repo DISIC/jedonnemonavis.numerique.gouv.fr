@@ -47,7 +47,7 @@ export const getByFieldCodeQuery = async ({
 			term: {
 				terms: {
 					script:
-						'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value.trim()',
+						'(doc["answer_text.keyword"].size() != 0 ? doc["answer_text.keyword"].value : "") + "#" + (doc["intention.keyword"].size() != 0 ? doc["intention.keyword"].value : "") + "#" + (doc["field_label.keyword"].size() != 0 ? doc["field_label.keyword"].value.trim() : "")',
 					size: 1000
 				}
 			}

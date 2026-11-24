@@ -18,6 +18,7 @@ import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	modal: CustomModalProps;
+	openCount: number;
 	modalType?: ButtonModalType;
 	button?: ButtonWithElements;
 	onButtonMutation: (isTest: boolean, button: ButtonWithElements) => void;
@@ -38,8 +39,14 @@ const defaultErrors = {
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, modalType, button, onButtonMutation, formTemplateButtons } =
-		props;
+	const {
+		modal,
+		openCount,
+		modalType,
+		button,
+		onButtonMutation,
+		formTemplateButtons
+	} = props;
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
@@ -54,24 +61,26 @@ const ButtonModal = (props: Props) => {
 	const currentDefaultTemplateButton =
 		currentButton?.form_template_button || defaultTemplateButton;
 
-	useEffect(() => {
-		if (button) {
-			const hasTemplateButtons =
-				button.integration_type !== 'link' &&
-				formTemplateButtons &&
-				formTemplateButtons.length > 0;
+	const resetCurrentButton = () => {
+		if (!button) return;
 
-			setCurrentButton({
-				...button,
-				form_template_button: hasTemplateButtons
-					? defaultTemplateButton || null
-					: null,
-				form_template_button_id: hasTemplateButtons
-					? defaultTemplateButton?.id || null
-					: null
-			});
-		}
-	}, [button]);
+		const hasTemplateButtons =
+			button.integration_type !== 'link' &&
+			formTemplateButtons &&
+			formTemplateButtons.length > 0;
+
+		setCurrentButton({
+			...button,
+			form_template_button: hasTemplateButtons
+				? defaultTemplateButton || null
+				: null,
+			form_template_button_id: hasTemplateButtons
+				? defaultTemplateButton?.id || null
+				: null
+		});
+	};
+
+	useEffect(resetCurrentButton, [button, openCount]);
 
 	const updateButton = trpc.button.update.useMutation({
 		onSuccess: result => {
@@ -163,6 +172,7 @@ const ButtonModal = (props: Props) => {
 						<hr />
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
+								key={openCount}
 								button={currentButton}
 								buttonStyle={currentButton.button_style}
 								formTemplateButton={currentButton.form_template_button}
@@ -276,10 +286,7 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-							resetErrors('title');
-						}
+						onClick: () => resetErrors('title')
 					},
 					{
 						children: 'Renommer',
@@ -291,10 +298,7 @@ const ButtonModal = (props: Props) => {
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-						}
+						priority: 'secondary'
 					},
 					{
 						children: "Fermer le lien d'intégration",

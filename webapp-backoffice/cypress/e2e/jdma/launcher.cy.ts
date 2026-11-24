@@ -1,6 +1,6 @@
 import './public/home.cy.ts';
 import './public/login.cy.ts';
-import './public/register.cy.ts';
+import './bo/onboarding.cy.ts';
 import './bo/admin.cy.ts';
 import './bo/forms.cy.ts';
 import './public/review.cy.ts';

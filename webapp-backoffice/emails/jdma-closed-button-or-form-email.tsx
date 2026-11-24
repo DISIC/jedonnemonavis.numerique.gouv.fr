@@ -15,9 +15,15 @@ export const JdmaClosedButtonOrFormEmail = ({
 	},
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaClosedButtonOrFormEmailProps) => {
-	const closeTitle = buttonTitle
-		? `le lien d'intégration « <strong>${buttonTitle}</strong> »`
-		: `le formulaire « <strong>${formTitle}</strong> »`;
+	const closeTitle = buttonTitle ? (
+		<>
+			le lien d'intégration « <strong>{buttonTitle}</strong> »
+		</>
+	) : (
+		<>
+			le formulaire « <strong>{formTitle}</strong> »
+		</>
+	);
 
 	const productUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms`;
 	const formUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms/${form.id.toString()}`;
@@ -33,8 +39,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 			<Text style={paragraph}>
 				{userName} vient de fermer&nbsp;
-				<span dangerouslySetInnerHTML={{ __html: closeTitle }} /> du service
-				numérique «&nbsp;
+				{closeTitle} du service numérique «&nbsp;
 				{product.title}&nbsp;». Il ne recevra plus de données, mais les
 				statistiques récoltées avant la fermeture restent accessibles.
 			</Text>

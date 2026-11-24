@@ -33,7 +33,7 @@ const RootTable = (props: Props) => {
 
 	return (
 		<div className={cx(classes.container, disabled ? classes.disabled : null)}>
-			<h3>{block.label}</h3>
+			<h3 className={fr.cx('fr-h5')}>{block.label}</h3>
 			<p>
 				Cette question ne s'affiche que si l'utilisateur a coché une des options
 				correspondantes dans la question précédente
@@ -51,17 +51,17 @@ const RootTable = (props: Props) => {
 					{step.form_template_blocks.slice(7).map(childBlock => {
 						const isParentHidden = getIsParentHidden(childBlock);
 						return (
-							<tr
-								key={childBlock.id}
-								className={cx(isParentHidden ? classes.parentHidden : null)}
-							>
+							<tr key={childBlock.id}>
 								<td>
-									<label className={cx(classes.childLabel)}>
+									<span className={cx(classes.childLabel)} aria-hidden="true">
 										{childBlock.label}
-									</label>
+									</span>
 								</td>
 								<td colSpan={6}>
 									<fieldset>
+										<legend className={fr.cx('fr-sr-only')}>
+											{childBlock.label}
+										</legend>
 										{!disabled && isParentHidden ? (
 											<Badge className={cx(classes.hiddenBadge)} small>
 												<span
@@ -164,11 +164,6 @@ const useStyles = tss.withName({ RootTable }).create({
 		p: {
 			marginTop: fr.spacing('4v')
 		},
-		'*': {
-			color: fr.colors.decisions.text.mention.grey.default
-		}
-	},
-	parentHidden: {
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
 		}

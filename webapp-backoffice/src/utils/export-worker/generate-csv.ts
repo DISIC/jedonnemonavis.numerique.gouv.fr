@@ -43,7 +43,7 @@ export async function generateCsvStream(
 	columns: TemplateColumn[],
 	out: Writable
 ): Promise<void> {
-	const stringifier = stringify({ bom: false });
+	const stringifier = stringify({ bom: false, escape_formulas: true });
 	stringifier.pipe(out, { end: false });
 
 	stringifier.write(buildHeader(columns));

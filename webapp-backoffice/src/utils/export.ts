@@ -125,7 +125,7 @@ export function getExportFiltersLabel(
 	};
 
 	addLabel(!!params.search, `Recherche : ${params.search}`);
-	addLabel(!!filters?.needVerbatim, 'Réponse avec commentaire');
+	addLabel(!!filters?.needVerbatim, 'Réponses avec commentaire uniquement');
 	addLabel(!!params.button_id, `Bouton ${params.button_id}`);
 
 	const addGroupedLabel = (fieldCode: string, values: string[]) => {

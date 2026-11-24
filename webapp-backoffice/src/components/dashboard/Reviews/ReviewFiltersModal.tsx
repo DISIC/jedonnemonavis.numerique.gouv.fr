@@ -200,10 +200,12 @@ const ReviewFiltersModal = (props: Props) => {
 					<Fragment key={index}>
 						{index > 0 && <hr className={cx(classes.separator)} />}
 						<div className={cx(classes.section)}>
-							<p className={cx(classes.subtitle)}>
-								{block.label || block.field_code}
-							</p>
-							<Checkbox options={options} state="default" />
+							<Checkbox
+								legend={block.label || block.field_code}
+								classes={{ legend: cx(classes.subtitle) }}
+								options={options}
+								state="default"
+							/>
 						</div>
 					</Fragment>
 				);
@@ -288,6 +290,15 @@ const useStyles = tss.withName({ ReviewFiltersModal }).create(() => ({
 	section: {
 		'& .fr-fieldset': {
 			marginBottom: 0,
+			marginLeft: 0,
+			marginRight: 0,
+			paddingLeft: 0,
+			paddingRight: 0,
+			width: 'fit-content',
+			maxWidth: '100%',
+			'& .fr-fieldset__content': {
+				marginInline: 0
+			},
 			'&  .fr-label': {
 				...fr.spacing('padding', { topBottom: '2v' }),
 				'&::before': {
@@ -296,13 +307,15 @@ const useStyles = tss.withName({ ReviewFiltersModal }).create(() => ({
 			}
 		},
 		'& .fr-fieldset__element': {
+			paddingLeft: 0,
 			marginBottom: 0
 		}
 	},
 	subtitle: {
 		...fr.typography[19].style,
-		marginBottom: fr.spacing('2w'),
-		fontWeight: 'bold',
+		margin: 0,
+		paddingLeft: 0,
+		fontWeight: 'bold !important',
 		color: fr.colors.decisions.text.label.grey.default
 	},
 	separator: {

@@ -58,6 +58,7 @@ async function main() {
 			await seed_root_form_template();
 			break;
 		case 'seedUsersProducts':
+			assertNotProduction();
 			await seed_root_form_template();
 			await seed_bug_form_template();
 			await seed_users_products();
@@ -69,9 +70,11 @@ async function main() {
 			await Promise.all(getWLDPromises());
 			break;
 		case 'seedDemarchesNumeriques':
+			assertNotProduction();
 			await seed_demarches_numeriques(prisma);
 			break;
 		default:
+			assertNotProduction();
 			await seed_root_form_template();
 			await seed_bug_form_template();
 			await seed_users_products();
@@ -122,6 +125,12 @@ async function seed_root_form_template() {
 	});
 
 	await seed_root_form_template_buttons(prisma, rootTemplate.id);
+}
+
+function assertNotProduction() {
+	if (process.env.NODE_ENV === 'production') {
+		throw new Error('Test users and products cannot be seeded in production');
+	}
 }
 
 async function seed_users_products() {
