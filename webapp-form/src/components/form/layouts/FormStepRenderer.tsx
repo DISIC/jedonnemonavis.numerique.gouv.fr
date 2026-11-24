@@ -16,6 +16,8 @@ interface Props {
 	currentStepIndex: number;
 	totalSteps: number;
 	isWidget?: boolean;
+	showValidationErrors?: boolean;
+	hidePersonalDataAlert?: boolean;
 }
 
 export const FormStepRenderer = (props: Props) => {
@@ -26,7 +28,9 @@ export const FormStepRenderer = (props: Props) => {
 		setAnswers,
 		currentStepIndex,
 		totalSteps,
-		isWidget
+		isWidget,
+		showValidationErrors,
+		hidePersonalDataAlert
 	} = props;
 	const { classes, cx } = useStyles({ isWidget: !!isWidget });
 
@@ -59,7 +63,7 @@ export const FormStepRenderer = (props: Props) => {
 					<Stepper
 						currentStep={currentStepIndex + 1}
 						stepCount={totalSteps}
-						title={step.title}
+						title={''}
 						className={fr.cx('fr-mb-12v')}
 					/>
 				</>
@@ -70,7 +74,8 @@ export const FormStepRenderer = (props: Props) => {
 			)}
 
 			<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
-				Sauf mention contraire, tous les champs sont obligatoires.
+				Les champs marqués d'un <span className={classes.asterisk}>*</span> sont
+				obligatoires
 			</p>
 
 			{visibleBlocks.map(block => (
@@ -81,6 +86,8 @@ export const FormStepRenderer = (props: Props) => {
 					answers={answers}
 					setAnswers={setAnswers}
 					isWidget={isWidget}
+					showValidationErrors={showValidationErrors}
+					hidePersonalDataAlert={hidePersonalDataAlert}
 				/>
 			))}
 		</div>

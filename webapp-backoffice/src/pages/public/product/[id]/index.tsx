@@ -24,9 +24,14 @@ export const getServerSideProps: GetServerSideProps = async context => {
 					},
 		include: {
 			forms: {
+				where: {
+					isPublic: true,
+					OR: [{ isDeleted: false }, { isDeleted: null }]
+				},
 				include: {
 					form_template: true,
 					form_configs: {
+						where: { status: 'published' },
 						include: {
 							form_config_displays: true,
 							form_config_labels: true
@@ -43,9 +48,13 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	prisma.$disconnect();
 
-	if (!product || !product.isPublic) {
+	if (
+		!product ||
+		product.status === 'archived' ||
+		product.forms.length === 0
+	) {
+		context.res.statusCode = 404;
 		return {
 			props: {
 				product: null

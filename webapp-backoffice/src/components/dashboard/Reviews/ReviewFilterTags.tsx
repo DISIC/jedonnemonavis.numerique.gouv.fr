@@ -2,7 +2,10 @@ import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { trpc } from '@/src/utils/trpc';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { fr } from '@codegouvfr/react-dsfr';
+import {
+	getFilterableBlocks,
+	renderFilterFieldLabel
+} from '@/src/utils/export';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Button } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
@@ -10,10 +13,11 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	buttons: Button[];
 	form: FormWithElements;
+	isGlobalAdmin?: boolean;
 }
 
 const ReviewFilterTags = (props: Props) => {
-	const { buttons, form } = props;
+	const { buttons, form, isGlobalAdmin } = props;
 	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
 
@@ -22,32 +26,7 @@ const ReviewFilterTags = (props: Props) => {
 		(catalogueData?.data ?? []).map(c => [c.code, c.label] as const)
 	);
 
-	const filterableBlocks = form.form_template.form_template_steps
-		.flatMap(step => step.form_template_blocks)
-		.filter(block =>
-			['mark_input', 'smiley_input', 'select', 'radio', 'checkbox'].includes(
-				block.type_bloc
-			)
-		);
-
-	const renderLabel = (fieldCode: string, value: string): string => {
-		const block = filterableBlocks.find(b => b.field_code === fieldCode);
-		const formTemplateBlockOption = block?.options?.find(
-			o => o.value === value
-		);
-
-		if (!block) {
-			if (fieldCode === 'buttonId') {
-				return `Source = ${buttons.find(b => b.id === parseInt(value as string))
-					?.title}`;
-			}
-			return value;
-		}
-
-		return `${block.alias || block.label || fieldCode} = ${
-			formTemplateBlockOption?.alias || value
-		}`;
-	};
+	const filterableBlocks = getFilterableBlocks(form);
 
 	const renderTags = () => {
 		const tags: JSX.Element[] = [];
@@ -62,10 +41,10 @@ const ReviewFilterTags = (props: Props) => {
 			if (filterValue === true) {
 				const label =
 					key === 'needVerbatim'
-						? 'Réponse avec commentaire'
+						? 'Réponses avec commentaire uniquement'
 						: key === 'needOtherDifficulties'
-						? 'Difficultés autres complété'
-						: 'Aide autres complété';
+						? 'Autres difficultés'
+						: 'Autre aide';
 
 				tags.push(
 					<Tag
@@ -102,13 +81,53 @@ const ReviewFilterTags = (props: Props) => {
 			}
 		});
 
+		if (isGlobalAdmin && filters.productReviews.filters.onlyDeleted) {
+			tags.push(
+				<Tag
+					key="onlyDeleted"
+					title="Retirer le filtre : Réponses supprimées"
+					dismissible
+					small
+					className={cx(classes.tagFilter)}
+					nativeButtonProps={{
+						onClick: () => {
+							const nextFilters: typeof filters = {
+								...filters,
+								productReviews: {
+									...filters.productReviews,
+									filters: {
+										...filters.productReviews.filters,
+										onlyDeleted: false
+									}
+								}
+							};
+							updateFilters({
+								...nextFilters,
+								sharedFilters: {
+									...nextFilters.sharedFilters,
+									hasChanged: hasAnyFilterChanged(nextFilters)
+								}
+							});
+						}
+					}}
+				>
+					Réponses supprimées
+				</Tag>
+			);
+		}
+
 		if (
 			filters.productReviews.filters.fields &&
 			filters.productReviews.filters.fields.length > 0
 		) {
 			filters.productReviews.filters.fields.forEach((field, fieldIndex) => {
 				field.values.forEach((value, valueIndex) => {
-					const labelRendered = renderLabel(field.field_code, value);
+					const labelRendered = renderFilterFieldLabel(
+						field.field_code,
+						value,
+						filterableBlocks,
+						buttons
+					);
 
 					tags.push(
 						<Tag

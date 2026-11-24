@@ -6,7 +6,7 @@ import {
 	Product
 } from '@/src/utils/types';
 import { useTranslation } from 'next-i18next';
-import { ChangeEvent, SetStateAction, useEffect } from 'react';
+import { ChangeEvent, SetStateAction } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
@@ -137,6 +137,7 @@ export const CheckboxInput = (props: Props) => {
 				<div className={cx(fr.cx('fr-col-12'), classes.checkboxContainer)}>
 					<>
 						<Checkbox
+							aria-labelledby={undefined}
 							legend={<h3>{t(field.label)}</h3>}
 							hintText={t(field.hint ?? '')}
 							options={field.options
@@ -161,7 +162,6 @@ export const CheckboxInput = (props: Props) => {
 									),
 									nativeInputProps: {
 										name: opt.name || `${field.name}-${index}`,
-										autoFocus: index === 0 ? true : false,
 										checked: opinion[
 											field.name as CheckboxOpinionKeys
 										]?.includes(opt.value),

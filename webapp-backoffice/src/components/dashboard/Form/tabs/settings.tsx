@@ -1,9 +1,6 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import {
-	ButtonWithElements,
-	FormWithElements
-} from '@/src/types/prismaTypesExtended';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -15,13 +12,13 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import FormDeleteModal from '../FormDeleteModal';
 import AlertEmailPreviewModal from '../AlertEmailPreviewModal';
+import FormStatsVisibility from '../FormStatsVisibility';
 
 interface Props {
 	form: FormWithElements;
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
-	buttons: ButtonWithElements[];
 	isLoading: boolean;
 }
 
@@ -39,7 +36,6 @@ const SettingsTab = ({
 	alertText,
 	isAlertShown,
 	setIsAlertShown,
-	buttons,
 	isLoading
 }: Props) => {
 	const router = useRouter();
@@ -48,9 +44,7 @@ const SettingsTab = ({
 	const [isCopied, setIsCopied] = useState(false);
 	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] = useState(false);
 
-	const deleteButton = trpc.button.delete.useMutation();
-
-	const { data: meData } = trpc.user.me.useQuery({});
+	const { data: meData } = trpc.user.me.useQuery();
 	const currentUser = meData?.data;
 	const alertsPaused = currentUser?.alerts_enabled === false;
 
@@ -65,18 +59,7 @@ const SettingsTab = ({
 
 	const isLocked = form.isTop250 || !!form.isDeleted;
 
-	const deleteAllButtons = async () => {
-		await Promise.all(
-			buttons.map(button => {
-				const { form, closedButtonLog, form_template_button, ...data } = button;
-				return deleteButton.mutateAsync({
-					buttonPayload: { ...data, deleted_at: new Date(), isDeleted: true },
-					shouldLogEvent: false,
-					product_id: form.product_id,
-					title: button.title
-				});
-			})
-		);
+	const redirectToFormsList = () => {
 		router.push(
 			`/administration/dashboard/product/${
 				form.product_id
@@ -114,7 +97,7 @@ const SettingsTab = ({
 			<FormDeleteModal
 				modal={delete_form_modal}
 				form={form}
-				onDelete={deleteAllButtons}
+				onDelete={redirectToFormsList}
 			/>
 			<AlertEmailPreviewModal
 				modal={alert_email_preview_modal}
@@ -174,16 +157,18 @@ const SettingsTab = ({
 								</a>{' '}
 								de votre compte.
 							</p>
-							<span
+							<ButtonDSFR
+								priority="secondary"
+								size="small"
+								type="button"
 								className={classes.previewEmailButton}
-								role="button"
 								onClick={() => {
 									setIsAlertEmailPreviewOpen(true);
 									alert_email_preview_modal.open();
 								}}
 							>
 								Voir un exemple de mail d’alerte
-							</span>
+							</ButtonDSFR>
 						</div>
 
 						<div
@@ -224,6 +209,12 @@ const SettingsTab = ({
 							/>
 						</div>
 					</div>
+					{form.form_template.hasStats && !form.isDeleted && (
+						<>
+							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
+							<FormStatsVisibility form={form} />
+						</>
+					)}
 					{!isLocked && (
 						<>
 							<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
@@ -336,17 +327,7 @@ const useStyles = tss.withName({ SettingsTab }).create({
 		}
 	},
 	previewEmailButton: {
-		textWrap: 'nowrap',
-		fontSize: '0.875rem',
-		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
-		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
-		backgroundSize: '100% 1px',
-		backgroundPosition: '0 100%',
-		backgroundRepeat: 'no-repeat',
-		'&:hover': {
-			cursor: 'pointer',
-			backgroundSize: '100% 2.25px'
-		},
+		whiteSpace: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

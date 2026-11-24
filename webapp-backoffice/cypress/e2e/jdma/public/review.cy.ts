@@ -8,8 +8,10 @@ import { appFormUrl } from '../../../utils/variables';
 
 describe('jdma-form-review', () => {
 	before(() => {
-		cy.visit(`${appFormUrl}/Demarches/1?button=1`, {
-			failOnStatusCode: false
+		cy.task<number>('db:getRootFormButtonId', 1).then(buttonId => {
+			cy.visit(`${appFormUrl}/Demarches/1?button=${buttonId}`, {
+				failOnStatusCode: false
+			});
 		});
 		cy.get('h1').contains('Je donne mon avis').should('exist');
 	});

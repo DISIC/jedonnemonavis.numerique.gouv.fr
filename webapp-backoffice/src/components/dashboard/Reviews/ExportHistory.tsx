@@ -1,12 +1,15 @@
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import type { RouterOutputs } from '@/src/utils/trpc';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ExportHistoryModal from './ExportHistoryModal';
-import { ExportWithPartialRelations } from '@/prisma/generated/zod';
 import { Button as ButtonModel } from '@prisma/client';
+import ExportHistoryModal from './ExportHistoryModal';
 
 interface Props {
-	exports: ExportWithPartialRelations[];
+	exports: RouterOutputs['export']['getList']['data'];
 	buttons: ButtonModel[];
+	form: FormWithElements;
+	isDisabled?: boolean;
 }
 
 const export_modal = createModal({
@@ -15,7 +18,7 @@ const export_modal = createModal({
 });
 
 const ExportHistory = (props: Props) => {
-	const { exports, buttons } = props;
+	const { exports, buttons, form, isDisabled } = props;
 
 	return (
 		<>
@@ -23,11 +26,13 @@ const ExportHistory = (props: Props) => {
 				modal={export_modal}
 				exports={exports}
 				buttons={buttons}
+				form={form}
 			/>
 
 			<Button
 				priority="secondary"
 				type="button"
+				disabled={isDisabled}
 				nativeButtonProps={export_modal.buttonProps}
 			>
 				Voir l'historique des exports

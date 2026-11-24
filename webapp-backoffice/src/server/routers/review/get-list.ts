@@ -1,14 +1,15 @@
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { buildSearchWhereRaw, formatWhereAndOrder } from '@/src/utils/reviews';
+import { maskAnswerText } from '@/src/utils/personal-data';
 import { getDateWhereFromUTCRange } from '@/src/utils/tools';
 import { Prisma } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkRightToProceed } from '../product';
 
 export const getReviewListInputSchema = z.object({
-	numberPerPage: z.number(),
-	page: z.number().default(1),
+	numberPerPage: z.number().int().min(1).max(100),
+	page: z.number().int().min(1).default(1),
 	product_id: z.number().optional(),
 	form_id: z.number().optional(),
 	shouldIncludeAnswers: z.boolean().optional().default(false),
@@ -67,10 +68,12 @@ export const getReviewListQuery = async ({
 		newReviews
 	} = input;
 
-	const product = await ctx.prisma.product.findUnique({
-		where: {
-			id: product_id
-		}
+	const { product } = await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id,
+		form_id,
+		authorizeCarrierUser: true
 	});
 
 	const form = await ctx.prisma.form.findUnique({
@@ -85,7 +88,7 @@ export const getReviewListQuery = async ({
 			where: {
 				user_id: parseInt(ctx.session!.user.id),
 				action: 'form_reviews_view',
-				product_id: product_id,
+				product_id: product.id,
 				metadata: {
 					path: ['form_id'],
 					equals: form_id
@@ -100,7 +103,7 @@ export const getReviewListQuery = async ({
 				where: {
 					user_id: parseInt(ctx.session!.user.id),
 					action: 'service_reviews_view',
-					product_id: product_id
+					product_id: product.id
 				},
 				orderBy: { created_at: 'desc' },
 				take: 2
@@ -122,6 +125,7 @@ export const getReviewListQuery = async ({
 	const { where, orderBy } = formatWhereAndOrder(
 		{
 			...input,
+			product_id: product.id,
 			lastSeenDate
 		},
 		!!form?.legacy
@@ -153,6 +157,9 @@ export const getReviewListQuery = async ({
 			.$queryRaw`
 				SELECT DISTINCT "review_id" FROM "Answer"
 				WHERE "field_code" = 'verbatim'
+				AND ("review_id", "review_created_at") IN (
+					SELECT "id", "created_at" FROM "Review" WHERE "product_id" = ${product.id}
+				)
 				${dateFilter}
 				AND ${searchWhereRaw}
 			`;
@@ -165,20 +172,13 @@ export const getReviewListQuery = async ({
 		where: {
 			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_reviews_view',
-			product_id: product_id
+			product_id: product.id
 		},
 		orderBy: {
 			created_at: 'desc'
 		},
 		take: 1
 	});
-
-	if (!product?.isPublic && !ctx.session?.user) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: 'This product is not public'
-		});
-	}
 
 	const [reviews, countFiltered, countAll, countNew, countForm1, countForm2] =
 		await Promise.all([
@@ -209,7 +209,7 @@ export const getReviewListQuery = async ({
 			ctx.prisma.review.count({ where }),
 			ctx.prisma.review.count({
 				where: {
-					product_id: input.product_id,
+					product_id: product.id,
 					...(form_id &&
 						(form?.legacy
 							? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
@@ -219,7 +219,7 @@ export const getReviewListQuery = async ({
 			lastSeenReview[0]
 				? ctx.prisma.review.count({
 						where: {
-							product_id: input.product_id,
+							product_id: product.id,
 							...(lastSeenReview[0] && {
 								created_at: {
 									gte: lastSeenReview[0].created_at
@@ -251,15 +251,55 @@ export const getReviewListQuery = async ({
 					action: input.loggingFromMail
 						? 'service_reviews_report_view'
 						: 'service_reviews_view',
-					product_id: product_id,
+					product_id: product.id,
 					metadata: input
 				}
 			});
 		}
 	}
 
+	// Masquage des données personnelles, côté serveur et non côté composant :
+	// masquer à l'affichage laisserait quand même partir le texte brut dans la
+	// réponse tRPC, lisible dans l'onglet Réseau du navigateur.
+	//
+	// L'`include` des réponses est conditionné par `shouldIncludeAnswers`, ce que
+	// l'inférence de Prisma ne sait pas traverser : elle retombe sur le type
+	// scalaire d'Answer, sans `parent_answer`. On redit donc ici ce que la
+	// requête produit réellement quand l'include est actif.
+	type AnswerWithParent = Prisma.AnswerGetPayload<{
+		include: { parent_answer: true };
+	}>;
+
+	const maskedReviews = reviews.map(review => {
+		const answers = review.answers as AnswerWithParent[] | undefined;
+		if (!answers) return review;
+
+		return {
+			...review,
+			answers: answers.map(answer => ({
+				...answer,
+				answer_text: maskAnswerText(answer, answer.answer_text),
+				...(answer.parent_answer && {
+					parent_answer: {
+						...answer.parent_answer,
+						answer_text: maskAnswerText(
+							answer.parent_answer,
+							answer.parent_answer.answer_text
+						)
+					}
+				})
+			}))
+		};
+	});
+
 	return {
-		data: reviews,
-		metadata: { countFiltered, countAll, countNew, countForm1, countForm2 }
+		data: maskedReviews,
+		metadata: {
+			countFiltered,
+			countAll,
+			countNew,
+			countForm1,
+			countForm2
+		}
 	};
 };

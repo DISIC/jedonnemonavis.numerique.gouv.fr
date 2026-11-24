@@ -2,7 +2,7 @@ import {
 	FormTemplateWithElements,
 	FormWithConfigAndTemplate
 } from '@/src/types/prismaTypesExtended';
-import { getHelperFromFormConfig } from '@/src/utils/tools';
+import { getFormPreviewUrl, getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Header from '@codegouvfr/react-dsfr/Header';
@@ -114,13 +114,7 @@ const FormLinkIntegrationPreview = ({
 					form && (
 						<iframe
 							title="Aperçu de l'intégration du formulaire"
-							src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								form.form_template?.slug === 'root'
-									? `/Demarches/${form.product_id}`
-									: `/Demarches/avis/${form.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(currentFormConfig)
-							)}`}
+							src={getFormPreviewUrl(form, currentFormConfig)}
 							className={classes.previewEmbedContainer}
 						/>
 					)
@@ -189,7 +183,7 @@ const FormLinkIntegrationPreview = ({
 						}
 					/>
 				</div>
-				<section id="onboarding-actions" className={classes.actionsContainer}>
+				<div id="onboarding-actions" className={classes.actionsContainer}>
 					<Button
 						size="large"
 						iconPosition="right"
@@ -208,7 +202,7 @@ const FormLinkIntegrationPreview = ({
 					>
 						Retour
 					</Button>
-				</section>
+				</div>
 			</div>
 			<div
 				className={cx(
@@ -315,19 +309,18 @@ const useStyles = tss.withName({ FormLinkIntegrationPreview }).create(() => ({
 		color: fr.colors.decisions.text.default.error.default
 	},
 	sideMenu: {
-		position: 'relative',
 		height: '100vh',
 		overflow: 'hidden',
-		padding: fr.spacing('10v'),
 		backgroundColor: 'white',
 		display: 'flex',
 		flexDirection: 'column'
 	},
 	scrollableContent: {
 		flex: 1,
+		minHeight: 0,
 		overflowY: 'auto',
 		overflowX: 'hidden',
-		paddingBottom: fr.spacing('8v')
+		padding: fr.spacing('10v')
 	},
 	previewContainer: {
 		display: 'block',
@@ -410,27 +403,29 @@ const useStyles = tss.withName({ FormLinkIntegrationPreview }).create(() => ({
 		pointerEvents: 'none'
 	},
 	actionsContainer: {
-		position: 'absolute',
-		bottom: 0,
-		left: 0,
-		right: 0,
-		zIndex: 1000,
+		flexShrink: 0,
+		overflow: 'hidden',
 		display: 'flex',
-		justifyContent: 'space-between',
+		flexWrap: 'wrap',
+		gap: fr.spacing('4v'),
 		width: '100%',
-		height: fr.spacing('20v'),
 		backgroundColor: 'white',
 		borderTop: `solid 1px ${fr.colors.decisions.border.default.grey.default}`,
 		...fr.spacing('padding', { topBottom: '4v', rightLeft: '10v' }),
+		button: {
+			flex: '1 1 auto',
+			justifyContent: 'center'
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			button: {
+				width: '100%'
+			}
+		},
 		[fr.breakpoints.down('sm')]: {
 			borderTop: 'none',
-			flexDirection: 'column',
-			height: 'auto',
-			gap: fr.spacing('4v'),
 			...fr.spacing('padding', { topBottom: '6v', rightLeft: '4v' }),
 			button: {
-				width: '100%',
-				justifyContent: 'center',
 				fontSize: '1rem',
 				lineHeight: '1.5rem',
 				minHeight: fr.spacing('8v')

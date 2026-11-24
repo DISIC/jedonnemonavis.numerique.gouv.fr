@@ -31,7 +31,7 @@ const ProductLayout = ({
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -63,14 +63,19 @@ const ProductLayout = ({
 				href: `/administration/dashboard/product/${id}/infos`
 			}
 		},
-		{
-			text: ownRight && ownRight === 'carrier_admin' ? 'Clés API' : 'Clés API',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/api_keys`
-			}
-		},
+		...(ownRight === 'carrier_admin'
+			? [
+					{
+						text: 'Clés API',
+						isActive:
+							router.pathname ===
+							`/administration/dashboard/product/[id]/api_keys`,
+						linkProps: {
+							href: `/administration/dashboard/product/${id}/api_keys`
+						}
+					}
+			  ]
+			: []),
 		{
 			text: "Historique d'activité",
 			isActive:
@@ -100,7 +105,7 @@ const ProductLayout = ({
 	return (
 		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
 			<Breadcrumb
-				currentPageLabel={'Service : ' + product.title}
+				currentPageLabel={'Service numérique : ' + product.title}
 				segments={breadcrumbSegments}
 				className={fr.cx('fr-mb-4v')}
 			/>
@@ -125,15 +130,13 @@ const ProductLayout = ({
 						'fr-mb-md-0'
 					)}
 				>
-					<div role="navigation">
-						<SideMenu
-							align="left"
-							aria-label="Menu latéral"
-							items={menuItems}
-							burgerMenuButtonText="Menu"
-							sticky
-						/>
-					</div>
+					<SideMenu
+						align="left"
+						aria-label="Menu latéral"
+						items={menuItems}
+						burgerMenuButtonText="Menu"
+						sticky
+					/>
 				</div>
 				<div
 					className={fr.cx(

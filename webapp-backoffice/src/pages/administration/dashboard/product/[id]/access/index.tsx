@@ -5,7 +5,11 @@ import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
-import { getNbPages } from '@/src/utils/tools';
+import {
+	getNbPages,
+	getRightOptionsIds,
+	RIGHT_OPTIONS_BUTTON_ID_PREFIX
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -38,6 +42,14 @@ const modal = createModal({
 	isOpenedByDefault: false
 });
 
+const INVITE_USERS_BUTTON_ID = 'button-invite-users';
+
+type ModalFocusReturn = {
+	onCancelIds: string[];
+	onSuccessIds: string[];
+	submittedAt?: number;
+};
+
 const AccessManagement = (props: Props) => {
 	const { cx, classes } = useStyles();
 
@@ -61,23 +73,28 @@ const AccessManagement = (props: Props) => {
 	const isModalOpen = useIsModalOpen(modal);
 	const { data: session } = useSession();
 
-	const { data: accessRightsResult, isLoading: isLoadingAccessRights } =
-		trpc.accessRight.getList.useQuery(
-			{
-				product_id: product.id,
-				numberPerPage,
-				page: currentPage,
-				isRemoved: carriersRemovedFilter
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
+	const modalFocusReturnRef = React.useRef<ModalFocusReturn | null>(null);
+
+	const {
+		data: accessRightsResult,
+		isLoading: isLoadingAccessRights,
+		dataUpdatedAt: accessRightsUpdatedAt
+	} = trpc.accessRight.getList.useQuery(
+		{
+			product_id: product.id,
+			numberPerPage,
+			page: currentPage,
+			isRemoved: carriersRemovedFilter
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
 				}
 			}
-		);
+		}
+	);
 
 	const {
 		data: accessRights,
@@ -137,9 +154,66 @@ const AccessManagement = (props: Props) => {
 			return;
 		}
 
+		modalFocusReturnRef.current =
+			accessRight && (modalType === 'switch' || modalType === 'remove')
+				? getModalFocusReturn(modalType, accessRight)
+				: null;
+
 		setIsModalSubmitted(false);
 		if (isMounted) modal.open();
 	};
+
+	const getModalFocusReturn = (
+		modalType: 'switch' | 'remove',
+		accessRight: AccessRightWithUsers
+	): ModalFocusReturn => {
+		const { optionsButtonId } = getRightOptionsIds(accessRight);
+		if (modalType === 'switch') {
+			return {
+				onCancelIds: [optionsButtonId],
+				onSuccessIds: [optionsButtonId]
+			};
+		}
+
+		const optionsButtonIds = Array.from(
+			document.querySelectorAll<HTMLElement>(
+				`[id^="${RIGHT_OPTIONS_BUTTON_ID_PREFIX}"]`
+			),
+			button => button.id
+		);
+		const index = optionsButtonIds.indexOf(optionsButtonId);
+
+		return {
+			onCancelIds: [optionsButtonId],
+			onSuccessIds: [
+				...optionsButtonIds.slice(0, Math.max(index, 0)).reverse(),
+				...optionsButtonIds.slice(index + 1),
+				INVITE_USERS_BUTTON_ID
+			]
+		};
+	};
+
+	React.useEffect(() => {
+		const focusReturn = modalFocusReturnRef.current;
+		if (isModalOpen || !focusReturn) return;
+
+		const { submittedAt } = focusReturn;
+		const isSubmitted = submittedAt !== undefined;
+		if (isSubmitted && accessRightsUpdatedAt < submittedAt) return;
+
+		const timer = window.setTimeout(() => {
+			const candidateIds = isSubmitted
+				? focusReturn.onSuccessIds
+				: focusReturn.onCancelIds;
+			candidateIds
+				.map(id => document.getElementById(id))
+				.find(element => element !== null)
+				?.focus();
+			modalFocusReturnRef.current = null;
+		}, 0);
+
+		return () => window.clearTimeout(timer);
+	}, [isModalOpen, accessRightsUpdatedAt]);
 
 	const getAlertTitle = () => {
 		const userName = currentAccessRight?.user
@@ -215,6 +289,11 @@ const AccessManagement = (props: Props) => {
 					setIsModalSubmitted={setIsModalSubmitted}
 					currentAccessRight={currentAccessRight}
 					setCurrentAccessRight={setCurrentAccessRight}
+					onSuccess={() => {
+						if (modalFocusReturnRef.current) {
+							modalFocusReturnRef.current.submittedAt = Date.now();
+						}
+					}}
 				/>
 
 				<div
@@ -233,6 +312,7 @@ const AccessManagement = (props: Props) => {
 					<div className={cx(fr.cx('fr-col-md-4'), classes.headerButton)}>
 						{ownRight === 'carrier_admin' && (
 							<Button
+								id={INVITE_USERS_BUTTON_ID}
 								priority="secondary"
 								iconPosition="right"
 								iconId="ri-user-add-line"
@@ -296,28 +376,29 @@ const AccessManagement = (props: Props) => {
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
-									<h2 className={cx(classes.categoryTitle)}>
-										Utilisateurs du service
-									</h2>
+									<h3 className={cx(classes.categoryTitle)}>
+										Utilisateurs du service numérique
+									</h3>
 									<p className={cx(classes.categoryDescription)}>
-										Utilisateurs ayant le droit de voir le service, mais pas de
-										le modifier
+										Utilisateurs ayant le droit de voir le service numérique,
+										mais pas de le modifier
 									</p>
 								</div>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (accessRight.status === 'carrier_user') {
-											return (
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessRights
+										.filter(
+											accessRight => accessRight.status === 'carrier_user'
+										)
+										.map(accessRight => (
+											<li key={accessRight.id}>
 												<AccessRightCard
-													key={index}
 													accessRight={accessRight}
 													onButtonClick={handleModalOpening}
 													ownRight={ownRight}
 												/>
-											);
-										}
-									})}
-								</div>
+											</li>
+										))}
+								</ul>
 							</div>
 						)}
 						{accessRights.some(
@@ -325,55 +406,53 @@ const AccessManagement = (props: Props) => {
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
-									<h2 className={cx(classes.categoryTitle)}>
-										Administrateurs du service
-									</h2>
+									<h3 className={cx(classes.categoryTitle)}>
+										Administrateurs du service numérique
+									</h3>
 									<p className={cx(classes.categoryDescription)}>
 										Utilisateurs ayant le droit de modifier tout aspect du
-										service
+										service numérique
 									</p>
 								</div>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (accessRight.status === 'carrier_admin') {
-											return (
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessRights
+										.filter(
+											accessRight => accessRight.status === 'carrier_admin'
+										)
+										.map(accessRight => (
+											<li key={accessRight.id}>
 												<AccessRightCard
-													key={index}
 													accessRight={accessRight}
 													onButtonClick={handleModalOpening}
 													ownRight={ownRight}
 												/>
-											);
-										}
-									})}
-								</div>
+											</li>
+										))}
+								</ul>
 							</div>
 						)}
 						{accessAdminEntityRights.length > 0 && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.entityWrapper)}>
 									<div className={cx(classes.titleContainer)}>
-										<h2 className={cx(classes.categoryTitle)}>
+										<h3 className={cx(classes.categoryTitle)}>
 											Administrateurs de l'organisation
-										</h2>
+										</h3>
 										<p className={cx(classes.categoryDescription)}>
 											Utilisateurs ayant le droit de modifier l'organisation (
 											{entity?.name}) et tous ses services associés.
 										</p>
 									</div>
 								</div>
-								<div>
-									{accessAdminEntityRights.map(
-										(accessAdminEntityRight, index) => {
-											return (
-												<EntityRightCard
-													key={index}
-													adminEntityRight={accessAdminEntityRight}
-												/>
-											);
-										}
-									)}
-								</div>
+								<ul className={fr.cx('fr-raw-list')}>
+									{accessAdminEntityRights.map(accessAdminEntityRight => (
+										<li key={accessAdminEntityRight.id}>
+											<EntityRightCard
+												adminEntityRight={accessAdminEntityRight}
+											/>
+										</li>
+									))}
+								</ul>
 							</div>
 						)}
 					</div>

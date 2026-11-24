@@ -201,6 +201,12 @@ export const thirdSectionA: FormField[] = [
 		kind: 'input-textarea',
 		hint: 'fields.verbatim.hint',
 		label: 'fields.verbatim.label'
+	},
+	{
+		name: 'contact_email',
+		kind: 'input-email',
+		hint: 'fields.contact_email.hint',
+		label: 'fields.contact_email.label'
 	}
 ];
 

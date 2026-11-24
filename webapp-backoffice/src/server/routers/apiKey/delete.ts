@@ -1,4 +1,5 @@
 import type { Context } from '@/src/server/trpc';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 export const deleteApiKeyInputSchema = z.object({
@@ -24,10 +25,20 @@ export const deleteApiKeyMutation = async ({
 		include: { user: true }
 	});
 
-	if (keyFound && keyFound.user.id === parseInt(ctx_user.id)) {
-		await ctx.prisma.apiKey.delete({ where: { id: keyFound.id } });
-		return { result: 'key deleted' };
+	if (!keyFound) {
+		return { result: 'key not found' };
 	}
 
-	return { result: 'key not found' };
+	const isOwner = keyFound.user.id === parseInt(ctx_user.id);
+
+	if (!isOwner && !ctx_user.role.includes('admin')) {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'Your are not authorized'
+		});
+	}
+
+	await ctx.prisma.apiKey.delete({ where: { id: keyFound.id } });
+
+	return { result: 'key deleted' };
 };

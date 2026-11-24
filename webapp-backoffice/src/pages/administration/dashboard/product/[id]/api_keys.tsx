@@ -1,6 +1,7 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
-import { getServerSideProps } from '.';
+import { getServerSideProps as getProductServerSideProps } from '.';
+import { GetServerSideProps } from 'next';
 import { Product, RightAccessStatus } from '@prisma/client';
 import Head from 'next/head';
 import ApiKeyHandler from '@/src/components/dashboard/ApiKey/ApiKeyHandler';
@@ -55,4 +56,21 @@ const useStyles = tss.withName({ ProductApiKeysPage }).create({
 
 export default ProductApiKeysPage;
 
-export { getServerSideProps };
+export const getServerSideProps: GetServerSideProps = async context => {
+	const result = await getProductServerSideProps(context);
+
+	if ('props' in result) {
+		const { ownRight } = (await result.props) as Props;
+
+		if (ownRight !== 'carrier_admin') {
+			return {
+				redirect: {
+					destination: `/administration/dashboard/product/${context.query.id}/forms`,
+					permanent: false
+				}
+			};
+		}
+	}
+
+	return result;
+};

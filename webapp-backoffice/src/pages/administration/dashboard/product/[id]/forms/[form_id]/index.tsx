@@ -12,7 +12,7 @@ import {
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
-import { getValidTabSlug } from '@/src/utils/tools';
+import { getFormPreviewUrl, getValidTabSlug } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -24,6 +24,7 @@ import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import { RightAccessStatus } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -54,6 +55,7 @@ const ProductFormPage = (props: Props) => {
 
 	const [modalType, setModalType] = useState<ButtonModalType>();
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
+	const [buttonModalOpenCount, setButtonModalOpenCount] = useState(0);
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
 	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
@@ -64,7 +66,7 @@ const ProductFormPage = (props: Props) => {
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -124,6 +126,7 @@ const ProductFormPage = (props: Props) => {
 	) => {
 		setCurrentButton(button);
 		setModalType(modalType);
+		setButtonModalOpenCount(count => count + 1);
 		buttonModal.open();
 	};
 
@@ -165,6 +168,7 @@ const ProductFormPage = (props: Props) => {
 				form={form}
 				formTemplateButtons={formTemplate.data?.data?.form_template_buttons}
 				modal={buttonModal}
+				openCount={buttonModalOpenCount}
 				modalType={modalType}
 				button={currentButton}
 				onButtonMutation={onButtonMutation}
@@ -209,11 +213,7 @@ const ProductFormPage = (props: Props) => {
 							<Button
 								priority="tertiary"
 								linkProps={{
-									href: `${process.env.NEXT_PUBLIC_FORM_APP_URL}/${
-										form.form_template.slug === 'root'
-											? `Demarches/${form.product_id}`
-											: `Demarches/avis/${form.id}`
-									}?preview=true`,
+									href: getFormPreviewUrl(form),
 									target: '_blank'
 								}}
 							>
@@ -388,7 +388,6 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
-										buttons={buttonResults.data}
 										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}
@@ -520,15 +519,21 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
+	if (form.product_id !== parseInt(id as string)) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
+				permanent: false
+			}
+		};
+	}
+
 	const currentUserToken = await getToken({
 		req: context.req,
 		secret: process.env.JWT_SECRET
 	});
 
-	if (
-		!currentUserToken ||
-		(currentUserToken.exp as number) > new Date().getTime()
-	) {
+	if (!isAuthTokenValid(currentUserToken)) {
 		prisma.$disconnect();
 		return {
 			redirect: {

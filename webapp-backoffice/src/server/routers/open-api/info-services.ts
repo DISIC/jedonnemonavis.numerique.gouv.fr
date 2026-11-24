@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Context } from '@/src/server/trpc';
+import { getAuthorizedProductIds } from './utils';
 
 export const infoServicesQuery = async ({
 	ctx
@@ -7,26 +8,7 @@ export const infoServicesQuery = async ({
 	ctx: Context;
 	input: {};
 }) => {
-	const getAuthorizedProductIds = async (): Promise<number[]> => {
-		if (ctx.api_key?.product_id) {
-			return [ctx.api_key.product_id];
-		}
-
-		if (ctx.api_key?.entity_id) {
-			const entity = await ctx.prisma.entity.findFirst({
-				where: { id: ctx.api_key.entity_id },
-				include: { products: true }
-			});
-
-			if (entity && entity.products) {
-				return entity.products.map(prod => prod.id);
-			}
-		}
-
-		return [];
-	};
-
-	const authorized_products_ids: number[] = await getAuthorizedProductIds();
+	const authorized_products_ids: number[] = await getAuthorizedProductIds(ctx);
 
 	const products = await ctx.prisma.product.findMany({
 		where: {
@@ -36,7 +18,14 @@ export const infoServicesQuery = async ({
 		},
 		include: {
 			entity: true,
+			// Les formulaires supprimés sont exclus : GET /avis répond 404 dessus,
+			// donc les exposer ici ne ferait que livrer aux partenaires des form_id
+			// inexploitables.
 			forms: {
+				where: {
+					deleted_at: null,
+					isDeleted: { not: true }
+				},
 				include: {
 					form_template: true
 				}
@@ -44,12 +33,8 @@ export const infoServicesQuery = async ({
 		}
 	});
 
-	await ctx.prisma.apiKeyLog.create({
-		data: {
-			apikey_id: ctx.api_key?.id || 0,
-			url: ctx.req.url || ''
-		}
-	});
+	// La journalisation est assurée par le wrapper HTTP des open API
+	// (`pages/api/open-api/[...trpc].ts`), pas ici.
 
 	return {
 		data: products.map(prod => {

@@ -10,32 +10,33 @@ export const JdmaProductArchivedEmail = ({
 }: JdmaProductArchivedEmailProps) => {
 	return (
 		<JdmaLayout
-			preview={`Suppression du service « ${productTitle} »`}
+			preview={`Suppression du service numérique « ${productTitle} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				{userName} vient de supprimer le service «&nbsp;
+				{userName} vient de supprimer le service numérique «&nbsp;
 				<strong>{productTitle}</strong> » sur la plateforme&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>
-				. Vous n'avez plus accès aux avis et commentaires de ce service, et les
-				utilisateurs de ce service n'ont plus accès au formulaire.
+				. Vous n'avez plus accès aux avis et commentaires de ce service
+				numérique, et les utilisateurs de ce service numérique n'ont plus accès
+				au formulaire.
 			</Text>
 
 			<Text style={paragraph}>
-				Vous pouvez restaurer ce service depuis&nbsp;
+				Vous pouvez restaurer ce service numérique depuis&nbsp;
 				<Link
 					href={`${baseUrl}/administration/dashboard/products`}
 					target="_blank"
 					style={linkStyle}
 				>
-					la page services
+					la page des services numériques
 				</Link>
-				&nbsp; pendant 6 mois. Après ce délai, le service sera définitivement
-				supprimé.
+				&nbsp; pendant 6 mois. Après ce délai, le service numérique sera
+				définitivement supprimé.
 			</Text>
 		</JdmaLayout>
 	);

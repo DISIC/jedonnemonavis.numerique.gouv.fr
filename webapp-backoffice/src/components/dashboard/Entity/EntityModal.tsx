@@ -6,7 +6,12 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Entity } from '@prisma/client';
 import { useEffect } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import {
+	Controller,
+	SubmitErrorHandler,
+	SubmitHandler,
+	useForm
+} from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -18,6 +23,16 @@ interface Props {
 
 type FormValues = Omit<Entity, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 	urls: { value: string }[];
+};
+
+const FIELDS_FOCUS_ORDER: (keyof FormValues)[] = ['name', 'acronym'];
+
+const focusField = (name: keyof FormValues) => {
+	setTimeout(() => {
+		document
+			.querySelector<HTMLInputElement>(`#entity-form input[name="${name}"]`)
+			?.focus();
+	}, 0);
 };
 
 const EntityModal = (props: Props) => {
@@ -46,6 +61,7 @@ const EntityModal = (props: Props) => {
 					type: 'Conflict name',
 					message: 'Une organisation avec ce nom existe déjà'
 				});
+				focusField('name');
 			}
 		}
 	});
@@ -61,12 +77,18 @@ const EntityModal = (props: Props) => {
 					type: 'Conflict name',
 					message: 'Une organisation avec ce nom existe déjà'
 				});
+				focusField('name');
 			}
 		}
 	});
 
+	const onInvalid: SubmitErrorHandler<FormValues> = formErrors => {
+		const firstFieldInError = FIELDS_FOCUS_ORDER.find(name => formErrors[name]);
+		if (firstFieldInError) focusField(firstFieldInError);
+	};
+
 	const onSubmit: SubmitHandler<FormValues> = async data => {
-		const tmpEntity = data;
+		const tmpEntity = { name: data.name, acronym: data.acronym };
 		let currentEntity;
 
 		try {
@@ -127,7 +149,7 @@ const EntityModal = (props: Props) => {
 				},
 				{
 					doClosesModal: false,
-					onClick: handleSubmit(onSubmit),
+					onClick: handleSubmit(onSubmit, onInvalid),
 					children:
 						entity && entity.id ? 'Sauvegarder' : 'Créer une organisation'
 				}

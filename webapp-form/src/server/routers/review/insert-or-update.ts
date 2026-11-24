@@ -1,14 +1,14 @@
-import { AnswerCreateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { reviewAnswersInputSchema } from './schemas';
 import { createOrUpdateAnswers } from './utils';
 
 export const insertOrUpdateReviewInputSchema = z.object({
-	answers: z.array(AnswerCreateInputSchema),
-	user_id: z.string(),
-	product_id: z.number(),
-	button_id: z.number(),
+	answers: reviewAnswersInputSchema,
+	user_id: z.string().max(255),
+	product_id: z.number().int(),
+	button_id: z.number().int(),
 	step_name: z.enum(['satisfaction', 'comprehension', 'verbatim', 'contact'])
 });
 

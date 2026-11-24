@@ -46,6 +46,11 @@ enum ProductStatus {
   archived
 }
 
+enum ProductSource {
+  manual
+  demarches_numeriques
+}
+
 enum FormConfigStatus {
   draft
   published
@@ -97,6 +102,11 @@ enum TypeExport {
   xls
 }
 
+enum ReviewSaveMode {
+  each_step
+  on_completion
+}
+
 enum Typebloc {
   paragraph
   heading_1
@@ -111,6 +121,7 @@ enum Typebloc {
   radio
   checkbox
   divider
+  consent
 }
 
 enum NotificationFrequency {
@@ -133,6 +144,7 @@ enum TypeAction {
   service_reviews_report_view
   service_new_reviews_view
   service_review_verbatim_view
+  service_review_delete
   service_buttons_list_view
   service_button_create
   service_button_update
@@ -156,6 +168,7 @@ enum TypeAction {
   service_form_create
   service_form_edit
   service_form_delete
+  service_form_stats_visibility_update
   form_alert_sent
 }
 
@@ -192,36 +205,36 @@ enum UserDesignLevel {
 
 // Next auth
 model User {
-  id                      Int                   @id @default(autoincrement())
-  firstName               String?
-  lastName                String?
-  active                  Boolean               @default(false)
-  xwiki_account           Boolean               @default(false)
-  xwiki_username          String?
-  email                   String                @unique
-  password                String
-  role                    UserRole              @default(user)
-  UserOTPs                UserOTP[]
-  UserValidationTokens    UserValidationToken[]
-  UserRequests            UserRequest[]
-  UserResetTokens         UserResetToken[]
-  accessRights            AccessRight[]
-  adminEntityRights       AdminEntityRight[]
-  entities                Entity[]
-  favorites               Favorite[]
-  api_keys                ApiKey[]
-  exports                 Export[]
-  form_templates          FormTemplate[]
-  forms                   Form[]
-  form_configs            FormConfig[]
-  reviewViewLogs          ReviewViewLog[]
-  notifications           Boolean               @default(false)
-  notifications_frequency NotificationFrequency @default(daily)
-  alerts_enabled          Boolean               @default(true)
+  id                       Int                     @id @default(autoincrement())
+  firstName                String?
+  lastName                 String?
+  active                   Boolean                 @default(false)
+  xwiki_account            Boolean                 @default(false)
+  xwiki_username           String?
+  email                    String                  @unique
+  password                 String
+  role                     UserRole                @default(user)
+  UserOTPs                 UserOTP[]
+  UserValidationTokens     UserValidationToken[]
+  UserRequests             UserRequest[]
+  UserResetTokens          UserResetToken[]
+  accessRights             AccessRight[]
+  adminEntityRights        AdminEntityRight[]
+  entities                 Entity[]
+  favorites                Favorite[]
+  api_keys                 ApiKey[]
+  exports                  Export[]
+  form_templates           FormTemplate[]
+  forms                    Form[]
+  form_configs             FormConfig[]
+  reviewViewLogs           ReviewViewLog[]
+  notifications            Boolean                 @default(false)
+  notifications_frequency  NotificationFrequency   @default(daily)
+  alerts_enabled           Boolean                 @default(true)
   form_alert_subscriptions FormAlertSubscription[]
   classification_validations ReviewClassification[]
-  UserEvent               UserEvent[]
-  proconnect_account      Boolean?
+  UserEvent                UserEvent[]
+  proconnect_account       Boolean?
 
   details    UserDetails?
   created_at DateTime     @default(now())
@@ -362,6 +375,14 @@ model ApiKey {
   id           Int         @id @default(autoincrement())
   key          String
   scope        UserRole
+  /// Coupure manuelle d'une clé, indépendante des quotas.
+  ///
+  /// Lue dans `isKeyAllowed`, où la clé est de toute façon chargée depuis
+  /// Postgres : c'est le seul mécanisme de blocage qui ne dépend pas de Redis,
+  /// donc celui qui reste disponible quand le cache est éteint. Une clé
+  /// compromise doit pouvoir être coupée en toutes circonstances.
+  blocked_at   DateTime?
+  block_reason String?
   user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
   product      Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
@@ -370,14 +391,96 @@ model ApiKey {
   entity_id    Int?
   api_key_logs ApiKeyLog[]
   UserEvent    UserEvent[]
+
+  // Partner (server-to-server) key, e.g. Démarches Numériques provisioning.
+  // Gated by assertPartnerKey — never set via the self-service apiKey.create flow.
+  is_partner     Boolean        @default(false)
+  partner_source ProductSource?
 }
 
+/// Journal d'audit des appels aux open API (`/api/open-api/*`).
+///
+/// Alimenté par un point de capture unique dans `pages/api/open-api/[...trpc].ts`,
+/// donc *tous* les endpoints y passent, y compris ceux qui échouent (clé invalide,
+/// 400, 404, 500) — ce sont justement ceux qu'on veut voir pour détecter un abus.
+/// Aucun endpoint n'a besoin d'écrire ici lui-même.
+///
+/// Ce que chaque appel stocke est décidé par route dans
+/// `src/server/open-api-log/policy.ts` (bodies complets pour les mutations,
+/// résumé pour les lectures volumineuses), et la rétention y est également
+/// définie puis appliquée par `scripts/purge-api-logs.ts`.
 model ApiKeyLog {
-  id         Int      @id @default(autoincrement())
-  apikey     ApiKey   @relation(fields: [apikey_id], references: [id], onDelete: Cascade)
-  apikey_id  Int
-  url        String
+  id        Int     @id @default(autoincrement())
+  /// Nullable : on journalise aussi les appels sans clé valide (401), et un
+  /// journal d'audit ne doit pas disparaître avec la clé qu'il incrimine
+  /// (d'où `SetNull` plutôt que `Cascade`).
+  apikey    ApiKey? @relation(fields: [apikey_id], references: [id], onDelete: SetNull)
+  apikey_id Int?
+  /// sha256 du Bearer présenté : conserve la corrélation entre appels même
+  /// après suppression de la clé, sans jamais stocker le secret en clair.
+  key_hash  String?
+  /// Porteur de la clé au moment de l'appel. Volontairement dénormalisé (pas de
+  /// relation) pour que la piste survive à la suppression du compte.
+  user_id   Int?
+
+  ip         String?
+  user_agent String?
+
+  method String?
+  /// Chemin *templaté* (`/demarches-numeriques/services/{external_id}/admins`).
+  /// C'est lui qui permet d'agréger par API — pour le suivi comme pour le
+  /// futur plafonnement par endpoint. `url` garde le chemin réel + query.
+  route  String?
+  url    String
+
+  request_body  Json?
+  status_code   Int?
+  response_body Json?
+  error_message String?
+  duration_ms   Int?
+
+  /// Un mécanisme de protection a décidé de rejeter cet appel — que le rejet
+  /// ait été appliqué ou non. En mode observation (drapeaux à `0`), l'appel
+  /// passe quand même : c'est en interrogeant cette colonne qu'on mesure
+  /// l'impact qu'auraient les seuils avant de les activer.
+  would_block  Boolean @default(false)
+  /// `quota` | `brute_force_ban` | `key_blocked`
+  block_reason String?
+
   created_at DateTime @default(now())
+
+  @@index([apikey_id, created_at])
+  @@index([ip, created_at])
+  @@index([route, created_at])
+  @@index([created_at])
+}
+
+/// Bannissements d'IP sur les open API.
+///
+/// Redis porte la décision temps réel (rapide, TTL natif, partagé entre
+/// instances) ; cette table en est la trace durable : elle survit à un
+/// redémarrage de Redis, elle est auditable, et elle accueille les
+/// bannissements posés à la main.
+///
+/// Les bans actifs sont rechargés depuis ici dans un cache de processus
+/// rafraîchi périodiquement — ce qui les rend applicables même Redis éteint.
+model ApiIpBan {
+  id         Int       @id @default(autoincrement())
+  ip         String
+  reason     String
+  /// `auto` pour la garde anti-force brute, sinon l'e-mail de l'agent.
+  created_by String    @default("auto")
+  /// Rang de récidive au moment du bannissement, pour suivre l'escalade.
+  strike     Int       @default(1)
+  expires_at DateTime
+  created_at DateTime  @default(now())
+  /// Levée manuelle : on ne supprime pas la ligne, on la neutralise, pour que
+  /// l'historique des bannissements reste lisible.
+  lifted_at  DateTime?
+  lifted_by  String?
+
+  @@index([ip, expires_at])
+  @@index([expires_at])
 }
 
 model Product {
@@ -396,12 +499,20 @@ model Product {
   forms           Form[]
   favorites       Favorite[]
   reviews         Review[]
-  isPublic        Boolean?
-  hasBeenTop250   Boolean?
   api_keys        ApiKey[]
   Export          Export[]
   UserEvent       UserEvent[]
   classification_facets ClassificationFacet[]
+
+  // Origin of the service. `demarches_numeriques` = provisioned via the DN API.
+  // external_id holds the DN démarche id; (source, external_id) is the idempotency key.
+  source                     ProductSource @default(manual)
+  external_id                String?
+  // Organisation name as provided by the source (DN). The service lands in a shared
+  // tampon Entity, so the real org name is kept here for later manual reassignment.
+  external_organisation_name String?
+
+  @@unique([source, external_id])
 }
 
 model AdminEntityRight {
@@ -451,15 +562,16 @@ model Favorite {
 }
 
 model Review {
-  id           Int     @default(autoincrement())
-  form_id      Int
-  product      Product @relation(fields: [product_id], references: [id])
-  product_id   Int
-  button       Button  @relation(fields: [button_id], references: [id])
-  button_id    Int
-  xwiki_id     Int?
-  user_id      String?
-  has_verbatim Boolean @default(false)
+  id                  Int     @default(autoincrement())
+  form_id             Int
+  product             Product @relation(fields: [product_id], references: [id])
+  product_id          Int
+  button              Button? @relation(fields: [button_id], references: [id], onDelete: Restrict)
+  button_id           Int?
+  requested_button_id Int?
+  xwiki_id            Int?
+  user_id             String?
+  has_verbatim        Boolean @default(false)
 
   reviewViewLogs ReviewViewLog[]
 
@@ -472,6 +584,25 @@ model Review {
   @@id([id, created_at])
   @@index([product_id, created_at])
   @@index([product_id, created_at, button_id])
+  @@index([form_id, created_at, id])
+}
+
+model ArchivedReview {
+  id                  Int      @id @default(autoincrement())
+  original_review_id  Int
+  review_created_at   DateTime
+  product_id          Int
+  form_id             Int
+  button_id           Int?
+  requested_button_id Int?
+  user_id             String?
+  has_verbatim        Boolean  @default(false)
+  answers             Json
+  deleted_by          Int?
+  archived_at         DateTime @default(now())
+
+  @@index([product_id, form_id, archived_at])
+  @@index([product_id, form_id, review_created_at, id])
 }
 
 model ReviewViewLog {
@@ -509,10 +640,6 @@ model Answer {
   @@index([review_id, field_code])
 }
 
-/// Hierarchical, JDMA-defined catalogue of verbatim categories (thème → problématique).
-/// Frozen for v1 but stored in DB so it can evolve under human control without a redeploy.
-/// `code` (not label) is the stable identifier injected into the LLM prompt and stored on
-/// ReviewClassification + denormalised into Elasticsearch.
 /// Référentiel de facettes (axes objet / thématique site). La polarité n'est pas stockée ici
 /// (enum fixe Polarite). `code` est unique PAR AXE et sert dans les prompts, en base et en ES.
 model ClassificationFacet {
@@ -599,6 +726,8 @@ model Export {
   endDate    DateTime?
   link       String?
   progress   Int          @default(0)
+
+  only_deleted_reviews Boolean @default(false)
 }
 
 model LimiterReporting {
@@ -624,6 +753,8 @@ model FormTemplate {
   description              String?
   active                   Boolean                  @default(false)
   hasStepper               Boolean                  @default(false)
+  hasStats                 Boolean                  @default(false)
+  review_save_mode         ReviewSaveMode           @default(each_step)
   form_template_steps      FormTemplateStep[]
   form_template_buttons    FormTemplateButton[]
   integration_types        ButtonIntegrationTypes[]
@@ -691,6 +822,7 @@ model FormTemplateBlock {
   isRequired            Boolean                   @default(false)
   isUpdatable           Boolean                   @default(false)
   isHideable            Boolean                   @default(false)
+  isHiddenByDefault     Boolean                   @default(false)
   options               FormTemplateBlockOption[]
 }
 
@@ -748,6 +880,7 @@ model Form {
   deleted_at               DateTime?
   isDeleted                Boolean?                @default(false)
   isTop250                 Boolean                 @default(false)
+  isPublic                 Boolean                 @default(false)
   last_review_at           DateTime?
   alert_max_window_minutes Int?
   last_alert_sent_at       DateTime?

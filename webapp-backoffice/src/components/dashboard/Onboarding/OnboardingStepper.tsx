@@ -21,7 +21,7 @@ const OnboardingStepper = () => {
 	return (
 		<div className={classes.stepperContainer}>
 			<h1 className={fr.cx('fr-h3', 'fr-mb-2v')}>
-				Configurez votre service en 4 étapes
+				Configurez votre service numérique en 4 étapes
 			</h1>
 
 			{steps.map((step, index) => {

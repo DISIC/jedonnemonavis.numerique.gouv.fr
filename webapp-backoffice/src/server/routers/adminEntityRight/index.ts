@@ -16,10 +16,6 @@ import {
 	resendAdminEntityRightEmailMutation
 } from './resend-email';
 import {
-	updateAdminEntityRightInputSchema,
-	updateAdminEntityRightMutation
-} from './update';
-import {
 	deleteAdminEntityRightInputSchema,
 	deleteAdminEntityRightMutation
 } from './delete';
@@ -41,11 +37,6 @@ export const adminEntityRightRouter = router({
 	resendEmail: protectedProcedure
 		.input(resendAdminEntityRightEmailInputSchema)
 		.mutation(resendAdminEntityRightEmailMutation),
-
-	update: protectedProcedure
-		.input(updateAdminEntityRightInputSchema)
-		.meta({ logEvent: true })
-		.mutation(updateAdminEntityRightMutation),
 
 	delete: protectedProcedure
 		.meta({ logEvent: true })

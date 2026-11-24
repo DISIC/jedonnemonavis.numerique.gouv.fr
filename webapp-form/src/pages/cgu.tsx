@@ -1,4 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { GetStaticProps } from 'next';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -6,15 +9,13 @@ import { CGU } from '../utils/content';
 
 const GeneralConditions = () => {
 	const { cx, classes } = useStyles();
+	const { t } = useTranslation('common');
 
 	return (
 		<>
 			<Head>
-				<title>Politique de confidentialité | Je donne mon avis</title>
-				<meta
-					name="description"
-					content={`Politique de confidentialité | Je donne mon avis`}
-				/>
+				<title>{t('pages.cgu.meta_title')}</title>
+				<meta name="description" content={t('pages.cgu.meta_title')} />
 			</Head>
 			<div
 				className={fr.cx(
@@ -32,67 +33,44 @@ const GeneralConditions = () => {
 					)}
 				>
 					<div className={'fr-col-lg-12'}>
-						<h1 className={fr.cx('fr-mb-12v')}>
-							Politique de confidentialité du formulaire de dépôt d’avis Je
-							donne mon avis
-						</h1>
+						<h1 className={fr.cx('fr-mb-12v')}>{t('pages.cgu.h1')}</h1>
 						{Object.keys(CGU).map(key => (
 							<div key={key} className={cx(classes.blockWrapper)}>
-								<h2>{CGU[key].title}</h2>
+								{!CGU[key].hideTitle && <h2>{t(CGU[key].titleKey)}</h2>}
 								<div className={'fr-col-lg-10'}>
 									{CGU[key].content.map((line, index) => {
-										const isLink =
-											typeof line === 'object' && line.type === 'link';
-										const isMailto =
-											typeof line === 'object' && line.type === 'mailto';
-										const isList =
-											typeof line === 'object' && line.type === 'list';
-										const hasNoSpaces =
-											typeof line === 'object' && line.type === 'noSpaces';
-
+										const text = t(line.key);
 										return (
 											<React.Fragment key={index}>
-												{isLink ? (
-													<>
-														<p>
-															<a
-																title={`${line.text}, nouvelle fenêtre`}
-																href={line.href}
-																target="_blank"
-																rel="noopener noreferrer"
-															>
-																{line.text}
-															</a>
-														</p>
-													</>
-												) : isMailto ? (
+												{line.type === 'link' ? (
 													<p>
-														<a href={line.href}>{line.text}</a>
+														<a
+															title={`${text}, ${t('global.new_window')}`}
+															href={line.href}
+															target="_blank"
+															rel="noopener noreferrer"
+														>
+															{text}
+														</a>
 													</p>
-												) : isList ? (
+												) : line.type === 'mailto' ? (
+													<p>
+														<a href={line.href}>{text}</a>
+													</p>
+												) : line.type === 'list' ? (
 													<ul>
-														<li>{line.text}</li>
+														<li>{text}</li>
 													</ul>
-												) : typeof line === 'string' ? (
-													<>
-														<p
-															className={cx(
-																hasNoSpaces ? classes.noSpacesParagraph : ''
-															)}
-														>
-															{line}
-														</p>
-													</>
 												) : (
-													<>
-														<p
-															className={cx(
-																hasNoSpaces ? classes.noSpacesParagraph : ''
-															)}
-														>
-															{line.text}
-														</p>
-													</>
+													<p
+														className={cx(
+															line.type === 'noSpaces'
+																? classes.noSpacesParagraph
+																: ''
+														)}
+													>
+														{text}
+													</p>
 												)}
 											</React.Fragment>
 										);
@@ -124,5 +102,11 @@ const useStyles = tss.withName({ GeneralConditions }).create(() => ({
 		marginBottom: '0 !important'
 	}
 }));
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+	props: {
+		...(await serverSideTranslations(locale ?? 'fr', ['common']))
+	}
+});
 
 export default GeneralConditions;

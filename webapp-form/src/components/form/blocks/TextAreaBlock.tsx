@@ -5,6 +5,7 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 import { SetStateAction } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { PersonalDataAlert } from '../elements/PersonalDataAlert';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -16,6 +17,7 @@ interface Props {
 	answers: FormAnswers;
 	setAnswers: (value: SetStateAction<FormAnswers>) => void;
 	isWidget?: boolean;
+	hidePersonalDataAlert?: boolean;
 }
 
 export const TextAreaBlock = ({
@@ -24,7 +26,8 @@ export const TextAreaBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget
+	isWidget,
+	hidePersonalDataAlert
 }: Props) => {
 	const { classes, cx } = useStyles();
 	const textareaAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -36,7 +39,8 @@ export const TextAreaBlock = ({
 				htmlFor={`textarea-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
+				{displayLabel}{' '}
+				{block.isRequired && <span className={classes.asterisk}>*</span>}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<Input
@@ -44,10 +48,14 @@ export const TextAreaBlock = ({
 				className={fr.cx('fr-mb-0')}
 				hintText={
 					<>
-						Pour nous aider à comprendre, vous pouvez préciser : <br /> - si
-						vous êtes sur un ordinateur ou un téléphone, <br />- ce que vous
-						cherchiez à faire, <br />- ce qui s’est réellement passé ou ce qui
-						pourrait être amélioré. <br />
+						Pour nous aider à comprendre, vous pouvez préciser :
+						<ul className={fr.cx('fr-mt-1v', 'fr-mb-0', 'fr-pl-3v')}>
+							<li>si vous êtes sur un ordinateur ou un téléphone,</li>
+							<li>ce que vous cherchiez à faire,</li>
+							<li>
+								ce qui s’est réellement passé ou ce qui pourrait être amélioré.
+							</li>
+						</ul>
 						Plus votre description est précise, plus nous pourrons agir
 						efficacement.
 					</>
@@ -57,6 +65,7 @@ export const TextAreaBlock = ({
 					value: textareaValue,
 					maxLength: 15000,
 					required: block.isRequired,
+					'aria-invalid': textareaValue.length > 15000,
 					onChange: e => {
 						const value = e.target.value;
 						setAnswers(prev => ({
@@ -66,16 +75,24 @@ export const TextAreaBlock = ({
 								answer_text: value
 							}
 						}));
-					},
-					autoFocus: true
+					}
 				}}
 				state={textareaValue.length > 15000 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 15000 caractères"
 				textArea
 			/>
-			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
-				{textareaValue.length} / 15000
-			</div>
+			{/*
+			  Rappel permanent, affiché même sur un champ vide : c'est ce qui évite
+			  la saisie, alors que l'alerte ne fait que la rattraper. Le
+			  `downLabel` du gabarit porte déjà ce message, mais il n'est rendu que
+			  par le formulaire historique (`Field.tsx`) — pas par ce rendu
+			  dynamique. Pas de doublon, donc.
+			*/}
+			<Notice
+				className={cx(classes.notice)}
+				title="Pour votre sécurité, ne partagez pas d’informations sensibles telles qu'un nom, adresse ou numéro de dossier."
+			/>
+			{!hidePersonalDataAlert && <PersonalDataAlert value={textareaValue} />}
 		</div>
 	);
 };
@@ -84,12 +101,6 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	inputContainer: {
 		display: 'flex',
 		flexDirection: 'column'
-	},
-	textCount: {
-		alignSelf: 'flex-end',
-		marginTop: fr.spacing('1v'),
-		marginBottom: 0,
-		marginRight: fr.spacing('1v')
 	},
 	hint: {
 		fontSize: '0.9rem',
@@ -100,6 +111,7 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	notice: {
 		background: 'none',
 		padding: 0,
+		marginTop: fr.spacing('1v'),
 		marginBottom: fr.spacing('4v'),
 		'.fr-container': {
 			padding: 0,
@@ -112,5 +124,8 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 				}
 			}
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default
 	}
 }));

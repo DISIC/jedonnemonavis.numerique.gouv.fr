@@ -7,26 +7,36 @@ import { FormWithElements } from '@/src/utils/types';
 import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import FormClosed from '../form-closed';
+import { PersonalDataAlert } from '@/src/components/form/elements/PersonalDataAlert';
 import {
 	DynamicAnswerData,
 	FormAnswers,
 	getVisibleBlocks,
 	hasBlockAnswer,
-	hasAllRequiredBlockAnswers
+	hasAllRequiredBlockAnswers,
+	getInvalidEmailBlocks,
+	getPersonalDataBlocks,
+	getContactConsent,
+	isStepHidden,
+	omitStepAnswers
 } from '@/src/utils/form-validation';
+import { parseButtonId } from '@/src/utils/tools';
 
 type AvisPageProps = {
 	form: FormWithElements;
-	buttonId: number;
+	buttonId: number | null;
 	productId: number;
 	isPreview: boolean;
 	isWidget: boolean;
 	widgetNonce: string | null;
+	isClosed: boolean;
 };
 
 export default function AvisPage({
@@ -35,14 +45,17 @@ export default function AvisPage({
 	productId,
 	isPreview,
 	isWidget,
-	widgetNonce
+	widgetNonce,
+	isClosed
 }: AvisPageProps) {
 	const { classes, cx } = useStyles({ isWidget });
 
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
+	const [acceptsContact, setAcceptsContact] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
+	const [showValidationErrors, setShowValidationErrors] = useState(false);
 	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
 	const createPromiseRef = useRef<Promise<{
 		id: number;
@@ -51,6 +64,19 @@ export default function AvisPage({
 
 	// Send content height to parent widget for dynamic resizing
 	const contentRef = useRef<HTMLDivElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
+	const isInitialStepMount = useRef(true);
+
+	useEffect(() => {
+		if (isInitialStepMount.current) {
+			isInitialStepMount.current = false;
+			return;
+		}
+		const firstField = formRef.current?.querySelector<HTMLElement>(
+			'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+		);
+		firstField?.focus();
+	}, [currentStepIndex]);
 
 	useEffect(() => {
 		if (!isWidget || window.parent === window || !contentRef.current) return;
@@ -73,15 +99,29 @@ export default function AvisPage({
 	}, [isWidget, widgetNonce, currentStepIndex, isSubmitted]);
 
 	const formConfig = form.form_configs[0];
-	const allSteps = form.form_template.form_template_steps;
-	const steps = allSteps.filter(step => {
-		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
-		);
-		return !isHidden;
-	});
+	const visibleSteps = form.form_template.form_template_steps.filter(
+		step => !isStepHidden(step, formConfig)
+	);
+	const contactConsent = getContactConsent(visibleSteps, formConfig);
+	const contactStep = contactConsent?.emailStep;
+	const steps = visibleSteps.filter(
+		step =>
+			step !== contactStep || (contactConsent?.isEnabled && acceptsContact)
+	);
 
 	const currentStep = steps[currentStepIndex];
+	const consentBlock =
+		contactConsent?.isEnabled &&
+		currentStep.form_template_blocks.includes(contactConsent.block)
+			? contactConsent.block
+			: undefined;
+
+	const handleContactConsentChange = (checked: boolean) => {
+		setAcceptsContact(checked);
+		if (!checked && contactStep) {
+			setAnswers(prev => omitStepAnswers(prev, contactStep));
+		}
+	};
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
 		onSuccess: () => {
@@ -106,15 +146,39 @@ export default function AvisPage({
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		const form = e.currentTarget;
-		if (!form.checkValidity()) {
-			form.reportValidity();
+		const invalidEmailBlocks = getInvalidEmailBlocks(
+			currentStep.form_template_blocks,
+			answers,
+			formConfig
+		);
+		if (invalidEmailBlocks.length > 0) {
+			setShowValidationErrors(true);
+			formRef.current
+				?.querySelector<HTMLInputElement>(`#input-${invalidEmailBlocks[0].id}`)
+				?.focus();
+			return;
+		}
+
+		// Le bouton est déjà désactivé dans ce cas, mais un formulaire reste
+		// soumettable à la touche Entrée depuis un champ texte : sans ce garde-fou,
+		// la donnée personnelle partirait en base malgré le blocage affiché.
+		const personalDataBlocks = getPersonalDataBlocks(
+			currentStep.form_template_blocks,
+			answers,
+			formConfig
+		);
+		if (personalDataBlocks.length > 0) {
+			setShowValidationErrors(true);
+			const firstId = personalDataBlocks[0].id;
+			formRef.current
+				?.querySelector<HTMLElement>(`#input-${firstId}, #textarea-${firstId}`)
+				?.focus();
 			return;
 		}
 
 		const isLastStep = currentStepIndex === steps.length - 1;
 
-		const saved = await saveCurrentStep();
+		const saved = await saveCurrentStep(isLastStep);
 		if (!saved) return;
 
 		if (isLastStep) {
@@ -127,12 +191,14 @@ export default function AvisPage({
 				);
 			}
 		} else {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex + 1);
 		}
 	};
 
 	const handlePrevious = () => {
 		if (currentStepIndex > 0) {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex - 1);
 		}
 	};
@@ -141,8 +207,30 @@ export default function AvisPage({
 		return Object.values(answers).flat();
 	};
 
-	const saveCurrentStep = async (): Promise<boolean> => {
+	const saveCurrentStep = async (isLastStep: boolean): Promise<boolean> => {
 		if (isPreview) return true;
+
+		if (form.form_template.review_save_mode === 'on_completion') {
+			if (!isLastStep) return true;
+
+			const allAnswers = getAnswersArray();
+			if (allAnswers.length === 0) return true;
+
+			try {
+				await createReview.mutateAsync({
+					review: {
+						product_id: productId,
+						button_id: buttonId,
+						form_id: form.id,
+						user_id: uuidv4()
+					},
+					answers: allAnswers
+				});
+				return true;
+			} catch {
+				return false;
+			}
+		}
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
@@ -224,6 +312,10 @@ export default function AvisPage({
 		/>
 	);
 
+	if (isClosed) {
+		return <FormClosed buttonId={buttonId} />;
+	}
+
 	if (isSubmitted) {
 		return (
 			<div ref={contentRef}>
@@ -271,6 +363,16 @@ export default function AvisPage({
 		formConfig
 	);
 
+	// Variante bloquante : tant qu'une donnée personnelle est présente dans un
+	// champ libre de l'étape, on ne laisse ni continuer ni envoyer. L'alerte qui
+	// nomme la donnée est rendue par `PersonalDataAlert`.
+	const personalDataBlocks = getPersonalDataBlocks(
+		currentStep.form_template_blocks,
+		answers,
+		formConfig
+	);
+	const hasPersonalDataInStep = personalDataBlocks.length > 0;
+
 	return (
 		<div ref={contentRef}>
 			{isPreview && !isWidget && <PreviewAlert />}
@@ -284,7 +386,7 @@ export default function AvisPage({
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
 						<div className={classes.formSection}>
-							<form onSubmit={handleSubmit}>
+							<form ref={formRef} onSubmit={handleSubmit} noValidate>
 								<FormStepRenderer
 									step={currentStep}
 									form={form}
@@ -293,7 +395,37 @@ export default function AvisPage({
 									currentStepIndex={currentStepIndex}
 									totalSteps={steps.length}
 									isWidget={isWidget}
+									showValidationErrors={showValidationErrors}
+									hidePersonalDataAlert={!!consentBlock}
 								/>
+
+								{consentBlock && (
+									<div className={fr.cx('fr-mt-2v', 'fr-mb-10v')}>
+										<Checkbox
+											small={isWidget}
+											className={cx(classes.contactConsent, fr.cx('fr-mb-0'))}
+											options={[
+												{
+													label: consentBlock.label ?? '',
+													nativeInputProps: {
+														checked: acceptsContact,
+														onChange: e =>
+															handleContactConsentChange(e.target.checked)
+													}
+												}
+											]}
+										/>
+										{personalDataBlocks.map(block => (
+											<PersonalDataAlert
+												key={block.id}
+												value={
+													(answers[`block_${block.id}`] as DynamicAnswerData)
+														.answer_text ?? ''
+												}
+											/>
+										))}
+									</div>
+								)}
 
 								{isRateLimitReached && (
 									<div role="alert">
@@ -317,7 +449,12 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty || isRateLimitReached}
+											disabled={
+												isFirstAnswerEmpty ||
+												!hasAllRequiredAnswers ||
+												hasPersonalDataInStep ||
+												isRateLimitReached
+											}
 											type="submit"
 										>
 											Continuer
@@ -326,7 +463,11 @@ export default function AvisPage({
 										<Button
 											priority="primary"
 											type="submit"
-											disabled={!hasAllRequiredAnswers || isRateLimitReached}
+											disabled={
+												!hasAllRequiredAnswers ||
+												hasPersonalDataInStep ||
+												isRateLimitReached
+											}
 										>
 											Envoyer mon avis
 										</Button>
@@ -358,7 +499,8 @@ export default function AvisPage({
 export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	params,
 	query,
-	locale
+	locale,
+	res
 }) => {
 	if (!params?.id || isNaN(parseInt(params?.id as string))) {
 		return {
@@ -370,30 +512,16 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
 	const widgetNonce = isWidget ? (query.nonce as string) || null : null;
-	const buttonId = parseInt(query.button as string);
+	const buttonId = parseButtonId(query.button);
 	const formConfigParam = query.formConfig as string | undefined;
 
-	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
+	if (!isPreview && !!formConfigParam) {
 		return {
 			notFound: true
 		};
 	}
 
 	await prisma.$connect();
-
-	if (!isPreview && !isWidget) {
-		const button = await prisma.button.findUnique({
-			where: { id: buttonId },
-			select: { id: true, form_id: true }
-		});
-
-		if (!button || button.form_id !== formId) {
-			await prisma.$disconnect();
-			return {
-				notFound: true
-			};
-		}
-	}
 
 	const form = await prisma.form.findUnique({
 		where: { id: formId },
@@ -424,7 +552,8 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			product: {
 				select: {
 					id: true,
-					title: true
+					title: true,
+					status: true
 				}
 			}
 		}
@@ -432,10 +561,20 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$disconnect();
 
-	if (!form) {
+	if (
+		!form ||
+		form.product.status === 'archived' ||
+		(!isPreview && form.form_template.slug === 'root')
+	) {
 		return {
 			notFound: true
 		};
+	}
+
+	const isClosed = !!form.isDeleted && !isPreview;
+
+	if (isClosed) {
+		res.statusCode = 404;
 	}
 
 	let formWithConfig = JSON.parse(JSON.stringify(form));
@@ -459,11 +598,12 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	return {
 		props: {
 			form: formWithConfig,
-			buttonId: buttonId || 0,
+			buttonId,
 			productId: form.product.id,
 			isPreview,
 			isWidget,
 			widgetNonce,
+			isClosed,
 			...(await serverSideTranslations(locale ?? 'fr', ['common']))
 		}
 	};
@@ -497,6 +637,12 @@ const useStyles = tss
 				height: `${blueSectionPxHeight}px`
 			}
 		},
+		contactConsent: {
+			'& .fr-label': {
+				fontSize: '1rem',
+				lineHeight: '1.5rem'
+			}
+		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			...fr.spacing('padding', {
@@ -513,7 +659,7 @@ const useStyles = tss
 			display: 'flex',
 			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
-			marginTop: fr.spacing(isWidget ? '4v' : '8v')
+			marginTop: fr.spacing(isWidget ? '10v' : '8v')
 		},
 		thanksSection: {
 			textAlign: 'center',

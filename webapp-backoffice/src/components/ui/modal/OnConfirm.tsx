@@ -105,7 +105,11 @@ const useStyles = tss.withName({ OnConfirmModal }).create(() => ({
 	},
 	dangerButton: {
 		color: fr.colors.decisions.text.default.error.default,
-		boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`
+		boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`,
+		'&:hover': {
+			color: 'white',
+			backgroundColor: `${fr.colors.decisions.text.default.error.default}!important`
+		}
 	},
 	dangerIcon: {
 		width: fr.spacing('4v'),

@@ -1,18 +1,17 @@
-import { ReviewUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
-import { createOrUpdateAnswers, formatDynamicAnswer } from './utils';
+import { dynamicAnswersInputSchema, dynamicReviewInputSchema } from './schemas';
+import {
+	assertFormAcceptsReviews,
+	createOrUpdateAnswers,
+	formatDynamicAnswer,
+	resolveReviewButton
+} from './utils';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 
 export const dynamicCreateReviewInputSchema = z.object({
-	review: ReviewUncheckedCreateInputSchema,
-	answers: z.array(
-		z.object({
-			block_id: z.number(),
-			answer_item_id: z.number().optional(),
-			answer_text: z.string().optional()
-		})
-	)
+	review: dynamicReviewInputSchema,
+	answers: dynamicAnswersInputSchema
 });
 
 export const dynamicCreateReviewMutation = async ({
@@ -25,13 +24,30 @@ export const dynamicCreateReviewMutation = async ({
 	const { prisma } = ctx;
 	const { review, answers } = input;
 
+	await assertFormAcceptsReviews(prisma, review);
+
 	const newReview = await prisma.review.create({
-		data: review,
+		data: {
+			...review,
+			...(await resolveReviewButton(prisma, review.form_id, review.button_id))
+		},
 		include: {
 			product: true,
 			button: true
 		}
 	});
+
+	await prisma.form.update({
+		where: { id: review.form_id },
+		data: { last_review_at: newReview.created_at }
+	});
+
+	if (newReview.button?.isDeleted)
+		await prisma.closedButtonLog.upsert({
+			where: { button_id: newReview.button.id },
+			update: { count: { increment: 1 } },
+			create: { button_id: newReview.button.id }
+		});
 
 	const formattedAnswers = await Promise.all(
 		answers.map(answer => formatDynamicAnswer(prisma, answer))
@@ -43,7 +59,11 @@ export const dynamicCreateReviewMutation = async ({
 			review: newReview
 		});
 	} catch (e) {
-		console.log(e);
+		console.error(
+			'[review] answers not saved:',
+			e instanceof Error ? e.name : 'unknown error',
+			(e as { code?: string })?.code ?? ''
+		);
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);

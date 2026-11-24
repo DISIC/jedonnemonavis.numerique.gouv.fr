@@ -16,7 +16,7 @@ const ProductFormConfigurationInfo = (props: Props) => {
 			<div>
 				<Badge severity="new">Beta</Badge>
 				<h4 className={cx(classes.title, fr.cx('fr-my-2v'))}>
-					Personnalisez le formulaire du service
+					Personnalisez le formulaire du service numérique
 				</h4>
 				<p className={fr.cx('fr-mb-1v')}>
 					Désormais, pour adapter vos formulaires à vos besoins spécifiques,

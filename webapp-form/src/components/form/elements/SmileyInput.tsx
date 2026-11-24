@@ -79,19 +79,8 @@ export const SmileyInput = (props: Props) => {
 								<label
 									htmlFor={`radio-${name}-${smiley.value}`}
 									className={cx(classes.smileyInput)}
-									tabIndex={0}
-									onKeyDown={e => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											setSmileySelected(smiley.value);
-										}
-									}}
 								>
-									<Image
-										alt={`Image: ${t(`smileys.${smiley.value}`)}`}
-										src={smiley.img}
-										width={56}
-										height={56}
-									/>
+									<Image alt="" src={smiley.img} width={56} height={56} />
 									{t(`smileys.${smiley.value}`)}
 								</label>
 							</li>

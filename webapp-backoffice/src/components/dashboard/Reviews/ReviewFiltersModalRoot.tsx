@@ -4,6 +4,7 @@ import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useEffect, useState } from 'react';
@@ -14,10 +15,19 @@ interface Props {
 	filters: ReviewFiltersType;
 	form_id: number;
 	submitFilters: (filters: ReviewFiltersType) => void;
+	isGlobalAdmin?: boolean;
+	deletedCount?: number;
 }
 
 const ReviewFiltersModalRoot = (props: Props) => {
-	const { modal, filters, submitFilters, form_id } = props;
+	const {
+		modal,
+		filters,
+		submitFilters,
+		form_id,
+		isGlobalAdmin,
+		deletedCount
+	} = props;
 	const { cx, classes } = useStyles();
 
 	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
@@ -142,17 +152,23 @@ const ReviewFiltersModalRoot = (props: Props) => {
 			size="large"
 		>
 			<div className={cx(classes.section)}>
-				<p className={cx(classes.subtitle)}>Satisfaction globale</p>
-				<Checkbox options={satisfactionOptions} state="default" />
+				<Checkbox
+					legend="Satisfaction globale"
+					classes={{ legend: cx(classes.subtitle) }}
+					options={satisfactionOptions}
+					state="default"
+				/>
 			</div>
 
 			<hr className={cx(classes.separator)} />
 
 			<div className={cx(classes.section)}>
-				<p className={cx(classes.subtitle)}>
-					Note donnée à la clarté des informations
-				</p>
-				<Checkbox options={comprehensionOptions} state="default" />
+				<Checkbox
+					legend="Note donnée à la clarté des informations"
+					classes={{ legend: cx(classes.subtitle) }}
+					options={comprehensionOptions}
+					state="default"
+				/>
 			</div>
 
 			{facetGroups.length > 0 && (
@@ -178,6 +194,23 @@ const ReviewFiltersModalRoot = (props: Props) => {
 						))}
 					</div>
 				</>
+			)}
+
+			{isGlobalAdmin && (
+				<div className={cx(classes.section)}>
+					<hr className={cx(classes.separator)} />
+					<ToggleSwitch
+						label={`Afficher les réponses supprimées${
+							deletedCount ? ` (${deletedCount})` : ''
+						}`}
+						checked={!!tmpFilters.onlyDeleted}
+						showCheckedHint={false}
+						onChange={checked => {
+							setTmpFilters({ ...tmpFilters, onlyDeleted: checked });
+							push(['trackEvent', 'Product - Avis', 'Toggle-Archived-Reviews']);
+						}}
+					/>
+				</div>
 			)}
 
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
@@ -241,6 +274,15 @@ const useStyles = tss.withName({ ReviewFiltersModalRoot }).create(() => ({
 	section: {
 		'& .fr-fieldset': {
 			marginBottom: 0,
+			marginLeft: 0,
+			marginRight: 0,
+			paddingLeft: 0,
+			paddingRight: 0,
+			width: 'fit-content',
+			maxWidth: '100%',
+			'& .fr-fieldset__content': {
+				marginInline: 0
+			},
 			'&  .fr-label': {
 				...fr.spacing('padding', { topBottom: '2v' }),
 				'&::before': {
@@ -249,13 +291,15 @@ const useStyles = tss.withName({ ReviewFiltersModalRoot }).create(() => ({
 			}
 		},
 		'& .fr-fieldset__element': {
+			paddingLeft: 0,
 			marginBottom: 0
 		}
 	},
 	subtitle: {
 		...fr.typography[19].style,
-		marginBottom: fr.spacing('2w'),
-		fontWeight: 'bold',
+		margin: 0,
+		paddingLeft: 0,
+		fontWeight: 'bold !important',
 		color: fr.colors.decisions.text.label.grey.default
 	},
 	separator: {

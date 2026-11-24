@@ -1,6 +1,6 @@
 import './public/home.cy.ts';
 import './public/login.cy.ts';
-import './public/register.cy.ts';
+import './bo/onboarding.cy.ts';
 import './bo/admin.cy.ts';
 import './bo/forms.cy.ts';
 import './public/review.cy.ts';
@@ -8,3 +8,5 @@ import './bo/reviewCheck.cy.ts';
 import './bo/account.cy.ts';
 import './bo/users.cy.ts';
 import './bo/logs.cy.ts';
+import './api/reviews-list.cy.ts';
+import './api/api-key-scope.cy.ts';

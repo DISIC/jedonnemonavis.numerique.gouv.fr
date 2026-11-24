@@ -1,146 +1,45 @@
-import { renderOtpEmail, renderRegisterEmail } from '@/src/utils/emails';
-import { sendMail } from '@/src/utils/mailer';
-import {
-	extractDomainFromEmail,
-	generateRandomString
-} from '@/src/utils/tools';
-import { Prisma, PrismaClient, User } from '@prisma/client';
+import { extractDomainFromEmail } from '@/src/utils/tools';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
+import { Session } from 'next-auth';
 
-export async function createOTP(prisma: PrismaClient, user: User) {
-	const now = new Date();
-	await prisma.userOTP.deleteMany({
-		where: {
-			user_id: user.id
-		}
+export async function deleteUserRelations(
+	prisma: Prisma.TransactionClient,
+	userIds: number[]
+) {
+	const users = await prisma.user.findMany({
+		where: { id: { in: userIds } },
+		select: { email: true }
 	});
+	const emails = users.map(user => user.email);
+	const normalizedEmails = emails.map(email => email.toLowerCase());
+	const rightsWhere = {
+		OR: [
+			{ user_email: { in: emails } },
+			{ user_email_invite: { in: normalizedEmails } }
+		]
+	};
 
-	const code = generateRandomString();
-	await prisma.userOTP.create({
-		data: {
-			user_id: user.id,
-			code,
-			//60mn validity
-			expiration_date: new Date(now.getTime() + 60 * 60 * 1000)
-		}
+	await prisma.favorite.deleteMany({ where: { user_id: { in: userIds } } });
+	await prisma.accessRight.deleteMany({ where: rightsWhere });
+	await prisma.adminEntityRight.deleteMany({ where: rightsWhere });
+	await prisma.userInviteToken.deleteMany({
+		where: { user_email: { in: normalizedEmails } }
 	});
-	const emailHtml = await renderOtpEmail({
-		code,
-		baseUrl: process.env.NODEMAILER_BASEURL
-	});
-
-	await sendMail(
-		'Votre mot de passe temporaire',
-		user.email.toLowerCase(),
-		emailHtml,
-		`Votre mot de passe temporaire valable 60 minutes : ${code}`
-	);
 }
 
-export async function registerUserFromOTP(
-	prisma: PrismaClient,
-	user: Prisma.UserCreateInput,
-	otp: string
-) {
-	const userOTP = await prisma.userOTP.findUnique({
-		where: {
-			code: otp
-		},
-		include: {
-			user: true
-		}
-	});
+/** Contrôle « admin ou soi-même » sur l'input parsé de la procédure. */
+export function assertAdminOrOwn(session: Session | null, id: number) {
+	const isAdmin = !!session?.user?.role?.includes('admin');
+	const isOwn =
+		session?.user?.id !== undefined && Number(session.user.id) === id;
 
-	if (!userOTP || !userOTP.user) return;
-
-	if (
-		!user.email ||
-		user.email.toLowerCase() !== userOTP.user.email.toLowerCase()
-	) {
-		return;
-	}
-
-	if (userOTP.expiration_date < new Date()) {
-		return;
-	}
-
-	const updatedUser = await prisma.user.update({
-		where: {
-			id: userOTP.user.id
-		},
-		data: {
-			...user,
-			email: user.email.toLowerCase()
-		}
-	});
-
-	await prisma.userOTP.delete({
-		where: {
-			code: otp
-		}
-	});
-
-	return { ...updatedUser, password: 'Nice try!' };
-}
-
-export async function updateUser(
-	prisma: PrismaClient,
-	userId: number,
-	user: Prisma.UserUpdateInput
-) {
-	const updatedUser = await prisma.user.update({
-		where: { id: userId },
-		data: { ...user }
-	});
-	return { ...updatedUser, password: 'Nice try!' };
-}
-
-export async function generateValidationToken(
-	prisma: PrismaClient,
-	userId: number
-) {
-	await prisma.userValidationToken.deleteMany({
-		where: { user_id: userId }
-	});
-
-	const token = generateRandomString(32);
-	await prisma.userValidationToken.create({
-		data: {
-			user_id: userId,
-			token
-		}
-	});
-
-	return token;
-}
-
-export async function makeRelationFromUserInvite(
-	prisma: PrismaClient,
-	email: string
-) {
-	const normalizedEmail = email.toLowerCase();
-
-	const userInvites = await prisma.accessRight.findMany({
-		where: { user_email_invite: normalizedEmail }
-	});
-
-	if (userInvites.length > 0) {
-		await prisma.accessRight.updateMany({
-			where: { id: { in: userInvites.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
+	if (!isAdmin && !isOwn)
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not authorized to perform this action'
 		});
-	}
-
-	const userInvitesEntity = await prisma.adminEntityRight.findMany({
-		where: { user_email_invite: normalizedEmail }
-	});
-
-	if (userInvitesEntity.length > 0) {
-		await prisma.adminEntityRight.updateMany({
-			where: { id: { in: userInvitesEntity.map(invite => invite.id) } },
-			data: { user_email: normalizedEmail }
-		});
-	}
 }
 
 export function omitPassword<T extends { password?: string | null }>(

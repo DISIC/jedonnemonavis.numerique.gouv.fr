@@ -8,6 +8,8 @@ interface MenuOptionProps {
 	open: boolean;
 	anchorEl: HTMLElement | null;
 	onClose: () => void;
+	buttonId: string;
+	menuId: string;
 	accessRight: AccessRightWithUsers;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	onButtonClick: (
@@ -23,12 +25,12 @@ const MENU_ITEMS = {
 		event: 'Access-rights-Remove'
 	},
 	SWITCH_TO_USER: {
-		label: 'Passer en utilisateur du service',
+		label: 'Passer en utilisateur du service numérique',
 		action: 'switch',
 		event: 'Access-rights-Switch'
 	},
 	SWITCH_TO_ADMIN: {
-		label: 'Passer en administrateur du service',
+		label: 'Passer en administrateur du service numérique',
 		action: 'switch',
 		event: 'Access-rights-Switch'
 	},
@@ -48,6 +50,8 @@ export const AccessRightMenuOptions = ({
 	open,
 	anchorEl,
 	onClose,
+	buttonId,
+	menuId,
 	accessRight,
 	ownRight,
 	onButtonClick
@@ -70,12 +74,12 @@ export const AccessRightMenuOptions = ({
 
 	return (
 		<Menu
-			id="option-menu"
+			id={menuId}
 			open={open}
 			anchorEl={anchorEl}
 			onClose={onClose}
 			MenuListProps={{
-				'aria-labelledby': 'button-options-access-right'
+				'aria-labelledby': buttonId
 			}}
 		>
 			{menuItems.map(itemKey => {
@@ -86,7 +90,7 @@ export const AccessRightMenuOptions = ({
 				return (
 					<MenuItem
 						key={item.action}
-						style={{ color: '#000091' }}
+						style={{ color: '#000091', whiteSpace: 'normal' }}
 						onClick={() =>
 							handleMenuAction(item.action as AccessRightModalType, item.event)
 						}

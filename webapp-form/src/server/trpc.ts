@@ -1,13 +1,14 @@
 import { createTRPCStoreLimiter } from '@/src/utils/trpcRateLimiter';
 import { Client as ElkClient } from '@elastic/elasticsearch';
-import { defaultFingerPrint } from '@trpc-limiter/memory';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import fs from 'fs';
 import path from 'path';
 import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
+import { getClientIp } from '../utils/clientIp';
 import prisma from '../utils/db';
+import { parseButtonId } from '../utils/tools';
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
 
@@ -54,7 +55,7 @@ const t = initTRPC.context<Context>().create({
 	}
 });
 
-const hashIp = (ip: string) => {
+export const hashIp = (ip: string) => {
 	// Hash IP with date until hour, and salt
 	const now = new Date();
 	const year = now.getFullYear();
@@ -104,27 +105,11 @@ function ipToNumber(ip: string): number {
 }
 
 const limiter = createTRPCStoreLimiter<typeof t>({
-	fingerprint: ctx => {
-		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-		const xClientIp = ctx.req.headers['x-client-ip'] as string;
-		const ip = xClientIp
-			? xClientIp.split(',')[0]
-			: xForwardedFor
-			? xForwardedFor.split(',')[0]
-			: defaultFingerPrint(ctx.req);
-
-		return ip;
-	},
+	fingerprint: ctx => getClientIp(ctx.req),
 	windowMs: 60000,
 	max: 5,
 	onLimit: async (retryAfter, ctx) => {
-		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-		const xClientIp = ctx.req.headers['x-client-ip'] as string;
-		const ip = xClientIp
-			? xClientIp.split(',')[0]
-			: xForwardedFor
-			? xForwardedFor.split(',')[0]
-			: defaultFingerPrint(ctx.req);
+		const ip = getClientIp(ctx.req);
 		const referer = ctx.req.headers['referer'] || ctx.req.headers['referrer'];
 		const hashedIp = hashIp(ip);
 		const currentTime = new Date();
@@ -169,7 +154,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
 					ip_id: hashedIp,
 					ip_adress: transformIp(ip),
 					product_id: parseInt(product_id ?? '0'),
-					button_id: parseInt(button_id ?? '0'),
+					button_id: parseButtonId(button_id) ?? 0,
 					total_attempts: 5,
 					first_attempt: currentTime,
 					last_attempt: currentTime,
@@ -186,13 +171,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
 });
 
 const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
-	const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-	const xClientIp = ctx.req.headers['x-client-ip'] as string;
-	const ip = xClientIp
-		? xClientIp.split(',')[0]
-		: xForwardedFor
-		? xForwardedFor.split(',')[0]
-		: defaultFingerPrint(ctx.req);
+	const ip = getClientIp(ctx.req);
 
 	if (isIpAllowed(ip)) {
 		return next();

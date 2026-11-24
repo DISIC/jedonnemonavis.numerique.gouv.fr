@@ -11,19 +11,27 @@ import {
 	displayIntention,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
-import {
-	formatFullFrenchDateTime,
-	getSeverity,
-	retrieveButtonName
-} from '@/src/utils/tools';
+import { formatFullFrenchDateTime, getSeverity } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Drawer } from '@mui/material';
+import { RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ClassificationEditor from './ClassificationEditor';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
+import { MaskedText } from './MaskedText';
+
+const deleteReviewModal = createModal({
+	id: 'delete-review-modal',
+	isOpenedByDefault: false
+});
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,6 +57,11 @@ type ReviewDrawerProps = {
 	onNext: () => void;
 	hasPrevious: boolean;
 	hasNext: boolean;
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	onDeleted: () => void;
+	isArchived?: boolean;
+	archivedAt?: Date | string | null;
+	isDeletionLocked?: boolean;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -124,13 +137,17 @@ const AnswerValues = ({
 			<ul className={cx(classes.answerList)}>
 				{values.map((v, i) => (
 					<li key={i} className={cx(classes.boldText)}>
-						{v}
+						<MaskedText text={v} />
 					</li>
 				))}
 			</ul>
 		);
 	}
-	return <span className={cx(classes.boldText)}>{values[0] ?? '-'}</span>;
+	return (
+		<span className={cx(classes.boldText)}>
+			<MaskedText text={values[0] ?? '-'} />
+		</span>
+	);
 };
 
 const ChildAnswerValue = ({
@@ -146,7 +163,9 @@ const ChildAnswerValue = ({
 		{value.parentOptionLabel && (
 			<span className={fr.cx('fr-text--sm')}>{value.parentOptionLabel} : </span>
 		)}
-		<span className={cx(classes.boldText)}>{value.text}</span>
+		<span className={cx(classes.boldText)}>
+			<MaskedText text={value.text} />
+		</span>
 	</>
 );
 
@@ -263,10 +282,24 @@ const ReviewDrawerContent = ({
 	onPrevious,
 	onNext,
 	hasPrevious,
-	hasNext
+	hasNext,
+	ownRight,
+	onDeleted,
+	isArchived,
+	archivedAt,
+	isDeletionLocked
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
+
+	const canDeleteReview = ownRight === 'carrier_admin' && !isDeletionLocked;
+
+	const deleteReview = trpc.review.delete.useMutation({
+		onSuccess: () => {
+			deleteReviewModal.close();
+			onDeleted();
+		}
+	});
 	const isFirstRender = useRef(true);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
@@ -286,9 +319,31 @@ const ReviewDrawerContent = ({
 		titleRef.current?.focus();
 	}, [review.id]);
 
-	const buttonName = review.button_id
-		? retrieveButtonName(review.button_id)
-		: undefined;
+	const { data: button } = trpc.button.getById.useQuery(
+		{ id: review.button_id ?? 0 },
+		{ enabled: !!review.button_id }
+	);
+	const buttonName = review.button_id ? (
+		button?.data?.title
+	) : (
+		<>
+			<Badge severity="error" small noIcon>
+				{review.requested_button_id
+					? 'Lien invalide'
+					: "Aucun lien d'intégration"}
+			</Badge>
+			{review.requested_button_id && (
+				<span
+					className={cx(
+						fr.cx('fr-ml-1w', 'fr-hint-text'),
+						classes.invalidLinkInfo
+					)}
+				>
+					identifiant : {review.requested_button_id}
+				</span>
+			)}
+		</>
+	);
 
 	const allBlocks = formTemplate.form_template_steps.flatMap(
 		step => step.form_template_blocks
@@ -346,7 +401,35 @@ const ReviewDrawerContent = ({
 			{answerBlocks.map((block, index) => {
 				const answers = getTopLevelAnswers(review.answers, block.field_code);
 				const childFields = groupChildAnswersByField(review.answers, answers);
-				const boldTexts = answers.map(a => a.answer_text || '-');
+				const otherOption = block.options?.find(o => o.isOther);
+				const verbatimAnswer = review.answers?.find(
+					a => a.field_code === `${block.field_code}_verbatim`
+				);
+				const numericValues =
+					block.type_bloc === 'mark_input'
+						? (block.options ?? [])
+								.map(o => parseInt(o.value ?? '', 10))
+								.filter(n => !isNaN(n))
+						: [];
+				const numericMax = numericValues.length
+					? Math.max(...numericValues)
+					: null;
+				const boldTexts = answers.map(a => {
+					if (numericMax) {
+						const value =
+							block.options?.find(o => o.id === a.answer_item_id)?.value ??
+							a.answer_text;
+						return value ? `${value} / ${numericMax}` : '-';
+					}
+					const isOtherLine =
+						!!otherOption &&
+						(a.answer_item_id === otherOption.id ||
+							a.answer_text === otherOption.value ||
+							a.answer_text === otherOption.label);
+					return isOtherLine && verbatimAnswer?.answer_text
+						? `${a.answer_text || '-'}: ${verbatimAnswer.answer_text}`
+						: a.answer_text || '-';
+				});
 
 				return (
 					<React.Fragment key={index}>
@@ -433,6 +516,60 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
+			{isArchived ? (
+				<div className={classes.deleteContainer}>
+					<Badge severity="error" noIcon>
+						Réponse supprimée
+						{archivedAt
+							? ` le ${formatFullFrenchDateTime(archivedAt.toString())}`
+							: ''}
+					</Badge>
+				</div>
+			) : (
+				canDeleteReview && (
+					<>
+						<div className={classes.deleteContainer}>
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-delete-line"
+								className={classes.deleteButton}
+								size={isMobile ? 'medium' : 'small'}
+								onClick={() => deleteReviewModal.open()}
+							>
+								Supprimer la réponse
+							</Button>
+						</div>
+						<OnConfirmModal
+							modal={deleteReviewModal}
+							title="Êtes-vous sûr de vouloir supprimer cette réponse ?"
+							kind="danger"
+							disableAction={deleteReview.isLoading}
+							handleOnConfirm={() => {
+								push(['trackEvent', 'Product - Avis', 'Delete-Review']);
+								deleteReview.mutate({
+									review_id: review.id as number,
+									product_id: review.product_id as number,
+									form_id: review.form_id as number
+								});
+							}}
+						>
+							<p>Cette action est définitive.</p>
+							<p>
+								Ne supprimez la réponse que si c'est une réponse que vous avez
+								déposée pour faire un test.
+							</p>
+							{deleteReview.isError && (
+								<Alert
+									severity="error"
+									small
+									description="La suppression a échoué, veuillez réessayer."
+									className={fr.cx('fr-mt-2v')}
+								/>
+							)}
+						</OnConfirmModal>
+					</>
+				)
+			)}
 
 			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
 
@@ -507,6 +644,17 @@ const useStyles = tss.create({
 			button: { width: '100%', justifyContent: 'center' }
 		}
 	},
+	deleteContainer: {
+		display: 'flex',
+		justifyContent: 'flex-start',
+		...fr.spacing('margin', { topBottom: '6v' }),
+		[fr.breakpoints.down('sm')]: {
+			button: { width: '100%', justifyContent: 'center' }
+		}
+	},
+	deleteButton: {
+		color: fr.colors.decisions.text.default.error.default
+	},
 	sectionTitle: {
 		fontWeight: 'bold',
 		marginBottom: 0
@@ -555,6 +703,9 @@ const useStyles = tss.create({
 		clip: 'rect(0,0,0,0)',
 		whiteSpace: 'nowrap',
 		border: 0
+	},
+	invalidLinkInfo: {
+		display: 'inline-block'
 	}
 });
 

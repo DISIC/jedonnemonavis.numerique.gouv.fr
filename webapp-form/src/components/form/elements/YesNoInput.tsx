@@ -35,7 +35,7 @@ export const YesNoInput = (props: Props) => {
 					element => 'options' in form[0] && field.needed.includes(element)
 				) && (
 					<div className={fr.cx('fr-col-12')}>
-						<h3>{t(field.label)}</h3>
+						<h3 aria-hidden="true">{t(field.label)}</h3>
 					</div>
 				)}
 				{'options' in form[0] &&
@@ -50,6 +50,9 @@ export const YesNoInput = (props: Props) => {
 												className={cx(classes.fieldset, fr.cx('fr-fieldset'))}
 											>
 												<legend className={fr.cx('fr-mb-4v')}>
+													<span className={fr.cx('fr-sr-only')}>
+														{t(field.label)}{' '}
+													</span>
 													{t(option.label)}
 												</legend>
 												<ul>
@@ -59,7 +62,7 @@ export const YesNoInput = (props: Props) => {
 																id={`radio-${index}-${fIndex}-${f.label}-${option.label}-${f.value}`}
 																className={fr.cx('fr-sr-only')}
 																type="radio"
-																name={`${f.value.toString()}-${index}`}
+																name={`yesno-${index}`}
 																checked={opinion.contact_reached.includes(
 																	`${option.value}_${f.value}`
 																)}

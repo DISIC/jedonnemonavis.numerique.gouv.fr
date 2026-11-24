@@ -2,6 +2,7 @@ import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import FormGenerationAnimationPanel from '@/src/components/dashboard/Form/FormGenerationAnimationPanel';
 import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
+import type { CreateFormConfigInput } from '@/src/server/routers/formConfig/create';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
 	FormConfigWithChildren,
@@ -9,23 +10,23 @@ import {
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import {
+	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { Form, FormTemplate, Prisma, RightAccessStatus } from '@prisma/client';
-import { GetServerSideProps } from 'next';
+import { Form, FormTemplate, RightAccessStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps as productGetServerSideProps } from '..';
+import { keepDisabledContrast } from '@/src/components/dashboard/Form/blocks/sharedStyles';
+import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
 
 interface Props {
@@ -55,11 +56,10 @@ const NewForm = (props: Props) => {
 	const [formTitle, setFormTitle] = useState<string>('');
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
-	const [createConfig, setCreateConfig] =
-		useState<Prisma.FormConfigUncheckedCreateInput>({
-			form_id: createdForm?.id || 0,
-			status: 'published'
-		});
+	const [createConfig, setCreateConfig] = useState<CreateFormConfigInput>({
+		form_id: createdForm?.id || 0,
+		status: 'published'
+	});
 	const [selectedFormTemplate, setSelectedFormTemplate] =
 		useState<FormTemplate>();
 
@@ -131,6 +131,10 @@ const NewForm = (props: Props) => {
 		}
 	});
 
+	const titleInfoId = 'form-title-info';
+	const titleErrorId = 'form-title-error';
+	const [committedTitle, setCommittedTitle] = useState<string>();
+
 	const createFormConfig = trpc.formConfig.create.useMutation({
 		onSuccess: () => {
 			window._mtm?.push({
@@ -150,7 +154,10 @@ const NewForm = (props: Props) => {
 			setSelectedFormTemplate(createdForm.form_template);
 			return;
 		}
-		if (availableFormTemplates.length > 0 && selectedFormTemplate === undefined) {
+		if (
+			availableFormTemplates.length > 0 &&
+			selectedFormTemplate === undefined
+		) {
 			const defaultTemplate =
 				availableFormTemplates.find(template => template.slug === 'root') ||
 				availableFormTemplates[0];
@@ -162,6 +169,7 @@ const NewForm = (props: Props) => {
 		reset({
 			title: defaultTitle || selectedFormTemplate?.title || ''
 		});
+		setCommittedTitle(undefined);
 	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
@@ -205,7 +213,7 @@ const NewForm = (props: Props) => {
 				.mutateAsync({
 					id: createdForm.id,
 					form: {
-						...data,
+						title: data.title,
 						product_id: product.id
 					}
 				})
@@ -215,7 +223,7 @@ const NewForm = (props: Props) => {
 		} else {
 			tmpForm = await createForm
 				.mutateAsync({
-					...data,
+					title: data.title,
 					product_id: product.id,
 					form_template_id: selectedFormTemplate?.id
 				})
@@ -281,15 +289,15 @@ const NewForm = (props: Props) => {
 							<form id="form-creation-form">
 								{availableFormTemplates.length > 0 && (
 									<RadioButtons
+										className={classes.templateRadios}
 										legend={
 											<>
 												Type de formulaire
 												<span className={classes.asterisk}>*</span>
 											</>
 										}
-										disabled={hasCreatedForm}
 										options={
-											availableFormTemplates.map(template => ({
+											formTemplates.data.map(template => ({
 												label: (
 													<p className="fr-m-0">
 														{template.title}&nbsp;
@@ -304,11 +312,16 @@ const NewForm = (props: Props) => {
 												nativeInputProps: {
 													value: template.id,
 													checked: selectedFormTemplate?.id === template.id,
+													disabled:
+														hasCreatedForm ||
+														!availableFormTemplates.some(
+															t => t.id === template.id
+														),
 													onChange: () => setSelectedFormTemplate(template)
 												},
 												illustration: (
 													<Image
-														alt={`Illustration type de formulaire ${template.slug}`}
+														alt=""
 														src={`/assets/form-template-${template.slug}.svg`}
 														width={56}
 														height={56}
@@ -347,49 +360,71 @@ const NewForm = (props: Props) => {
 										render={({ field: { onChange, value, name, ref } }) => {
 											return (
 												<div
-													ref={ref}
 													className={fr.cx(
 														'fr-input-group',
 														errors[name] ? 'fr-input-group--error' : undefined
 													)}
 												>
-													<Input
-														label={
-															<p className={fr.cx('fr-mb-0')}>
-																Nom du formulaire{' '}
-																<span className={cx(classes.asterisk)}>*</span>
-															</p>
+													<label
+														className={fr.cx('fr-label')}
+														htmlFor="form-title"
+													>
+														<span>
+															Nom du formulaire{' '}
+															<span className={cx(classes.asterisk)}>*</span>
+														</span>
+														<span className={fr.cx('fr-hint-text')}>
+															Visible uniquement par vous et les autres membres
+															de l’équipe
+														</span>
+													</label>
+													<input
+														id="form-title"
+														ref={ref}
+														className={fr.cx(
+															'fr-input',
+															errors[name] ? 'fr-input--error' : undefined
+														)}
+														type="text"
+														onChange={onChange}
+														onBlur={e =>
+															setCommittedTitle(e.target.value.trim())
 														}
-														nativeInputProps={{
-															onChange,
-															value: value || '',
-															name,
-															required: true,
-															onKeyDown: e => {
-																if (e.key === 'Enter') {
-																	e.preventDefault();
-																	handleSubmit(onSubmitCreateForm)();
-																}
+														value={value || ''}
+														name={name}
+														required
+														aria-invalid={errors[name] ? true : undefined}
+														aria-describedby={
+															errors[name]
+																? `${titleInfoId} ${titleErrorId}`
+																: titleInfoId
+														}
+														onKeyDown={e => {
+															if (e.key === 'Enter') {
+																e.preventDefault();
+																handleSubmit(onSubmitCreateForm)();
 															}
 														}}
-														hintText={
-															<>
-																<span className={fr.cx('fr-hint-text')}>
-																	Visible uniquement par vous et les autres
-																	membres de l’équipe
-																</span>
-															</>
-														}
-														state="info"
-														stateRelatedMessage={
-															'Vous pouvez modifier ce nom par défaut'
-														}
 													/>
-													{errors[name] && (
-														<p className={fr.cx('fr-error-text')}>
-															{errors[name]?.message}
+													<div className={fr.cx('fr-messages-group')}>
+														<p
+															id={titleInfoId}
+															className={fr.cx(
+																'fr-message',
+																'fr-message--info'
+															)}
+														>
+															Vous pouvez modifier ce nom par défaut
 														</p>
-													)}
+														{errors[name] && (
+															<p
+																id={titleErrorId}
+																className={fr.cx('fr-error-text')}
+															>
+																{errors[name]?.message}
+															</p>
+														)}
+													</div>
 												</div>
 											);
 										}}
@@ -446,16 +481,10 @@ const NewForm = (props: Props) => {
 							si nécessaire
 						</p>
 					),
-					headerActions: (
+					headerActions: createdForm && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								createdForm?.form_template.slug === 'root'
-									? `/Demarches/${product.id}`
-									: `/Demarches/avis/${createdForm?.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(tmpConfigHelper)
-							)}`}
+							href={getFormPreviewUrl(createdForm, tmpConfigHelper)}
 							target="_blank"
 							rel="noopener noreferrer"
 						>
@@ -466,9 +495,16 @@ const NewForm = (props: Props) => {
 		}
 	})();
 
+	const headTitle =
+		(formStep === 'CREATE' ? committedTitle ?? defaultTitle : formTitle) ||
+		formTitle ||
+		selectedFormTemplate?.title ||
+		currentStepValues.title;
+
 	return (
 		<OnboardingLayout
 			title={currentStepValues.title}
+			headTitle={headTitle}
 			onConfirm={currentStepValues.confirmAction}
 			noBackground={currentStepValues.noBackground}
 			isConfirmDisabled={formStep === 'GENERATING'}
@@ -491,6 +527,7 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},
+	templateRadios: keepDisabledContrast('.fr-radio-rich input[type=radio]'),
 	infoContainer: {
 		display: 'flex',
 		justifyContent: 'center',
@@ -510,21 +547,4 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	}
 }));
 
-export const getServerSideProps: GetServerSideProps = async context => {
-	const result = await productGetServerSideProps(context);
-
-	if ('props' in result) {
-		const props = await result.props;
-		const product = (props as { product?: { isTop250?: boolean } }).product;
-		if (product?.isTop250) {
-			return {
-				redirect: {
-					destination: `/administration/dashboard/product/${context.query.id}/forms`,
-					permanent: false
-				}
-			};
-		}
-	}
-
-	return result;
-};
+export { getServerSideProps };

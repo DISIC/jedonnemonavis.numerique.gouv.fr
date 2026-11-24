@@ -8,10 +8,25 @@ import path from 'path';
 import SuperJSON from 'superjson';
 import { OpenApiMeta } from 'trpc-openapi';
 import { ZodError } from 'zod';
+// Sous-modules importés directement : passer par l'index de `open-api-log`
+// remonterait au routeur tRPC et créerait un cycle d'imports.
+import {
+	enrichApiLog,
+	getApiLog,
+	markWouldBlock
+} from './open-api-log/context';
+import {
+	checkQuota,
+	quotaEnforced,
+	rateLimitHeaders
+} from './open-api-log/limits';
+import { getPolicy } from './open-api-log/policy';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
 import prisma from '../utils/db';
 import { actionMapping } from '../utils/tools';
+import { getClientIp } from './utils/client-ip';
+import { consumeRateLimit } from './utils/rate-limit';
 
 // Metadata for protected procedures
 interface Meta {
@@ -26,6 +41,9 @@ interface Meta {
 export const createContext = async (opts: CreateNextContextOptions) => {
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
 	const req = opts.req;
+	// Exposée pour que le plafonnement puisse poser ses en-têtes `X-RateLimit-*`
+	// depuis le middleware, avant de lever une erreur.
+	const res = opts.res;
 	const user_api = null as UserWithAccessRight | null;
 	const api_key = null as ApiKey | null;
 
@@ -53,6 +71,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 		session,
 		elkClient,
 		req,
+		res,
 		user_api,
 		api_key
 	};
@@ -107,13 +126,19 @@ const scrubSensitiveValues = (value: any): any => {
 
 // Auth middleware
 const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
-	const user = await ctx.prisma.user.findUnique({
-		where: {
-			email: ctx.session?.user?.email as string
-		}
-	});
+	const sessionEmail = ctx.session?.user?.email;
+	const user = sessionEmail
+		? await ctx.prisma.user.findUnique({ where: { email: sessionEmail } })
+		: null;
 
 	if (meta?.authRequired && (!ctx.session?.user || !user)) {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'You are not authorized to perform this action'
+		});
+	}
+
+	if (user && user.active === false) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: 'You are not authorized to perform this action'
@@ -222,8 +247,9 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						form_id = input.json.form_id;
 					}
 
-					const shouldLogEvent =
-						'shouldLogEvent' in input?.json ? input.json.shouldLogEvent : true;
+					const shouldLogEvent = !(
+						query === 'button.delete' && input?.json?.shouldLogEvent === false
+					);
 
 					if (user && action && shouldLogEvent) {
 						await ctx.prisma.userEvent.create({
@@ -247,6 +273,43 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		throw error;
 	}
 });
+
+/**
+ * Applique le plafond de la route à la clé qui vient d'être authentifiée.
+ *
+ * Ici et pas dans le wrapper HTTP : c'est le seul endroit où l'on sait de qui il
+ * s'agit. La route, elle, vient du journal, qui l'a déjà résolue en amont.
+ *
+ * Sans effet hors open API — un appel tRPC interne n'a pas de ligne de journal,
+ * donc pas de route.
+ */
+const applyQuota = async (ctx: Context, apiKeyId: number) => {
+	const entry = getApiLog(ctx.req);
+	if (!entry?.route) return;
+
+	const { rateLimit } = getPolicy(entry.method, entry.route);
+	const verdict = await checkQuota(apiKeyId, entry.route, rateLimit);
+
+	// `null` : pas de plafond sur la route, ou Redis muet. Dans les deux cas on
+	// laisse passer.
+	if (!verdict) return;
+
+	for (const [header, value] of Object.entries(rateLimitHeaders(verdict))) {
+		ctx.res.setHeader(header, value);
+	}
+
+	if (!verdict.wouldBlock) return;
+
+	markWouldBlock(ctx.req, 'quota');
+
+	// En mode observation on s'arrête là : la marque est posée, l'appel passe.
+	if (!quotaEnforced()) return;
+
+	throw new TRPCError({
+		code: 'TOO_MANY_REQUESTS',
+		message: `Rate limit exceeded, retry in ${verdict.retryAfterSeconds}s`
+	});
+};
 
 const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 	if (ctx.req.headers.authorization) {
@@ -278,6 +341,28 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 				message: 'Please provide a valid API key'
 			});
 		} else {
+			// Seul endroit où la clé est résolue : on en profite pour nommer
+			// l'appelant dans le journal d'audit, plutôt que de refaire la
+			// requête depuis le handler HTTP. Sans effet hors open API.
+			enrichApiLog(ctx.req, {
+				apikey_id: checkApiKey.id,
+				user_id: checkApiKey.user_id
+			});
+
+			// Coupure manuelle. Lue depuis la ligne déjà chargée, donc sans coût
+			// et sans dépendance à Redis : c'est le seul blocage qui reste
+			// disponible quand le cache est éteint.
+			if (checkApiKey.blocked_at) {
+				markWouldBlock(ctx.req, 'key_blocked');
+
+				throw new TRPCError({
+					code: 'FORBIDDEN',
+					message: 'This API key has been suspended'
+				});
+			}
+
+			await applyQuota(ctx, checkApiKey.id);
+
 			return next({
 				ctx: {
 					...ctx,
@@ -300,6 +385,21 @@ export const middleware = t.middleware;
 
 // Unprotected procedure
 export const publicProcedure = t.procedure;
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 20;
+
+const isRateLimited = t.middleware(async ({ next, ctx, path }) => {
+	consumeRateLimit({
+		key: `${path}:${getClientIp(ctx.req)}`,
+		max: RATE_LIMIT_MAX,
+		windowMs: RATE_LIMIT_WINDOW_MS
+	});
+
+	return next();
+});
+
+export const rateLimitedProcedure = t.procedure.use(isRateLimited);
 
 // Protected procedure
 export const protectedProcedure = t.procedure.use(isAuthed);

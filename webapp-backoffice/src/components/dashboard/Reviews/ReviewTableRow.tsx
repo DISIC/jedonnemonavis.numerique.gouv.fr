@@ -20,10 +20,12 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { MaskedText } from './MaskedText';
 
 const highlightSearchTerms = (
 	text: string,
-	search: string
+	search: string,
+	highlightClass: string
 ): React.ReactNode => {
 	if (!search.trim()) return text;
 
@@ -41,7 +43,10 @@ const highlightSearchTerms = (
 			.map(buildAccentAwarePattern);
 
 		if (words.length === 0) return null;
-		return new RegExp(`\\b(${words.join('|')})\\b`, 'gi');
+		return new RegExp(
+			`(?<![\\p{L}\\p{N}])(${words.join('|')})(?![\\p{L}\\p{N}])`,
+			'giu'
+		);
 	};
 
 	const splitRegex = buildPattern();
@@ -52,7 +57,9 @@ const highlightSearchTerms = (
 		if (!part) return null;
 		const isMatch = idx % 2 === 1;
 		return isMatch ? (
-			<span key={idx}>{part}</span>
+			<span key={idx} className={highlightClass}>
+				{part}
+			</span>
 		) : (
 			<React.Fragment key={idx}>{part}</React.Fragment>
 		);
@@ -117,21 +124,6 @@ const ReviewTableRow = ({
 		onSelectReview(review);
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			handleSelect();
-		} else if (e.key === 'ArrowDown') {
-			e.preventDefault();
-			const next = e.currentTarget.nextElementSibling as HTMLElement | null;
-			next?.focus();
-		} else if (e.key === 'ArrowUp') {
-			e.preventDefault();
-			const prev = e.currentTarget.previousElementSibling as HTMLElement | null;
-			prev?.focus();
-		}
-	};
-
 	return (
 		<tr
 			ref={rowRef}
@@ -142,10 +134,6 @@ const ReviewTableRow = ({
 				isSelected && classes.containerSelected
 			)}
 			onClick={handleSelect}
-			tabIndex={0}
-			onKeyDown={handleKeyDown}
-			aria-selected={isSelected}
-			title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 		>
 			<td
 				className={cx(
@@ -226,9 +214,19 @@ const ReviewTableRow = ({
 			{hasVerbatimBlock && (
 				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
 					<p className={cx(classes.content, classes.contentVerbatim)}>
-						{verbatimAnswer
-							? highlightSearchTerms(verbatimAnswer.answer_text || '', search)
-							: '-'}
+						{verbatimAnswer ? (
+							<MaskedText
+								focusable={false}
+								text={verbatimAnswer.answer_text || ''}
+								renderSegment={(segment, key) => (
+									<React.Fragment key={key}>
+										{highlightSearchTerms(segment, search, classes.highlight)}
+									</React.Fragment>
+								)}
+							/>
+						) : (
+							'-'
+						)}
 					</p>
 					{(facetChips.length > 0 || polarite.length > 0) && (
 						<div className={cx(classes.classBadges)}>
@@ -259,9 +257,22 @@ const ReviewTableRow = ({
 			)}
 
 			<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
-				<span className={classes.action} role="button">
+				<button
+					type="button"
+					data-review-action
+					aria-haspopup="dialog"
+					className={classes.action}
+					onClick={e => {
+						e.stopPropagation();
+						handleSelect();
+					}}
+				>
 					Voir l'avis
-				</span>
+					<span className={fr.cx('fr-sr-only')}>
+						{' '}
+						du {formatFullFrenchDateTime(review.created_at?.toString() || '')}
+					</span>
+				</button>
 			</td>
 		</tr>
 	);
@@ -279,7 +290,7 @@ const useStyles = tss.create({
 		},
 		'&:hover': {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-			'& td:last-of-type span': {
+			'& td:last-of-type button': {
 				backgroundSize: '100% 2.25px'
 			}
 		},
@@ -330,10 +341,13 @@ const useStyles = tss.create({
 		WebkitBoxOrient: 'vertical',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-		margin: 0,
-		span: {
-			backgroundColor: 'yellow'
-		}
+		margin: 0
+	},
+	// Classe dédiée plutôt qu'un sélecteur sur tous les `span` descendants :
+	// celui-ci teintait en jaune n'importe quel span posé dans le verbatim,
+	// dont celui que le Tooltip DSFR enroule autour d'une donnée masquée.
+	highlight: {
+		backgroundColor: 'yellow'
 	},
 	contentVerbatim: {
 		...fr.typography[18].style,
@@ -341,6 +355,10 @@ const useStyles = tss.create({
 		margin: 0
 	},
 	action: {
+		border: 'none',
+		padding: 0,
+		backgroundColor: 'transparent',
+		cursor: 'pointer',
 		fontSize: '0.875rem',
 		textWrap: 'nowrap',
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default,

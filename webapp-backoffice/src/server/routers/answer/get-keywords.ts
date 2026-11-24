@@ -2,7 +2,8 @@ import type { Context } from '@/src/server/trpc';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import { excludeKeywords } from '../../../utils/keywords';
-import { checkAndGetForm, checkAndGetProduct } from './utils';
+import { assertAggregatableFieldCode } from './field-codes';
+import { checkAndGetFormForProduct } from './utils';
 
 export const getKeywordsInputSchema = z.object({
 	product_id: z.number(),
@@ -35,8 +36,17 @@ export const getKeywordsQuery = async ({
 }) => {
 	const { product_id, form_id, start_date, end_date, size, fields } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
+
+	// `field.field_code` sert de nom de champ ES dans la requête ci-dessous :
+	// le restreindre aux questions à choix fermé évite de cibler un champ libre.
+	for (const field of fields ?? []) {
+		await assertAggregatableFieldCode({
+			prisma: ctx.prisma,
+			form,
+			field_code: field.field_code
+		});
+	}
 
 	const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
 
@@ -133,8 +143,7 @@ export const getKeywordsQuery = async ({
 		const dominantBigram = bigrams
 			.filter(bigram => bigram.key.split(' ').includes(unigram.key))
 			.reduce<KeywordBucket | null>(
-				(max, bigram) =>
-					!max || bigram.count > max.count ? bigram : max,
+				(max, bigram) => (!max || bigram.count > max.count ? bigram : max),
 				null
 			);
 

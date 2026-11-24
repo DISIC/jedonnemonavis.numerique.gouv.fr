@@ -19,7 +19,7 @@ const HomeStepper = () => {
 		},
 		{
 			number: 2,
-			title: 'Ajoutez ou rejoignez votre service'
+			title: 'Ajoutez ou rejoignez votre service numérique'
 		},
 		{
 			number: 3,

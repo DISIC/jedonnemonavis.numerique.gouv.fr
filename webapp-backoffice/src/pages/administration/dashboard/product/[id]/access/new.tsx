@@ -94,7 +94,7 @@ const NewAccess = ({ product }: Props) => {
 
 			updateCreatedUserAccesses([
 				...(createdUserAccesses || []),
-				{ ...createdValue.data }
+				createdValue.data
 			]);
 
 			window._mtm?.push({
@@ -317,8 +317,8 @@ const NewAccess = ({ product }: Props) => {
 					state={userToInvite.errorStatus ? 'error' : 'default'}
 					stateRelatedMessage={
 						userToInvite.errorStatus == 409
-							? "L'utilisateur avec cet email a déja accès à ce service ou à l'oganisation à laquelle appartient ce service."
-							: 'Veuillez saisir une adresse email valide.'
+							? "L'utilisateur avec cet email a déja accès à ce service numérique ou à l'oganisation à laquelle appartient ce service numérique."
+							: 'Veuillez saisir une adresse email valide. Format attendu : nom@domaine.fr'
 					}
 					hintText="Format attendu : nom@domaine.fr"
 					nativeInputProps={{
@@ -346,9 +346,9 @@ const NewAccess = ({ product }: Props) => {
 					className={fr.cx('fr-mb-3v')}
 					options={[
 						{
-							label: 'Utilisateur du service',
+							label: 'Utilisateur du service numérique',
 							hintText:
-								'Utilisateurs ayant le droit de voir le service, mais pas de le modifier',
+								'Utilisateurs ayant le droit de voir le service numérique, mais pas de le modifier',
 							nativeInputProps: {
 								value: 'carrier_user',
 								onChange: e => {
@@ -367,9 +367,9 @@ const NewAccess = ({ product }: Props) => {
 							}
 						},
 						{
-							label: 'Administrateur du service',
+							label: 'Administrateur du service numérique',
 							hintText:
-								'Utilisateurs ayant le droit de modifier tout aspect du service',
+								'Utilisateurs ayant le droit de modifier tout aspect du service numérique',
 							nativeInputProps: {
 								value: 'carrier_admin',
 								onChange: e => {

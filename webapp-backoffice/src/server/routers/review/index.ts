@@ -10,15 +10,6 @@ import {
 	countReviewsQuery
 } from './count-reviews';
 import {
-	exportReviewDataInputSchema,
-	exportReviewDataMutation
-} from './export-data';
-import {
-	getProgressionExportInputSchema,
-	getProgressionExportOutputSchema,
-	getProgressionExportQuery
-} from './get-progression-export';
-import {
 	getCountsByFormInputSchema,
 	getCountsByFormOutputSchema,
 	getCountsByFormQuery
@@ -27,6 +18,7 @@ import {
 	createFormReviewViewEventInputSchema,
 	createFormReviewViewEventMutation
 } from './create-form-review-view-event';
+import { deleteReviewInputSchema, deleteReviewMutation } from './delete';
 
 export const reviewRouter = router({
 	getList: protectedProcedure
@@ -39,15 +31,6 @@ export const reviewRouter = router({
 		.output(countReviewsOutputSchema)
 		.query(countReviewsQuery),
 
-	exportData: protectedProcedure
-		.input(exportReviewDataInputSchema)
-		.mutation(exportReviewDataMutation),
-
-	getProgressionExport: protectedProcedure
-		.input(getProgressionExportInputSchema)
-		.output(getProgressionExportOutputSchema)
-		.query(getProgressionExportQuery),
-
 	getCountsByForm: protectedProcedure
 		.input(getCountsByFormInputSchema)
 		.output(getCountsByFormOutputSchema)
@@ -55,5 +38,9 @@ export const reviewRouter = router({
 
 	createFormReviewViewEvent: protectedProcedure
 		.input(createFormReviewViewEventInputSchema)
-		.mutation(createFormReviewViewEventMutation)
+		.mutation(createFormReviewViewEventMutation),
+
+	delete: protectedProcedure
+		.input(deleteReviewInputSchema)
+		.mutation(deleteReviewMutation)
 });

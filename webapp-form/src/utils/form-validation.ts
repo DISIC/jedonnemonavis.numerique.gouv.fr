@@ -1,3 +1,4 @@
+import { hasPersonalData } from './personal-data';
 import { FormWithElements } from './types';
 
 export type DynamicAnswerData = {
@@ -13,8 +14,11 @@ export type FormAnswers = Record<
 
 type FormConfig = FormWithElements['form_configs'][0];
 
-type Block =
-	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+type Step = FormWithElements['form_template']['form_template_steps'][0];
+
+type Block = Step['form_template_blocks'][0];
+
+const CONTACT_EMAIL_FIELD_CODE = 'contact_email';
 
 const DECORATIVE_BLOCK_TYPES = [
 	'paragraph',
@@ -25,9 +29,10 @@ const DECORATIVE_BLOCK_TYPES = [
 ];
 
 export function isBlockHidden(block: Block, formConfig?: FormConfig): boolean {
-	return !!formConfig?.form_config_displays?.some(
-		d => d.kind === 'block' && d.parent_id === block.id && d.hidden
+	const display = formConfig?.form_config_displays?.find(
+		d => d.kind === 'block' && d.parent_id === block.id
 	);
+	return display ? display.hidden : block.isHiddenByDefault;
 }
 
 export function getVisibleBlocks(
@@ -35,6 +40,47 @@ export function getVisibleBlocks(
 	formConfig?: FormConfig
 ): Block[] {
 	return blocks.filter(block => !isBlockHidden(block, formConfig));
+}
+
+export function isStepHidden(step: Step, formConfig?: FormConfig): boolean {
+	return !!formConfig?.form_config_displays?.some(
+		d => d.kind === 'step' && d.parent_id === step.id && d.hidden
+	);
+}
+
+export type ContactConsent = {
+	block: Block;
+	isEnabled: boolean;
+	emailStep?: Step;
+};
+
+export function getContactConsent(
+	steps: Step[],
+	formConfig?: FormConfig
+): ContactConsent | undefined {
+	const block = steps
+		.flatMap(step => step.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	if (!block) return undefined;
+
+	return {
+		block,
+		isEnabled: !isBlockHidden(block, formConfig),
+		emailStep: steps.find(step =>
+			step.form_template_blocks.some(
+				block => block.field_code === CONTACT_EMAIL_FIELD_CODE
+			)
+		)
+	};
+}
+
+export function omitStepAnswers(answers: FormAnswers, step: Step): FormAnswers {
+	const stepKeys = new Set(
+		step.form_template_blocks.map(block => `block_${block.id}`)
+	);
+	return Object.fromEntries(
+		Object.entries(answers).filter(([key]) => !stepKeys.has(key))
+	);
 }
 
 export function hasBlockAnswer(
@@ -47,6 +93,75 @@ export function hasBlockAnswer(
 
 export function isAnswerableBlock(block: Block): boolean {
 	return !DECORATIVE_BLOCK_TYPES.includes(block.type_bloc);
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const MAX_TEXT_INPUT_LENGTH = 250;
+
+export type TextInputErrorKind = 'too_long' | 'invalid_email';
+
+export function isValidEmail(value: string): boolean {
+	return EMAIL_REGEX.test(value.trim());
+}
+
+export function getTextInputErrorKind(
+	value: string,
+	isEmail: boolean,
+	revealEmailError: boolean
+): TextInputErrorKind | null {
+	if (value.length > MAX_TEXT_INPUT_LENGTH) return 'too_long';
+	if (
+		isEmail &&
+		revealEmailError &&
+		value.trim() !== '' &&
+		!isValidEmail(value)
+	)
+		return 'invalid_email';
+	return null;
+}
+
+export function getInvalidEmailBlocks(
+	blocks: Block[],
+	answers: FormAnswers,
+	formConfig?: FormConfig
+): Block[] {
+	return getVisibleBlocks(blocks, formConfig).filter(block => {
+		if (block.type_bloc !== 'input_email') return false;
+		const answer = answers[`block_${block.id}`];
+		if (!answer || Array.isArray(answer)) return false;
+		const text = answer.answer_text?.trim();
+		return !!text && !isValidEmail(text);
+	});
+}
+
+/**
+ * Blocs de saisie libre susceptibles de contenir une donnée personnelle.
+ *
+ * `input_email` en est volontairement absent : c'est le bloc « Adresse mail »,
+ * opt-in, dont le contenu est une donnée personnelle **demandée**. Le bloquer
+ * reviendrait à interdire la seule case du formulaire prévue pour ça.
+ */
+const FREE_TEXT_BLOCK_TYPES = ['input_text', 'input_text_area'];
+
+/**
+ * Blocs dont la réponse contient une donnée personnelle détectée.
+ *
+ * Alimente à la fois l'alerte affichée sous le champ et la désactivation du
+ * bouton d'envoi : les deux doivent reposer sur la même liste, sinon l'usager
+ * se retrouve bloqué sans message, ou averti sans blocage.
+ */
+export function getPersonalDataBlocks(
+	blocks: Block[],
+	answers: FormAnswers,
+	formConfig?: FormConfig
+): Block[] {
+	return getVisibleBlocks(blocks, formConfig).filter(block => {
+		if (!FREE_TEXT_BLOCK_TYPES.includes(block.type_bloc)) return false;
+		const answer = answers[`block_${block.id}`];
+		if (!answer || Array.isArray(answer)) return false;
+		return hasPersonalData(answer.answer_text ?? '');
+	});
 }
 
 export function hasAllRequiredBlockAnswers(

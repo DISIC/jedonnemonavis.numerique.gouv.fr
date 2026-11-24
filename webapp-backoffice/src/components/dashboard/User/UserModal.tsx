@@ -5,7 +5,8 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
-import { User, UserRole } from '@prisma/client';
+import { UserWithoutPassword } from '@/src/types/prismaTypesExtended';
+import { UserRole } from '@prisma/client';
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
@@ -14,14 +15,13 @@ interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
 	refetchUsers: () => void;
-	user?: User;
+	user?: UserWithoutPassword;
 }
 
 type FormValues = {
 	email: string;
 	firstName: string;
 	lastName: string;
-	password: string;
 	role: UserRole;
 };
 
@@ -39,10 +39,9 @@ const ButtonModal = (props: Props) => {
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
 		if (user) {
-			const { password, ...updateUser } = data;
 			editUser.mutate({
 				id: user.id,
-				user: { ...updateUser }
+				user: data
 			});
 		} else {
 			createUser.mutate(data);
@@ -52,7 +51,6 @@ const ButtonModal = (props: Props) => {
 	const resetForm = () => {
 		reset({
 			email: '',
-			password: '',
 			firstName: '',
 			lastName: '',
 			role: 'user'
@@ -133,39 +131,6 @@ const ButtonModal = (props: Props) => {
 							/>
 						)}
 					/>
-					{!user && (
-						<Controller
-							control={control}
-							name="password"
-							rules={{
-								required: 'Ce champ est requis',
-								minLength: {
-									value: 12,
-									message:
-										'Votre mot de passe doit contenir au moins 12 caractères'
-								},
-								pattern: {
-									value: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-									message:
-										'Votre mot de passe doit contenir au moins un chiffre et un caractère spécial'
-								}
-							}}
-							render={({ field: { onChange, value } }) => (
-								<Input
-									label="Mot de passe"
-									className={cx(classes.boldText)}
-									state={errors.password ? 'error' : 'default'}
-									stateRelatedMessage={errors.password?.message}
-									nativeInputProps={{
-										onChange,
-										value,
-										type: 'password',
-										name: 'password'
-									}}
-								/>
-							)}
-						/>
-					)}
 					<Controller
 						control={control}
 						name="firstName"

@@ -296,16 +296,18 @@ const NotificationsAccount: React.FC<Props> = props => {
 												pouvez définir sur chaque formulaire.
 											</li>
 										</ul>
-										<span
+										<Button
+											priority="secondary"
+											size="small"
+											type="button"
 											className={classes.previewEmailButton}
-											role="button"
 											onClick={() => {
 												setIsNotificationsEmailPreviewOpen(true);
 												notifications_email_preview_modal.open();
 											}}
 										>
 											Voir un exemple de mail de synthèse
-										</span>
+										</Button>
 									</div>
 								</>
 							)}
@@ -346,10 +348,10 @@ const NotificationsAccount: React.FC<Props> = props => {
 										}}
 									>
 										<Input
-											label="Rechercher un service"
+											label="Rechercher un service numérique"
 											hideLabel
 											nativeInputProps={{
-												placeholder: 'Rechercher un service',
+												placeholder: 'Rechercher un service numérique',
 												type: 'search',
 												value: search,
 												onChange: e => {
@@ -374,11 +376,11 @@ const NotificationsAccount: React.FC<Props> = props => {
 								<Loader />
 							) : !hasAnyService && !validatedSearch ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-									Vous n'avez accès à aucun service pour le moment.
+									Vous n'avez accès à aucun service numérique pour le moment.
 								</p>
 							) : combinedGroups.length === 0 ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-									Aucun service ne correspond à votre recherche.
+									Aucun service numérique ne correspond à votre recherche.
 								</p>
 							) : (
 								<>
@@ -404,16 +406,18 @@ const NotificationsAccount: React.FC<Props> = props => {
 											envoyé
 										</li>
 									</ul>
-									<span
+									<Button
+										priority="secondary"
+										size="small"
+										type="button"
 										className={classes.previewEmailButton}
-										role="button"
 										onClick={() => {
 											setIsAlertEmailPreviewOpen(true);
 											alert_email_preview_modal.open();
 										}}
 									>
 										Voir un exemple de mail d’alerte
-									</span>
+									</Button>
 								</div>
 							)}
 						</div>
@@ -554,17 +558,7 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 		'&:last-child': { borderBottom: 'none' }
 	},
 	previewEmailButton: {
-		textWrap: 'nowrap',
-		fontSize: '0.875rem',
-		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
-		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
-		backgroundSize: '100% 1px',
-		backgroundPosition: '0 100%',
-		backgroundRepeat: 'no-repeat',
-		'&:hover': {
-			cursor: 'pointer',
-			backgroundSize: '100% 2.25px'
-		},
+		whiteSpace: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

@@ -10,7 +10,8 @@ export const createExportInputSchema = z.object({
 	params: z.string(),
 	product_id: z.number(),
 	form_id: z.number(),
-	type: TypeExportSchema
+	type: TypeExportSchema,
+	only_deleted_reviews: z.boolean().default(false)
 });
 
 export const createExportMutation = async ({
@@ -34,6 +35,13 @@ export const createExportMutation = async ({
 			code: 'INTERNAL_SERVER_ERROR',
 			message:
 				"Le service d'export est indisponible (file d'attente non configurée)."
+		});
+	}
+
+	if (input.only_deleted_reviews && !ctx.session!.user.role.includes('admin')) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Only global admins can export deleted reviews'
 		});
 	}
 

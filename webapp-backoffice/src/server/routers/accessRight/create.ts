@@ -3,7 +3,8 @@ import { sendMail } from '@/src/utils/mailer';
 import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { generateInviteToken } from '../helpers';
+
+import { checkRightToProceed } from '../product/utils';
 
 export const createAccessRightInputSchema = z.object({
 	user_email: z.string().email(),
@@ -20,6 +21,12 @@ export const createAccessRightMutation = async ({
 }) => {
 	const contextUser = ctx.session!.user;
 	const { user_email, product_id, role } = input;
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id
+	});
 
 	const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({
 		where: {
@@ -74,16 +81,15 @@ export const createAccessRightMutation = async ({
 			status: role,
 			product_id
 		},
-		include: { user: true, product: true }
+		include: {
+			user: { select: { firstName: true, lastName: true, email: true } },
+			product: true
+		}
 	});
 
 	if (newAccessRight.user === null) {
-		const token = await generateInviteToken(ctx.prisma, user_email);
-
 		const emailHtml = await renderUserInviteEmail({
 			inviterName: contextUser.name || "Quelqu'un",
-			recipientEmail: user_email.toLowerCase(),
-			inviteToken: token,
 			productTitle: newAccessRight.product.title,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});
@@ -92,17 +98,13 @@ export const createAccessRightMutation = async ({
 			'Invitation à rejoindre « Je donne mon avis »',
 			user_email.toLowerCase(),
 			emailHtml,
-			`Cliquez sur ce lien pour créer votre compte : ${
-				process.env.NODEMAILER_BASEURL
-			}/register?${new URLSearchParams({
-				email: user_email.toLowerCase(),
-				inviteToken: token
-			})}`
+			`Connectez-vous avec ProConnect pour y accéder : ${process.env.NODEMAILER_BASEURL}/login`
 		);
 	} else {
 		const emailHtml = await renderInviteEmail({
 			inviterName: contextUser.name || "Quelqu'un",
 			productTitle: newAccessRight.product.title,
+			productId: newAccessRight.product.id,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});
 

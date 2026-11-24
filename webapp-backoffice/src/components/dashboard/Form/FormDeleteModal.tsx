@@ -26,15 +26,11 @@ const FormDeleteModal = ({ modal, form, onDelete }: Props) => {
 	});
 
 	const handleFormDelete = () => {
-		const { form_configs, product, form_template, ...data } = form;
 		deleteForm.mutate({
 			id: form.id,
 			product_id: form.product_id,
 			form: {
-				...data,
-				deleted_at: new Date(),
-				delete_reason: deleteReason || null,
-				isDeleted: true
+				delete_reason: deleteReason || null
 			}
 		});
 	};

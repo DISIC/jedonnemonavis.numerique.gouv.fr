@@ -1,8 +1,16 @@
-import { Prisma } from '@prisma/client';
+import { AnswerIntention, AnswerKind, Prisma, User } from '@prisma/client';
+
+/** Utilisateur tel qu'exposé par l'API : le hash de mot de passe n'en fait jamais partie. */
+export type UserWithoutPassword = Omit<User, 'password'>;
+
+/** Sous-ensemble minimal d'un utilisateur renvoyé dans les relations (droits, demandes). */
+const publicUserSelect = {
+	select: { firstName: true, lastName: true, email: true }
+} as const;
 
 const AccessRightWithUsers = Prisma.validator<Prisma.AccessRightDefaultArgs>()({
 	include: {
-		user: true
+		user: publicUserSelect
 	}
 });
 
@@ -13,7 +21,7 @@ export type AccessRightWithUsers = Prisma.AccessRightGetPayload<
 const AdminEntityRightWithUsers =
 	Prisma.validator<Prisma.AdminEntityRightDefaultArgs>()({
 		include: {
-			user: true
+			user: publicUserSelect
 		}
 	});
 
@@ -89,16 +97,6 @@ const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 });
 
 export type UserWithEntities = Prisma.UserGetPayload<typeof UserWithEntities>;
-
-const UserRequestWithUser = Prisma.validator<Prisma.UserRequestDefaultArgs>()({
-	include: {
-		user: true
-	}
-});
-
-export type UserRequestWithUser = Prisma.UserRequestGetPayload<
-	typeof UserRequestWithUser
->;
 
 const UserWithAccessRight = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
@@ -198,3 +196,14 @@ const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
 export type FormConfigWithChildren = Prisma.FormConfigGetPayload<
 	typeof FormConfigWithChildren
 >;
+
+export type ArchivedAnswerSnapshot = {
+	id: number;
+	field_code: string;
+	field_label: string;
+	answer_text: string;
+	answer_item_id: number;
+	intention: AnswerIntention | null;
+	kind: AnswerKind;
+	parent_answer_id: number | null;
+};

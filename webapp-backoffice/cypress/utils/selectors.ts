@@ -13,23 +13,15 @@ export const selectors = {
 	footer: 'footer',
 	footerLinks: '.fr-footer__bottom-list',
 	footerLogo: '.fr-logo',
-	loginForm: {
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		continueButton: '[class*="LoginForm-button"]'
-	},
+	proconnectButton: 'button.fr-connect',
 	signupForm: {
 		firstName: 'input[name="firstName"]',
 		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		submitButton: 'button[type="submit"]'
+		email: 'input[name="email"]'
 	},
 	accountForm: {
 		firstName: 'input[name="firstName"]',
 		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		emailConfirmation: 'input[name="emailConfirmation"]',
 		confirm: 'input[name="word"]'
 	},
 	input: {
@@ -40,7 +32,9 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
-		newLink: '/administration/dashboard/product/5/forms/4/new-link'
+		newLink: '/administration/dashboard/product/5/forms/4/new-link',
+		seededProductReviews:
+			'/administration/dashboard/product/1/forms/1?tab=reviews'
 	},
 	dashboard: {
 		nameTestOrga: 'e2e-jdma-entity-test',
@@ -58,7 +52,9 @@ export const selectors = {
 		button: 'dialog#button-modal',
 		renameForm: 'dialog#rename-form-modal',
 		publishForm: 'dialog#form-publish-modal',
-		deleteForm: 'dialog#delete-form-modal'
+		deleteForm: 'dialog#delete-form-modal',
+		deleteReview: 'dialog#delete-review-modal',
+		filterReviews: 'dialog#filter-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productTitle: '[class*="productTitle"]',
@@ -68,9 +64,6 @@ export const selectors = {
 		menu: 'nav.fr-sidemenu',
 		menuItem: 'li.fr-sidemenu__item'
 	},
-	errorMessages: '.fr-messages-group',
-	passwordInput: 'input.fr-password__input',
-	passwordToggle: 'label[for*="toggle-show"]',
 	modalHeader: '.fr-modal__header',
 	card: {
 		identity: 'Identité',
@@ -85,6 +78,17 @@ export const selectors = {
 		delete: 'Supprimer le compte',
 		confirmDelete: 'Supprimer',
 		confirm: 'Confirmer'
+	},
+	review: {
+		drawer: '[aria-labelledby="review-drawer-title"]',
+		drawerTitle: "Détail de l'avis",
+		deleteButton: 'Supprimer la réponse',
+		deleteToast: 'La réponse a bien été supprimée.',
+		moreFilters: 'Plus de filtres',
+		applyFilters: 'Appliquer les filtres',
+		showDeletedToggle: 'input.fr-toggle__input',
+		deletedNotice: 'Réponses supprimées',
+		deletedBadge: 'Réponse supprimée'
 	},
 	onboarding: {
 		actionsContainer: '#onboarding-actions',

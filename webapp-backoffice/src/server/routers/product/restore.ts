@@ -54,7 +54,7 @@ export const restoreProductMutation = async ({
 		});
 
 		await sendMail(
-			`Restauration du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+			`Restauration du service numérique « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
 			email,
 			emailHtml,
 			`Le produit numérique "${updatedProduct.title}" a été restauré.`

@@ -3,9 +3,11 @@ import FormEditModal from '@/src/components/dashboard/Form/FormEditModal';
 import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
+import type { CreateFormConfigInput } from '@/src/server/routers/formConfig/create';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
 import {
+	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
@@ -16,10 +18,11 @@ import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
-import { $Enums, Prisma } from '@prisma/client';
+import InfoTooltip from '@/src/components/ui/InfoTooltip';
+import { $Enums } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -89,11 +92,10 @@ const ProductFormPage = (props: Props) => {
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
-	const [createConfig, setCreateConfig] =
-		useState<Prisma.FormConfigUncheckedCreateInput>({
-			form_id: form.id,
-			status: 'published'
-		});
+	const [createConfig, setCreateConfig] = useState<CreateFormConfigInput>({
+		form_id: form.id,
+		status: 'published'
+	});
 	const [shouldModalOpen, setShouldModalOpen] = useState(false);
 
 	useEffect(() => {
@@ -109,7 +111,7 @@ const ProductFormPage = (props: Props) => {
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -268,15 +270,15 @@ const ProductFormPage = (props: Props) => {
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<div className={cx(classes.titleContainer)}>
 						<h1 className={fr.cx('fr-mb-0')}>
 							{form.title || form.form_template.title}
 						</h1>
 						{form.form_template.description && (
-							<Tooltip
+							<InfoTooltip
 								className={classes.tooltip}
-								kind="hover"
+								buttonLabel="Pourquoi ce modèle ?"
 								title={
 									<>
 										<b>Pourquoi ce modèle ?</b>
@@ -292,7 +294,12 @@ const ProductFormPage = (props: Props) => {
 						)}
 					</div>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div
+					className={cx(
+						classes.headerButtons,
+						fr.cx('fr-col-12', 'fr-col-md-4')
+					)}
+				>
 					<Button
 						priority="secondary"
 						iconId="fr-icon-edit-line"
@@ -306,20 +313,14 @@ const ProductFormPage = (props: Props) => {
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
 					<hr className={fr.cx('fr-hr')} />
 				</div>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h2 className={fr.cx('fr-mb-0')}>Personnaliser le formulaire</h2>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-12'))}>
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
-								form.form_template.slug === 'root'
-									? `/Demarches/${form.product_id}`
-									: `/Demarches/avis/${form.id}`
-							}?preview=true&formConfig=${encodeURIComponent(
-								JSON.stringify(tmpConfigHelper)
-							)}`}
+							href={getFormPreviewUrl(form, tmpConfigHelper)}
 							target="_blank"
 						>
 							Prévisualiser
@@ -359,9 +360,16 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	},
 	headerButtons: {
 		display: 'flex',
+		flexWrap: 'wrap',
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
+		'&&': {
+			paddingBottom: fr.spacing('6v')
+		},
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start'
+		},
 		button: {
 			a: {
 				display: 'flex',
@@ -370,7 +378,16 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		}
 	},
 	configuratorContainer: {
-		minHeight: '75vh'
+		minHeight: '75vh',
+		[fr.breakpoints.down('md')]: {
+			'&&': {
+				padding: 0,
+				marginInline: `-${fr.spacing('2v')}`,
+				flexBasis: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				width: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				maxWidth: 'none'
+			}
+		}
 	},
 	tooltip: {
 		...fr.typography[18].style
@@ -378,7 +395,7 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	titleContainer: {
 		display: 'flex',
 		alignItems: 'center',
-		'.fr-icon-question-line': {
+		'.ri-information-line': {
 			marginLeft: fr.spacing('2v')
 		}
 	}
@@ -441,6 +458,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
+	if (form.product_id !== parseInt(id as string)) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
+				permanent: false
+			}
+		};
+	}
+
 	if (form.isDeleted || form.isTop250) {
 		return {
 			redirect: {
@@ -455,10 +481,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		secret: process.env.JWT_SECRET
 	});
 
-	if (
-		!currentUserToken ||
-		(currentUserToken.exp as number) > new Date().getTime()
-	) {
+	if (!isAuthTokenValid(currentUserToken)) {
 		prisma.$disconnect();
 		return {
 			redirect: {

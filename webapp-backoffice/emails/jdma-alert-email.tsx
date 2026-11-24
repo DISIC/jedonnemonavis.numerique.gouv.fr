@@ -31,7 +31,7 @@ export const JdmaAlertEmail = ({
 				</strong>
 				{' nécessitant votre attention sur le formulaire '}
 				<strong>{formTitle}</strong>
-				{' du service '}
+				{' du service numérique '}
 				<strong>{productTitle}</strong>
 				{nbReviewsWithComments > 0
 					? `, dont ${formatNumber(nbReviewsWithComments)} avec ${

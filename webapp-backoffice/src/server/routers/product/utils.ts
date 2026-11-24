@@ -16,15 +16,15 @@ export const checkRightToProceed = async ({
 	form_id?: number;
 	authorizeCarrierUser?: boolean;
 }) => {
-	const orFilters: Prisma.ProductWhereInput[] = [];
+	const filters: Prisma.ProductWhereInput[] = [];
 	if (typeof product_id === 'number') {
-		orFilters.push({ id: product_id });
+		filters.push({ id: product_id });
 	}
 	if (typeof form_id === 'number') {
-		orFilters.push({ forms: { some: { id: form_id } } });
+		filters.push({ forms: { some: { id: form_id } } });
 	}
 
-	if (orFilters.length === 0) {
+	if (filters.length === 0) {
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'Either product_id or form_id must be provided'
@@ -33,14 +33,21 @@ export const checkRightToProceed = async ({
 
 	const product = await prisma.product.findFirst({
 		where: {
-			OR: orFilters
+			AND: filters
 		},
 		include: { entity: { select: { name: true } } }
 	});
 
+	if (!product) {
+		throw new TRPCError({
+			code: 'NOT_FOUND',
+			message: 'Product not found'
+		});
+	}
+
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
-			product_id: product_id,
+			product_id: product.id,
 			user_email: session.user.email,
 			status: authorizeCarrierUser
 				? { in: ['carrier_admin', 'carrier_user'] }
@@ -49,7 +56,7 @@ export const checkRightToProceed = async ({
 	});
 	const adminEntityRight = await prisma.adminEntityRight.findFirst({
 		where: {
-			entity_id: product?.entity_id,
+			entity_id: product.entity_id,
 			user_email: session.user.email
 		}
 	});

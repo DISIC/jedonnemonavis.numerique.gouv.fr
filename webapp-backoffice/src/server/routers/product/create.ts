@@ -1,9 +1,23 @@
-import { ProductUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
-import { actionMapping, normalizeString } from '@/src/utils/tools';
+import { actionMapping, isHttpUrl, normalizeString } from '@/src/utils/tools';
 import { z } from 'zod';
 
-export const createProductInputSchema = ProductUncheckedCreateInputSchema;
+const productUrlSchema = z
+	.string()
+	.trim()
+	.regex(/^[^\x00-\x1f\x7f]*$/)
+	.refine(url => !/^[a-z][a-z0-9+.-]*:/i.test(url) || isHttpUrl(url), {
+		message: 'URL must use http or https'
+	});
+
+export const productEditableFieldsSchema = z.object({
+	title: z.string().min(1),
+	entity_id: z.number(),
+	urls: z.array(productUrlSchema).optional(),
+	volume: z.number().int().nullable().optional()
+});
+
+export const createProductInputSchema = productEditableFieldsSchema;
 
 export const createProductMutation = async ({
 	ctx,
@@ -14,11 +28,13 @@ export const createProductMutation = async ({
 }) => {
 	const userEmail = ctx.session?.user?.email;
 
-	productPayload.title_formatted = normalizeString(productPayload.title);
-
 	const product = await ctx.prisma.product.create({
 		data: {
-			...productPayload,
+			title: productPayload.title,
+			title_formatted: normalizeString(productPayload.title),
+			entity_id: productPayload.entity_id,
+			urls: productPayload.urls,
+			volume: productPayload.volume,
 			accessRights: {
 				create: [
 					{

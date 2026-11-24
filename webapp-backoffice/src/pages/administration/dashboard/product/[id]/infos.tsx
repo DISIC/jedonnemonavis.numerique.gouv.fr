@@ -7,12 +7,12 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
+import { isHttpUrl } from '@/src/utils/tools';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
-import Link from 'next/link';
 import Head from 'next/head';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
@@ -98,7 +98,7 @@ const ProductInformationPage = (props: Props) => {
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title="Supprimer ce service"
+				title="Supprimer ce service numérique"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
 						product_id: product.id
@@ -109,14 +109,15 @@ const ProductInformationPage = (props: Props) => {
 			>
 				<div>
 					<p>
-						Vous êtes sûr de vouloir supprimer le service{' '}
+						Vous êtes sûr de vouloir supprimer le service numérique{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>En supprimant ce service :</p>
+					<p>En supprimant ce service numérique :</p>
 					<ul className={fr.cx('fr-mb-8v')}>
 						<li>vous n’aurez plus accès aux avis du formulaire,</li>
 						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
+							les utilisateurs de ce service numérique n’auront plus accès au
+							formulaire.
 						</li>
 					</ul>
 				</div>
@@ -172,7 +173,10 @@ const ProductInformationPage = (props: Props) => {
 							priority="secondary"
 							iconId="fr-icon-edit-line"
 							iconPosition="right"
-							nativeButtonProps={editProductModal.buttonProps}
+							nativeButtonProps={{
+								...editProductModal.buttonProps,
+								'aria-label': `Modifier les informations du service numérique ${product.title}`
+							}}
 						>
 							Modifier
 						</Button>
@@ -188,8 +192,7 @@ const ProductInformationPage = (props: Props) => {
 						type="button"
 						className={classes.copyBtn}
 						nativeButtonProps={{
-							title: `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
-							'aria-label': `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier dans le presse-papier l’identifiant du service numérique ${product.title}`,
 							onClick: () => {
 								navigator.clipboard.writeText(product.id.toString());
 								setDisplayToast(true);
@@ -210,38 +213,27 @@ const ProductInformationPage = (props: Props) => {
 				<div>
 					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>URLs</h3>
 					<div className={classes.urlsWrapper}>
-						{product.urls.map(url => (
-							<Tag key={url} linkProps={{ href: url }}>
-								{url}
-							</Tag>
-						))}
+						{product.urls.map(url =>
+							isHttpUrl(url) ? (
+								<Tag key={url} linkProps={{ href: url }}>
+									{url}
+								</Tag>
+							) : (
+								<Tag key={url}>{url}</Tag>
+							)
+						)}
 					</div>
-				</div>
-				<div>
-					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
-						Données statistiques publiques
-					</h3>
-					{product.isPublic ? 'Oui' : 'Non'}
-					{product.isPublic && (
-						<div className={fr.cx('fr-mt-1v')}>
-							<Link
-								className={fr.cx('fr-link', 'fr-text--sm')}
-								href={`/public/product/${product.id}/stats`}
-								target="_blank"
-							>
-								Voir la page publique
-							</Link>
-						</div>
-					)}
 				</div>
 				{ownRight === 'carrier_admin' && !hasLockedForm && (
 					<div>
-						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Supprimer le service</h3>
-						<p>En supprimant ce service :</p>
+						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
+							Supprimer le service numérique
+						</h3>
+						<p>En supprimant ce service numérique :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
-								les utilisateurs de ce service n’auront plus accès au
+								les utilisateurs de ce service numérique n’auront plus accès au
 								formulaire.
 							</li>
 						</ul>
@@ -251,10 +243,11 @@ const ProductInformationPage = (props: Props) => {
 							iconPosition="right"
 							priority="tertiary"
 							className={classes.buttonError}
+							aria-label={`Supprimer ce service numérique ${product.title}`}
 							onClick={() => {
 								if (hasLockedForm) {
 									setStatusProductState({
-										msg: `Le service "${product.title}" possède un formulaire de démarche essentielle et ne peut pas être supprimé.`,
+										msg: `Le service numérique "${product.title}" possède un formulaire de démarche essentielle et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({
@@ -267,7 +260,7 @@ const ProductInformationPage = (props: Props) => {
 								}
 							}}
 						>
-							Supprimer ce service
+							Supprimer ce service numérique
 						</Button>
 					</div>
 				)}
@@ -280,7 +273,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start'
+		}
 	},
 	column: {
 		display: 'flex',
@@ -299,7 +296,11 @@ const useStyles = tss.withName({ ProductInformationPage }).create({
 		boxShadow: 'none'
 	},
 	buttonError: {
-		color: fr.colors.decisions.text.default.error.default
+		color: fr.colors.decisions.text.default.error.default,
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	}
 });
 

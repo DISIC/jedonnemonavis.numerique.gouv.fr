@@ -1,19 +1,23 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { GetStaticProps } from 'next';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Accessibility as A11E } from '../utils/content';
 
-const LegalNotice = () => {
+const Accessibility = () => {
 	const { cx, classes } = useStyles();
+	const { t } = useTranslation('common');
 
 	return (
 		<>
 			<Head>
-				<title>Accessibilité | Je donne mon avis</title>
+				<title>{t('pages.accessibility.meta_title')}</title>
 				<meta
 					name="description"
-					content={`Accessibilité | Je donne mon avis`}
+					content={t('pages.accessibility.meta_title')}
 				/>
 			</Head>
 			<div
@@ -32,49 +36,39 @@ const LegalNotice = () => {
 					)}
 				>
 					<div className={'fr-col-lg-12'}>
-						<h1 className={fr.cx('fr-mb-12v')}>Déclaration d'accessibilité</h1>
+						<h1 className={fr.cx('fr-mb-12v')}>
+							{t('pages.accessibility.h1')}
+						</h1>
 						{Object.keys(A11E).map(key => (
 							<div key={key} className={cx(classes.blockWrapper)}>
-								{A11E[key].title !== 'En savoir plus' &&
-									A11E[key].title !== '' && (
-										<h2 className={fr.cx('fr-mt-8v')}>{A11E[key].title}</h2>
-									)}
+								{!A11E[key].hideTitle && (
+									<h2 className={fr.cx('fr-mt-8v')}>{t(A11E[key].titleKey)}</h2>
+								)}
 								<div>
 									{A11E[key].content.map((line, index) => {
-										const isLink =
-											typeof line === 'object' && line.type === 'link';
-										const isMailto =
-											typeof line === 'object' && line.type === 'mailto';
-										const isList =
-											typeof line === 'object' && line.type === 'list';
-										const isBold =
-											typeof line === 'object' && line.type === 'bold';
+										const text = t(line.key);
 										return (
 											<React.Fragment key={index}>
-												{isLink ? (
+												{line.type === 'link' ? (
 													<span>
 														<a
 															href={line.href}
 															target="_blank"
 															rel="noopener noreferrer"
 														>
-															{line.text}
+															{text}
 														</a>
 													</span>
-												) : isMailto ? (
-													<a href={line.href}>{line.text}</a>
-												) : isList ? (
+												) : line.type === 'mailto' ? (
+													<a href={line.href}>{text}</a>
+												) : line.type === 'list' ? (
 													<ul>
-														<li>{line.text}</li>
+														<li>{text}</li>
 													</ul>
-												) : typeof line === 'string' ? (
-													<span>{line}</span>
-												) : isBold ? (
-													<span className={fr.cx('fr-text--bold')}>
-														{line.text}
-													</span>
+												) : line.type === 'bold' ? (
+													<span className={fr.cx('fr-text--bold')}>{text}</span>
 												) : (
-													<span className={fr.cx()}>{line.text}</span>
+													<span>{text}</span>
 												)}
 											</React.Fragment>
 										);
@@ -89,7 +83,7 @@ const LegalNotice = () => {
 	);
 };
 
-const useStyles = tss.withName({ LegalNotice }).create(() => ({
+const useStyles = tss.withName({ Accessibility }).create(() => ({
 	blockWrapper: {
 		display: 'inline-block',
 		flexDirection: 'column',
@@ -107,4 +101,10 @@ const useStyles = tss.withName({ LegalNotice }).create(() => ({
 	}
 }));
 
-export default LegalNotice;
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+	props: {
+		...(await serverSideTranslations(locale ?? 'fr', ['common']))
+	}
+});
+
+export default Accessibility;

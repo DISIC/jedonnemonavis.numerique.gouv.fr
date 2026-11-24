@@ -33,7 +33,7 @@ const ProductEmptyState = (props: Props) => {
 				>
 					<h2 className={fr.cx('fr-h4')}>
 						<span className={cx(classes.blueText)}>Je donne mon avis </span>{' '}
-						n’est pas installé sur votre service ?
+						n’est pas installé sur votre service numérique ?
 					</h2>
 					<div className={cx(fr.cx('fr-pb-5v'), classes.subtitle)}>
 						Commencez à{' '}
@@ -54,7 +54,7 @@ const ProductEmptyState = (props: Props) => {
 							}
 						}}
 					>
-						Ajouter un service
+						Ajouter un service numérique
 					</Button>
 				</div>
 				<div className={cx(classes.divider)} />
@@ -66,7 +66,7 @@ const ProductEmptyState = (props: Props) => {
 				>
 					<h2 className={fr.cx('fr-h4')}>
 						<span className={cx(classes.blueText)}>Je donne mon avis</span> est
-						déjà installé sur votre service ?
+						déjà installé sur votre service numérique ?
 					</h2>
 					<div className={cx(classes.subtitle)}>
 						Accédez aux <span className={cx(classes.boldText)}>avis</span> et

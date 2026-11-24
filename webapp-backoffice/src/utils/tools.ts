@@ -1,18 +1,21 @@
+import { JdmaLinkIssueEmailProps } from '@/emails/interface';
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { matchSorter } from 'match-sorter';
+import React, { ReactNode } from 'react';
 import { z } from 'zod';
 import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/ProductButton/CopyInstructionPanel/interface';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import {
+	ArchivedAnswerSnapshot,
 	ButtonWithElements,
-	FormConfigWithChildren
+	FormConfigWithChildren,
+	FormWithElements
 } from '../types/prismaTypesExtended';
-import { trpc } from './trpc';
-import React, { ReactNode } from 'react';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -41,10 +44,20 @@ export function isValidEmail(email: string): boolean {
 export function generateRandomString(length: number = 8): string {
 	const characters =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	// Les valeurs à partir de ce seuil sont rejetées : sans cela, les premiers
+	// caractères de l'alphabet seraient légèrement plus probables (biais modulo).
+	const unbiasedLimit = 256 - (256 % characters.length);
+	const buffer = new Uint8Array(length);
 	let otp = '';
-	for (let i = 0; i < length; i++) {
-		otp += characters.charAt(Math.floor(Math.random() * characters.length));
+
+	while (otp.length < length) {
+		globalThis.crypto.getRandomValues(buffer);
+		for (let i = 0; i < buffer.length && otp.length < length; i++) {
+			if (buffer[i] >= unbiasedLimit) continue;
+			otp += characters.charAt(buffer[i] % characters.length);
+		}
 	}
+
 	return otp;
 }
 
@@ -54,7 +67,7 @@ type FormatDateOptions = {
 	withHour?: boolean;
 	hourOnly?: boolean;
 	hourFormat?: HourFormat;
-	monthFormat?: 'default' | 'literal';
+	monthFormat?: 'default' | 'literal' | 'short';
 };
 
 function formatHourPart(date: Date, format: HourFormat): string {
@@ -95,7 +108,9 @@ export function formatDateToFrenchString(
 
 	const datePart = new Intl.DateTimeFormat('fr-FR', {
 		year: 'numeric',
-		month: monthFormat === 'literal' ? 'long' : 'numeric',
+		month: ({ default: 'numeric', literal: 'long', short: 'short' } as const)[
+			monthFormat
+		],
 		day: 'numeric'
 	}).format(date);
 
@@ -117,6 +132,43 @@ export function parseLocalDate(isoStr: string): Date | null {
 	if (!isValidDate(isoStr)) return null;
 	const [y, mo, d] = isoStr.split('-').map(Number);
 	return new Date(y, mo - 1, d);
+}
+
+export function startOfLocalDay(date: Date): Date {
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export type DateRangeErrors = { startDate?: string; endDate?: string };
+
+export const INVALID_DATE_ERROR = 'Date invalide';
+
+export function getDateRangeErrors(
+	start: Date | null,
+	end: Date | null,
+	today: Date
+): DateRangeErrors {
+	const errors: DateRangeErrors = {};
+
+	if (start && !isValidDate(dateToLocalISO(start))) {
+		errors.startDate = INVALID_DATE_ERROR;
+	}
+	if (end && !isValidDate(dateToLocalISO(end))) {
+		errors.endDate = INVALID_DATE_ERROR;
+	}
+	if (!errors.startDate && start && start > today) {
+		errors.startDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.endDate && end && end > today) {
+		errors.endDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.startDate && !errors.endDate && start && end && start > end) {
+		errors.startDate = 'La date de début doit précéder la date de fin';
+	}
+	if (!errors.startDate && !start && end) {
+		errors.startDate = 'Date de début requise';
+	}
+
+	return errors;
 }
 
 export function formatFullFrenchDateTime(date: string | Date): string {
@@ -177,11 +229,111 @@ export const getSeverity = (intention: string) => {
 	}
 };
 
-export const retrieveButtonName = (buttonId: number) => {
-	const { data: button } = trpc.button.getById.useQuery({
-		id: buttonId
-	});
-	if (button?.data) return button.data?.title || '';
+export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
+	requestedButtonId
+		? `Lien invalide (identifiant ${requestedButtonId})`
+		: "Aucun lien d'intégration";
+
+export const getClosedButtonLogWording = (form: {
+	isDeleted: boolean | null;
+	form_template: { slug: string };
+}) =>
+	form.isDeleted || form.form_template.slug === 'root'
+		? {
+				title: "Tentative de dépôt d'avis",
+				description:
+					"Une tentative de dépôt d'avis a été effectuée depuis ce lien fermé. Nous vous invitons à supprimer le code HTML correspondant de la page concernée.",
+				lastLabel: 'Dernière tentative',
+				countLabel: 'Nombre total de tentatives'
+		  }
+		: {
+				title: 'Avis déposés sur un lien fermé',
+				description:
+					'Des avis ont été déposés depuis ce lien fermé. Ils sont bien enregistrés, mais nous vous invitons à supprimer le code HTML correspondant de la page concernée.',
+				lastLabel: 'Dernier avis déposé',
+				countLabel: "Nombre total d'avis déposés"
+		  };
+
+export const MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT = 3;
+export const MAX_INVALID_LINK_ALERTS_PER_PRODUCT = 3;
+
+type LinkIssueForm = {
+	id: number;
+	title: string | null;
+	form_template: { title: string };
+	product: { id: number; title: string };
+};
+
+export const buildLinkIssues = (
+	invalidLinkCounts: {
+		form_id: number;
+		requested_button_id: number | null;
+		_count: { _all: number };
+	}[],
+	invalidLinkForms: LinkIssueForm[],
+	closedLinks: { title: string; form: LinkIssueForm }[]
+): Omit<JdmaLinkIssueEmailProps, 'baseUrl'>[] => {
+	const invalidLinkFormsById = new Map(invalidLinkForms.map(f => [f.id, f]));
+	const alertCountByProductId = new Map<number, number>();
+
+	const invalidLinkIssues = invalidLinkCounts
+		.filter(
+			ilc => ilc._count._all >= MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT
+		)
+		.sort((a, b) => b._count._all - a._count._all)
+		.flatMap(ilc => {
+			const form = invalidLinkFormsById.get(ilc.form_id);
+			if (!form) return [];
+
+			const alertCount = alertCountByProductId.get(form.product.id) ?? 0;
+			if (alertCount >= MAX_INVALID_LINK_ALERTS_PER_PRODUCT) return [];
+			alertCountByProductId.set(form.product.id, alertCount + 1);
+
+			return [
+				{ form, linkLabel: getInvalidButtonLabel(ilc.requested_button_id) }
+			];
+		});
+
+	const closedLinkIssues = closedLinks.map(closedLink => ({
+		form: closedLink.form,
+		linkLabel: closedLink.title
+	}));
+
+	const linkIssuesByProductId = new Map<
+		number,
+		Omit<JdmaLinkIssueEmailProps, 'baseUrl'>
+	>();
+
+	for (const { form, linkLabel } of [
+		...closedLinkIssues,
+		...invalidLinkIssues
+	]) {
+		const productLinkIssues = linkIssuesByProductId.get(form.product.id) ?? {
+			product: { id: form.product.id, title: form.product.title },
+			issues: []
+		};
+		productLinkIssues.issues.push({
+			form: { id: form.id, title: form.title || form.form_template.title },
+			linkLabel
+		});
+		linkIssuesByProductId.set(form.product.id, productLinkIssues);
+	}
+
+	return [...linkIssuesByProductId.values()];
+};
+
+export const getLinkIssuesMailText = ({
+	product,
+	issues
+}: Omit<JdmaLinkIssueEmailProps, 'baseUrl'>) => {
+	const hasSeveralIssues = issues.length > 1;
+	const issuesText = issues
+		.map(({ form, linkLabel }) => `«${linkLabel}» (formulaire «${form.title}»)`)
+		.join(', ');
+
+	return hasSeveralIssues
+		? `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur des liens d'intégration fermés ou invalides du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ces liens sur votre site.`
+		: `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur un lien d'intégration fermé ou invalide du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ce lien sur votre site.`;
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {
@@ -223,8 +375,43 @@ export const normalizeString = (str: string): string => {
 		.trim();
 };
 
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+export const RIGHT_OPTIONS_BUTTON_ID_PREFIX = 'button-options-access-right-';
+
+export const getRightOptionsIds = (right: {
+	id: number;
+	user: { firstName: string | null; lastName: string | null } | null;
+	user_email: string | null;
+	user_email_invite: string | null;
+}) => {
+	const userFullName = right.user
+		? `${right.user.firstName} ${right.user.lastName}`
+		: right.user_email ?? right.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${right.id}`;
+
+	return {
+		userFullName,
+		idSuffix,
+		optionsButtonId: `${RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
+};
+
 export const alternativeString = (str: string): string => {
 	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
+};
+
+export const capitalizeFirstLetter = (str: string): string => {
+	if (!str) return str;
+	return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
 export const createFilterOptionsWithArgument =
@@ -466,7 +653,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'formConfig.create': TypeAction.form_config_create,
 	'form.create': TypeAction.service_form_create,
 	'form.update': TypeAction.service_form_edit,
-	'form.delete': TypeAction.service_form_delete
+	'form.delete': TypeAction.service_form_delete,
+	'form.setVisibility': TypeAction.service_form_stats_visibility_update
 };
 
 const escapeHtmlValue = (value: unknown): string => {
@@ -486,7 +674,11 @@ export const handleActionTypeDisplay = (
 ) => {
 	if (!metadata) return '';
 
-	const metadataTyped = metadata as { json: { [key: string]: any } };
+	// Défensif : certains events (ex. anciens events DN) peuvent avoir un metadata
+	// « à plat » sans clé `json`. On évite alors que l'accès `metadata.json.x` ne fasse
+	// planter tout l'historique — on retombe sur un objet vide.
+	const rawMetadata = metadata as { json?: { [key: string]: any } };
+	const metadataTyped = { json: rawMetadata.json ?? {} };
 	const e = escapeHtmlValue;
 	const userEmail = () =>
 		e(
@@ -497,15 +689,17 @@ export const handleActionTypeDisplay = (
 
 	switch (action) {
 		case TypeAction.service_create:
-			return `Création du service <strong>${e(productTitle)}</strong>`;
+			return `Création du service numérique <strong>${e(
+				productTitle
+			)}</strong>`;
 		case TypeAction.service_update:
-			return `Modification sur le service`;
+			return `Modification sur le service numérique`;
 		case TypeAction.service_archive:
-			return `Archivage du service`;
+			return `Archivage du service numérique`;
 		case TypeAction.service_restore:
-			return `Restauration du service`;
+			return `Restauration du service numérique`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service en tant <strong>${
+			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service numérique en tant <strong>${
 				metadataTyped.json.status === 'carrier_admin'
 					? "qu'utilisateur"
 					: "qu'administrateur"
@@ -515,7 +709,7 @@ export const handleActionTypeDisplay = (
 				metadataTyped.json.status === 'carrier_admin'
 					? "d'utilisateur"
 					: "d'administrateur"
-			}</strong> pour <strong>${userEmail()}</strong> sur le service`;
+			}</strong> pour <strong>${userEmail()}</strong> sur le service numérique`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${e(
 				metadataTyped.json.entity_name
@@ -560,6 +754,14 @@ export const handleActionTypeDisplay = (
 			return `Fermeture du formulaire <strong>${e(
 				metadataTyped.json.form?.title
 			)}</strong>`;
+		case TypeAction.service_form_stats_visibility_update:
+			return metadataTyped.json.isPublic
+				? `Publication des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`
+				: `Passage en privé des statistiques du formulaire <strong>#${e(
+						metadataTyped.json.form_id
+				  )}</strong>`;
 	}
 };
 
@@ -592,7 +794,11 @@ export const filtersLabel = [
 	{ value: 'form_config_create', label: 'Modification du formulaire' },
 	{ value: 'service_form_create', label: 'Création d’un formulaire' },
 	{ value: 'service_form_edit', label: 'Modification d’un formulaire' },
-	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' }
+	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' },
+	{
+		value: 'service_form_stats_visibility_update',
+		label: 'Modification de la visibilité des statistiques'
+	}
 ];
 
 export const getHelperFromFormConfig = (
@@ -612,6 +818,31 @@ export const getHelperFromFormConfig = (
 				kind: fcl.kind
 			})) || []
 	};
+};
+
+type FormStep =
+	FormWithElements['form_template']['form_template_steps'][number];
+
+export const getContactStepState = (
+	step: FormStep,
+	steps: FormStep[],
+	configHelper: FormConfigHelper
+): 'hidden' | 'conditional' | null => {
+	const consentBlock = steps
+		.flatMap(s => s.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	const isContactStep = step.form_template_blocks.some(
+		block => block.field_code === 'contact_email'
+	);
+	if (!consentBlock || !isContactStep) return null;
+
+	const display = configHelper.displays.find(
+		d => d.kind === 'block' && d.parent_id === consentBlock.id
+	);
+	const isConsentHidden = display
+		? display.hidden
+		: consentBlock.isHiddenByDefault;
+	return isConsentHidden ? 'hidden' : 'conditional';
 };
 
 export const getHasConfigChanged = (
@@ -714,18 +945,7 @@ export function computeItemFraction(
 	return Math.max(0, Math.min(1, raw));
 }
 
-export const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-export const regexAtLeastOneNumber = /\d/;
-export const getMissingPasswordRequirements = (password: string): string[] => {
-	const missing: string[] = [];
-
-	if (password.length < 12) missing.push('12 caractères');
-	if (!regexAtLeastOneSpecialCharacter.test(password))
-		missing.push('1 caractère spécial');
-	if (!regexAtLeastOneNumber.test(password)) missing.push('1 chiffre');
-
-	return missing;
-};
+export const isHttpUrl = (url: string): boolean => /^https?:\/\//i.test(url);
 
 export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	const defaultUrl = '/administration/dashboard/products';
@@ -739,7 +959,19 @@ export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 	if (rawCallback.startsWith('//')) {
 		return defaultUrl;
 	}
-	return rawCallback;
+	if (/[\x00-\x1f\x7f\\]/.test(rawCallback)) {
+		return defaultUrl;
+	}
+	const base = 'http://localhost';
+	try {
+		const url = new URL(rawCallback, base);
+		if (url.origin !== base || url.pathname.startsWith('//')) {
+			return defaultUrl;
+		}
+		return `${url.pathname}${url.search}${url.hash}`;
+	} catch {
+		return defaultUrl;
+	}
 };
 
 export const getButtonCode = ({
@@ -775,6 +1007,21 @@ export const getButtonUrl = (button?: ButtonWithElements) => {
 	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
 };
 
+export const getFormPreviewUrl = (
+	form: { id: number; product_id: number; form_template: { slug: string } },
+	formConfig?: object
+) => {
+	const path =
+		form.form_template.slug === 'root'
+			? `/${form.product_id}?preview=true&form=${form.id}`
+			: `/avis/${form.id}?preview=true`;
+	const configParam = formConfig
+		? `&formConfig=${encodeURIComponent(JSON.stringify(formConfig))}`
+		: '';
+
+	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${path}${configParam}`;
+};
+
 export const getModalCode = ({
 	buttonStyle,
 	button,
@@ -803,3 +1050,59 @@ export const getModalCode = ({
 
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
 };
+
+type ArchivedReviewSnapshot = {
+	original_review_id: number;
+	review_created_at: Date | string;
+	product_id: number;
+	form_id: number;
+	button_id: number | null;
+	requested_button_id: number | null;
+	user_id: string | null;
+	has_verbatim: boolean;
+	answers: JsonValue;
+};
+
+export const mapArchivedReviewToReview = (
+	archived: ArchivedReviewSnapshot
+): ReviewPartialWithRelations => {
+	const createdAt = new Date(archived.review_created_at);
+	const answers = Array.isArray(archived.answers)
+		? (archived.answers as unknown as ArchivedAnswerSnapshot[])
+		: [];
+
+	return {
+		id: archived.original_review_id,
+		created_at: createdAt,
+		product_id: archived.product_id,
+		form_id: archived.form_id,
+		button_id: archived.button_id,
+		requested_button_id: archived.requested_button_id,
+		user_id: archived.user_id ?? undefined,
+		has_verbatim: archived.has_verbatim,
+		answers: answers.map(a => ({
+			id: a.id,
+			field_code: a.field_code,
+			field_label: a.field_label,
+			answer_text: a.answer_text,
+			answer_item_id: a.answer_item_id,
+			intention: a.intention ?? undefined,
+			kind: a.kind,
+			parent_answer_id: a.parent_answer_id ?? undefined,
+			review_id: archived.original_review_id,
+			review_created_at: createdAt,
+			created_at: createdAt
+		}))
+	};
+};
+
+type DsfrApi = (node: HTMLElement) => { modal?: { conceal: () => void } };
+
+export const closeHeaderMenuModal = (headerId: string) => {
+	const modal = document.getElementById(`header-menu-modal-${headerId}`);
+	const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr;
+
+	if (modal && typeof dsfr === 'function') dsfr(modal).modal?.conceal();
+};
+
+export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];

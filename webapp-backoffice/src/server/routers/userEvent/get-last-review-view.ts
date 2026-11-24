@@ -15,15 +15,11 @@ export const getLastReviewViewQuery = async ({
 }) => {
 	const { product_id } = input;
 
-	let where: Prisma.UserEventWhereInput = {};
-
-	if (product_id) {
-		where = {
-			user_id: parseInt(ctx.session!.user.id),
-			action: 'service_reviews_view',
-			product_id: product_id
-		};
-	}
+	const where: Prisma.UserEventWhereInput = {
+		user_id: parseInt(ctx.session!.user.id),
+		action: 'service_reviews_view',
+		...(product_id ? { product_id } : {})
+	};
 
 	const reviewViewLog = await ctx.prisma.userEvent.findMany({
 		where,

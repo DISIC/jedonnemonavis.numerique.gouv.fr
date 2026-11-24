@@ -4,11 +4,15 @@ import {
 	useFilters
 } from '@/src/contexts/FiltersContext';
 import {
+	DateRangeErrors,
 	dateToLocalISO,
 	formatDateToFrenchString,
+	getDateRangeErrors,
 	getDatesByShortCut,
+	INVALID_DATE_ERROR,
 	isValidDate,
-	parseLocalDate
+	parseLocalDate,
+	startOfLocalDay
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -65,28 +69,25 @@ const DateRangePickerButton = ({
 	const [localDisplayNew, setLocalDisplayNew] = useState(
 		filters.productReviews.displayNew
 	);
-	const [localStartDate, setLocalStartDate] = useState(
-		sharedFilters.currentStartDate
+	const [localStartDate, setLocalStartDate] = useState<Date | null>(
+		parseLocalDate(sharedFilters.currentStartDate)
 	);
-	const [localEndDate, setLocalEndDate] = useState(
-		sharedFilters.currentEndDate
+	const [localEndDate, setLocalEndDate] = useState<Date | null>(
+		parseLocalDate(sharedFilters.currentEndDate)
 	);
 	const [calendarRangeStart, setCalendarRangeStart] = useState<Date | null>(
 		null
 	);
 	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(null);
-	const [errors, setErrors] = useState<{
-		startDate?: string;
-		endDate?: string;
-	}>({});
+	const [errors, setErrors] = useState<DateRangeErrors>({});
 
 	// Sync local state from applied filters every time the popover opens.
 	useEffect(() => {
 		if (!open) return;
 		setLocalShortcut(sharedFilters.dateShortcut);
 		setLocalDisplayNew(filters.productReviews.displayNew);
-		setLocalStartDate(sharedFilters.currentStartDate);
-		setLocalEndDate(sharedFilters.currentEndDate);
+		setLocalStartDate(parseLocalDate(sharedFilters.currentStartDate));
+		setLocalEndDate(parseLocalDate(sharedFilters.currentEndDate));
 		if (
 			sharedFilters.currentStartDate &&
 			sharedFilters.currentEndDate &&
@@ -104,8 +105,8 @@ const DateRangePickerButton = ({
 	}, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const clearCustomDates = () => {
-		setLocalStartDate('');
-		setLocalEndDate('');
+		setLocalStartDate(null);
+		setLocalEndDate(null);
 		setCalendarRangeStart(null);
 		setCalendarRangeEnd(null);
 		setErrors({});
@@ -116,10 +117,12 @@ const DateRangePickerButton = ({
 		setLocalDisplayNew(false);
 		if (name) {
 			const { startDate, endDate } = getDatesByShortCut(name);
-			setLocalStartDate(startDate);
-			setLocalEndDate(endDate);
-			setCalendarRangeStart(parseLocalDate(startDate));
-			setCalendarRangeEnd(parseLocalDate(endDate));
+			const start = parseLocalDate(startDate);
+			const end = parseLocalDate(endDate);
+			setLocalStartDate(start);
+			setLocalEndDate(end);
+			setCalendarRangeStart(start);
+			setCalendarRangeEnd(end);
 			setErrors({});
 		} else {
 			clearCustomDates();
@@ -131,12 +134,12 @@ const DateRangePickerButton = ({
 		setLocalDisplayNew(next);
 		setLocalShortcut(undefined);
 		if (next && reviewLogDate) {
-			const start = dateToLocalISO(new Date(reviewLogDate));
-			const end = dateToLocalISO(new Date());
+			const start = startOfLocalDay(new Date(reviewLogDate));
+			const end = startOfLocalDay(new Date());
 			setLocalStartDate(start);
 			setLocalEndDate(end);
-			setCalendarRangeStart(parseLocalDate(start));
-			setCalendarRangeEnd(parseLocalDate(end));
+			setCalendarRangeStart(start);
+			setCalendarRangeEnd(end);
 			setErrors({});
 		} else {
 			clearCustomDates();
@@ -145,34 +148,42 @@ const DateRangePickerButton = ({
 
 	const handleDateFieldChange =
 		(key: 'currentStartDate' | 'currentEndDate') => (value: Date | null) => {
+			const errorKey = key === 'currentStartDate' ? 'startDate' : 'endDate';
+			const otherErrorKey = errorKey === 'startDate' ? 'endDate' : 'startDate';
+
+			if (value !== null && isNaN(value.getTime())) {
+				setErrors(prev => ({ ...prev, [errorKey]: INVALID_DATE_ERROR }));
+				return;
+			}
+
 			setLocalShortcut(undefined);
 			setLocalDisplayNew(false);
 
-			const valid = value instanceof Date && !isNaN(value.getTime());
-			const maxForKey =
-				key === 'currentEndDate'
-					? today
-					: (localEndDate && parseLocalDate(localEndDate)) || today;
-			const clamped = valid && value! > maxForKey ? maxForKey : value;
-			const isoDate = valid ? dateToLocalISO(clamped!) : '';
-
 			if (key === 'currentStartDate') {
-				setLocalStartDate(isoDate);
-				setCalendarRangeStart(valid ? clamped : null);
-				if (!valid) setCalendarRangeEnd(null);
+				setLocalStartDate(value);
+				setCalendarRangeStart(value);
 			} else {
-				setLocalEndDate(isoDate);
-				setCalendarRangeEnd(valid ? clamped : null);
+				setLocalEndDate(value);
+				setCalendarRangeEnd(value);
 			}
 
 			setErrors(prev => ({
-				...prev,
-				[key === 'currentStartDate' ? 'startDate' : 'endDate']:
-					value && !valid ? 'Date invalide' : undefined
+				[errorKey]: undefined,
+				[otherErrorKey]:
+					prev[otherErrorKey] === INVALID_DATE_ERROR
+						? INVALID_DATE_ERROR
+						: undefined
 			}));
 		};
 
 	const handleApply = () => {
+		if (
+			errors.startDate === INVALID_DATE_ERROR ||
+			errors.endDate === INVALID_DATE_ERROR
+		) {
+			return;
+		}
+
 		let nextFilters: typeof filters = {
 			...filters,
 			currentPage: 1,
@@ -231,20 +242,23 @@ const DateRangePickerButton = ({
 				action: `${shortcutLabel.split(' ')[0]}_days_filter_apply`,
 				ui_source: 'quick_filter'
 			});
-		} else if (calendarRangeStart || localStartDate) {
-			const start =
-				localStartDate ||
-				(calendarRangeStart ? dateToLocalISO(calendarRangeStart) : '');
-			const end =
-				localEndDate ||
-				(calendarRangeEnd ? dateToLocalISO(calendarRangeEnd) : start);
+		} else if (calendarRangeStart || localStartDate || localEndDate) {
+			const start = localStartDate ?? calendarRangeStart;
+			const end = localEndDate ?? calendarRangeEnd ?? start;
+
+			const rangeErrors = getDateRangeErrors(start, end, new Date());
+			if (!start || !end || rangeErrors.startDate || rangeErrors.endDate) {
+				setErrors(rangeErrors);
+				return;
+			}
+
 			nextFilters = {
 				...nextFilters,
 				productReviews: { ...filters.productReviews, displayNew: false },
 				sharedFilters: {
 					...filters.sharedFilters,
-					currentStartDate: start,
-					currentEndDate: end,
+					currentStartDate: dateToLocalISO(start),
+					currentEndDate: dateToLocalISO(end),
 					dateShortcut: undefined
 				}
 			};
@@ -298,9 +312,9 @@ const DateRangePickerButton = ({
 		) {
 			const today = dateToLocalISO(new Date());
 			return `${formatDateToFrenchString(reviewLogDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(today, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
@@ -311,9 +325,9 @@ const DateRangePickerButton = ({
 			isValidDate(endDate)
 		) {
 			return `${formatDateToFrenchString(startDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(endDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
@@ -322,9 +336,9 @@ const DateRangePickerButton = ({
 				sharedFilters.dateShortcut
 			);
 			return `${formatDateToFrenchString(sDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})} - ${formatDateToFrenchString(eDate, {
-				monthFormat: 'literal'
+				monthFormat: 'short'
 			})}`;
 		}
 
@@ -385,24 +399,33 @@ const DateRangePickerButton = ({
 					>
 						<div className={cx(classes.dateInputsRow)}>
 							<div
-								className={cx(fr.cx('fr-input-group'), classes.dateFieldGroup)}
+								className={cx(
+									fr.cx(
+										'fr-input-group',
+										errors.startDate ? 'fr-input-group--error' : undefined
+									),
+									classes.dateFieldGroup
+								)}
 							>
 								<label id="date-debut-label" className={fr.cx('fr-label')}>
 									Date de début
 								</label>
 								<DateField
-									aria-labelledby="date-debut-label"
-									value={localStartDate ? parseLocalDate(localStartDate) : null}
+									value={localStartDate}
 									onChange={handleDateFieldChange('currentStartDate')}
-									maxDate={
-										(localEndDate && parseLocalDate(localEndDate)) || today
-									}
+									maxDate={today}
 									format="dd / MM / yyyy"
 									className={fr.cx('fr-input')}
 									sx={{ width: '100%' }}
 									slotProps={{
 										textField: {
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-debut-label',
+												'aria-describedby': errors.startDate
+													? 'date-debut-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
@@ -410,16 +433,26 @@ const DateRangePickerButton = ({
 										}
 									}}
 								/>
+								{errors.startDate && (
+									<p id="date-debut-error" className={fr.cx('fr-error-text')}>
+										{errors.startDate}
+									</p>
+								)}
 							</div>
 							<div
-								className={cx(fr.cx('fr-input-group'), classes.dateFieldGroup)}
+								className={cx(
+									fr.cx(
+										'fr-input-group',
+										errors.endDate ? 'fr-input-group--error' : undefined
+									),
+									classes.dateFieldGroup
+								)}
 							>
 								<label id="date-fin-label" className={fr.cx('fr-label')}>
 									Date de fin
 								</label>
 								<DateField
-									aria-labelledby="date-fin-label"
-									value={localEndDate ? parseLocalDate(localEndDate) : null}
+									value={localEndDate}
 									onChange={handleDateFieldChange('currentEndDate')}
 									maxDate={today}
 									format="dd / MM / yyyy"
@@ -429,6 +462,12 @@ const DateRangePickerButton = ({
 										textField: {
 											variant: 'outlined',
 											InputProps: { className: fr.cx('fr-input') },
+											inputProps: {
+												'aria-labelledby': 'date-fin-label',
+												'aria-describedby': errors.endDate
+													? 'date-fin-error'
+													: undefined
+											},
 											sx: {
 												'& .MuiFormLabel-root': { display: 'none' },
 												'& fieldset': { display: 'none' }
@@ -436,26 +475,64 @@ const DateRangePickerButton = ({
 										}
 									}}
 								/>
+								{errors.endDate && (
+									<p id="date-fin-error" className={fr.cx('fr-error-text')}>
+										{errors.endDate}
+									</p>
+								)}
 							</div>
 						</div>
 					</LocalizationProvider>
 
-					<div className={cx(classes.shortcutsRow)}>
+					<ul
+						className={cx(classes.shortcutsRow)}
+						aria-label="Raccourcis de période"
+					>
 						{dateShortcuts.map(ds => {
 							const isSelected = localShortcut === ds.name && !localDisplayNew;
 							return (
+								<li key={ds.name}>
+									<button
+										type="button"
+										aria-pressed={isSelected}
+										className={cx(
+											classes.shortcutButton,
+											isSelected ? classes.shortcutButtonSelected : undefined
+										)}
+										onClick={() => handleShortcutClick(ds.name)}
+									>
+										{ds.label}
+										{isSelected && (
+											<span
+												aria-hidden="true"
+												className={cx(
+													classes.selectedIcon,
+													fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+												)}
+											/>
+										)}
+									</button>
+								</li>
+							);
+						})}
+						{showNewReviewsOption && reviewLogDate && (
+							<li>
 								<button
-									key={ds.name}
 									type="button"
-									aria-pressed={isSelected}
+									aria-pressed={localDisplayNew}
 									className={cx(
 										classes.shortcutButton,
-										isSelected ? classes.shortcutButtonSelected : undefined
+										localDisplayNew ? classes.shortcutButtonSelected : undefined
 									)}
-									onClick={() => handleShortcutClick(ds.name)}
+									onClick={handleNewReviewsClick}
+									title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
+										reviewLogDate,
+										{ withHour: true }
+									)})`}
 								>
-									{ds.label}
-									{isSelected && (
+									Nouvelles réponses (du{' '}
+									{formatDateToFrenchString(reviewLogDate)} à aujourd'hui)
+									{localDisplayNew && (
 										<span
 											aria-hidden="true"
 											className={cx(
@@ -465,36 +542,9 @@ const DateRangePickerButton = ({
 										/>
 									)}
 								</button>
-							);
-						})}
-						{showNewReviewsOption && reviewLogDate && (
-							<button
-								type="button"
-								aria-pressed={localDisplayNew}
-								className={cx(
-									classes.shortcutButton,
-									localDisplayNew ? classes.shortcutButtonSelected : undefined
-								)}
-								onClick={handleNewReviewsClick}
-								title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
-									reviewLogDate,
-									{ withHour: true }
-								)})`}
-							>
-								Nouvelles réponses (du {formatDateToFrenchString(reviewLogDate)}{' '}
-								à aujourd'hui)
-								{localDisplayNew && (
-									<span
-										aria-hidden="true"
-										className={cx(
-											classes.selectedIcon,
-											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
-										)}
-									/>
-								)}
-							</button>
+							</li>
 						)}
-					</div>
+					</ul>
 					<hr className={cx(classes.separator)} />
 					<DateRangeCalendar
 						rangeStart={calendarRangeStart}
@@ -502,10 +552,11 @@ const DateRangePickerButton = ({
 						onRangeChange={(start, end) => {
 							setCalendarRangeStart(start);
 							setCalendarRangeEnd(end);
-							setLocalStartDate(start ? dateToLocalISO(start) : '');
-							setLocalEndDate(end ? dateToLocalISO(end) : '');
+							setLocalStartDate(start);
+							setLocalEndDate(end);
 							setLocalShortcut(undefined);
 							setLocalDisplayNew(false);
+							setErrors({});
 						}}
 					/>
 					<div className={cx(classes.actionsRow)}>
@@ -581,6 +632,13 @@ const useStyles = tss.create({
 		...fr.spacing('margin', { rightLeft: '6v' })
 	},
 	shortcutsRow: {
+		listStyle: 'none',
+		margin: 0,
+		padding: 0,
+		'& > li': {
+			margin: 0,
+			padding: 0
+		},
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: fr.spacing('2v'),

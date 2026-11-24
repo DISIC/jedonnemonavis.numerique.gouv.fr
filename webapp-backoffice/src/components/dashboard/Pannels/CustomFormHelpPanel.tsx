@@ -20,7 +20,7 @@ const CustomFormHelpPanel = () => {
 					Beta
 				</Badge>
 				<span className={classes.smallTitle}>
-					Personnalisez le formulaire du service
+					Personnalisez le formulaire du service numérique
 				</span>
 				<p className={fr.cx('fr-mb-0')}>
 					Désormais, pour adapter vos formulaires à vos besoins spécifiques,

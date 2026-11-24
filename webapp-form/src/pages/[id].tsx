@@ -8,10 +8,12 @@ import {
 } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
-import { AnswerIntention, Prisma } from '@prisma/client';
+import { AnswerIntention } from '@prisma/client';
+import type { ReviewAnswerInput } from '@/src/server/routers/review/schemas';
 import { push } from '@socialgouv/matomo-next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -44,6 +46,7 @@ export type FormStepNames =
 			| 'contact_reached'
 			| 'contact_satisfaction'
 			| 'contact_tried_verbatim'
+			| 'contact_email'
 	  >
 	| 'contact';
 
@@ -151,7 +154,7 @@ export default function JDMAForm({
 
 	const formatAnswers = (
 		opinion: Partial<Opinion>
-	): Prisma.AnswerCreateInput[] => {
+	): ReviewAnswerInput[] => {
 		return Object.entries(opinion).reduce((accumulator, [key, value]) => {
 			if (['contact_reached', 'contact_satisfaction'].includes(key)) {
 				if (Array.isArray(value)) {
@@ -196,7 +199,6 @@ export default function JDMAForm({
 																lng: 'fr'
 															}) as string,
 															kind: 'radio',
-															review_id: -1,
 															answer_text: t(childOption.label, {
 																lng: 'fr'
 															}),
@@ -228,11 +230,11 @@ export default function JDMAForm({
 						fieldInSection.kind === 'smiley'
 							? 'radio'
 							: fieldInSection.kind !== 'input-text' &&
-							  fieldInSection.kind !== 'input-textarea'
+							  fieldInSection.kind !== 'input-textarea' &&
+							  fieldInSection.kind !== 'input-email'
 							? fieldInSection.kind
-							: 'text',
-					review: {}
-				} as Prisma.AnswerCreateInput;
+							: 'text'
+				} as ReviewAnswerInput;
 
 				if (typeof value == 'number') {
 					const selectedOption = getSelectedOption(fieldInSection, value);
@@ -257,7 +259,7 @@ export default function JDMAForm({
 			}
 
 			return accumulator;
-		}, [] as Prisma.AnswerCreateInput[]);
+		}, [] as ReviewAnswerInput[]);
 	};
 
 	const handleCreateReview = async (opinion: Partial<Opinion>) => {
@@ -335,6 +337,7 @@ export default function JDMAForm({
 	}, [router.events]);
 
 	React.useEffect(() => {
+		if (isButtonDeleted) return;
 		resetForm();
 	}, [router.isReady]);
 
@@ -358,7 +361,8 @@ export default function JDMAForm({
 		contact_tried_verbatim: undefined,
 		contact_reached: [],
 		contact_satisfaction: [],
-		verbatim: undefined
+		verbatim: undefined,
+		contact_email: undefined
 	});
 
 	const displayLayout = () => {
@@ -370,7 +374,6 @@ export default function JDMAForm({
 						<Image
 							alt=""
 							src="/Demarches/assets/icon-check.svg"
-							title="Icone - Merci pour votre aide"
 							width={40}
 							height={40}
 						/>
@@ -405,6 +408,7 @@ export default function JDMAForm({
 								href={`https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2&id_demarche=${product.id}`}
 								target="_blank"
 								rel="noopener noreferrer"
+								title={`${t('success_block.link')}, ${t('global.new_window')}`}
 							>
 								{t('success_block.link')}
 							</Link>
@@ -506,6 +510,13 @@ export default function JDMAForm({
 
 	return (
 		<div>
+			{isFormSubmitted && (
+				<Head>
+					<title>{`${t('global.thanks_title')} ${t('global.page_title', {
+						product: product.title
+					})}`}</title>
+				</Head>
+			)}
 			{isPreviewUnpublished && (
 				<Notice
 					className={cx(classes.notice)}
@@ -580,6 +591,7 @@ export const getServerSideProps: GetServerSideProps<{
 	const xwikiButtonName = query.nd_source as string;
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
+	const previewFormId = isPreview ? parseInt(query.form as string) : NaN;
 
 	const isXWikiLink = !buttonId && !isPreview;
 
@@ -588,15 +600,44 @@ export const getServerSideProps: GetServerSideProps<{
 	let isButtonDeleted: boolean = false;
 
 	if (buttonId) {
-		const button = await prisma.button.findUnique({
-			where: { id: parseInt(buttonId) },
-			select: { id: true, form_id: true, isDeleted: true }
-		});
-		buttonFormId = button?.form_id;
+		const parsedButtonId = parseInt(buttonId);
 
-		if (button?.isDeleted) {
-			isButtonDeleted = true;
+		if (isNaN(parsedButtonId)) {
+			await prisma.$disconnect();
+			return {
+				notFound: true
+			};
 		}
+
+		const button = await prisma.button.findUnique({
+			where: { id: parsedButtonId },
+			select: {
+				id: true,
+				form_id: true,
+				isDeleted: true,
+				form: {
+					select: {
+						product_id: true,
+						isDeleted: true,
+						form_template: { select: { slug: true } }
+					}
+				}
+			}
+		});
+
+		if (
+			!button ||
+			button.form.product_id !== parseInt(productId) ||
+			button.form.form_template.slug !== 'root'
+		) {
+			await prisma.$disconnect();
+			return {
+				notFound: true
+			};
+		}
+
+		buttonFormId = button.form_id;
+		isButtonDeleted = !!button.isDeleted || !!button.form.isDeleted;
 	}
 
 	const product = await prisma.product.findUnique({
@@ -605,8 +646,22 @@ export const getServerSideProps: GetServerSideProps<{
 			: { id: parseInt(productId) },
 		include: {
 			forms: {
-				// Si buttonFormId est défini, on filtre les forms, sinon on les laisse tous
-				where: buttonFormId ? { id: buttonFormId } : undefined,
+				where: buttonFormId
+					? { id: buttonFormId }
+					: !isNaN(previewFormId)
+					? { id: previewFormId, form_template: { slug: 'root' } }
+					: {
+							// isDeleted est nullable : NOT: { isDeleted: true } écarterait aussi
+							// les anciens formulaires restés à NULL.
+							OR: [{ isDeleted: false }, { isDeleted: null }],
+							// Les liens hérités (xwiki) ne précisent pas le formulaire : on
+							// cible explicitement le formulaire d'avis, comme le fait déjà la
+							// branche `button`. Sinon un second formulaire du service (bug,
+							// alertes…) peut passer devant et faire répondre 404.
+							...(isXWikiLink ? { form_template: { slug: 'root' } } : {})
+					  },
+				// Sans tri explicite, l'ordre dépend de Postgres : forms[0] doit être stable.
+				orderBy: { created_at: 'asc' },
 				include: {
 					product: {
 						select: {
@@ -678,6 +733,10 @@ export const getServerSideProps: GetServerSideProps<{
 	}
 
 	if (product && product.status !== 'archived') {
+		if (isButtonDeleted) {
+			res.statusCode = 404;
+		}
+
 		return {
 			props: {
 				product: {

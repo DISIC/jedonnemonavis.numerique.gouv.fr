@@ -2,9 +2,9 @@ import type { Context } from '@/src/server/trpc';
 import { AnswerIntention } from '@prisma/client';
 import { z } from 'zod';
 import { Buckets, ElkAnswer } from '../../../types/custom';
+import { assertAggregatableFieldCode } from './field-codes';
 import {
-	checkAndGetForm,
-	checkAndGetProduct,
+	checkAndGetFormForProduct,
 	getDefaultValues,
 	queryCountByFieldCode
 } from './utils';
@@ -28,8 +28,12 @@ export const getByFieldCodeQuery = async ({
 }) => {
 	const { product_id, xwiki, button_id, form_id } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
+	await assertAggregatableFieldCode({
+		prisma: ctx.prisma,
+		form,
+		field_code: input.field_code
+	});
 
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: 'jdma-answers',
@@ -43,7 +47,7 @@ export const getByFieldCodeQuery = async ({
 			term: {
 				terms: {
 					script:
-						'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value.trim()',
+						'(doc["answer_text.keyword"].size() != 0 ? doc["answer_text.keyword"].value : "") + "#" + (doc["intention.keyword"].size() != 0 ? doc["intention.keyword"].value : "") + "#" + (doc["field_label.keyword"].size() != 0 ? doc["field_label.keyword"].value.trim() : "")',
 					size: 1000
 				}
 			}

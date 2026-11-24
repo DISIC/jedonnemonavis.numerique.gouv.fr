@@ -1,6 +1,6 @@
 import PublicLayout from '@/src/layouts/PublicLayout';
 import { trpc } from '@/src/utils/trpc';
-import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
+import { MuiDsfrThemeProvider } from '@/src/utils/mui-theme';
 import { createNextDsfrIntegrationApi } from '@codegouvfr/react-dsfr/next-pagesdir';
 import { init } from '@socialgouv/matomo-next';
 import { SessionProvider } from 'next-auth/react';
@@ -12,6 +12,7 @@ import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
 import { useJdmaWidget } from '../hooks/useJdmaWidget';
+import { useModalFocusRestore } from '../hooks/useModalFocusRestore';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
@@ -84,11 +85,17 @@ function App({ Component, pageProps }: AppProps) {
 		if (process.env.NODE_ENV === 'production')
 			init({
 				url: MATOMO_URL ? MATOMO_URL : '',
-				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
+				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : '',
+				excludeUrlsPatterns: [
+					/^\/register/,
+					/^\/reset-password/,
+					/^\/login\/otp/
+				]
 			});
 	}, []);
 
 	useJdmaWidget(!isAdminDashboard);
+	useModalFocusRestore();
 
 	return (
 		<MuiDsfrThemeProvider>
@@ -119,6 +126,7 @@ function App({ Component, pageProps }: AppProps) {
 											id="jdma-widget"
 											src={`https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`}
 											data-jdma-form-url={
+												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL_FLOATING ||
 												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
 											}
 											data-jdma-button-image={`https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-problem-solid-light.svg`}

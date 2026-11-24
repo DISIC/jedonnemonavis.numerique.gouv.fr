@@ -31,15 +31,17 @@ export interface JdmaClosedButtonOrFormEmailProps {
 	baseUrl?: string;
 }
 
-export interface JdmaInviteEmailProps {
-	inviterName: string;
-	productTitle?: string;
-	entityName?: string;
+export interface JdmaLinkIssueEmailProps {
+	product: { id: number; title: string };
+	issues: { form: { id: number; title: string }; linkLabel: string }[];
 	baseUrl?: string;
 }
 
-export interface JdmaOtpEmailProps {
-	code: string;
+export interface JdmaInviteEmailProps {
+	inviterName: string;
+	productTitle?: string;
+	productId?: number;
+	entityName?: string;
 	baseUrl?: string;
 }
 
@@ -56,21 +58,15 @@ export interface JdmaProductRestoredEmailProps {
 	baseUrl?: string;
 }
 
-export interface JdmaTokenEmailProps {
-	token: string;
-	baseUrl?: string;
-}
 export interface JdmaUserInviteEmailProps {
 	inviterName: string;
-	recipientEmail: string;
-	inviteToken: string;
 	productTitle?: string;
 	entityName?: string;
 	baseUrl?: string;
 }
 
-export interface JdmaUserRequestRefusedEmailProps {
-	message?: string;
+export interface JdmaDnCreatorInviteEmailProps {
+	demarcheName: string;
 	baseUrl?: string;
 }
 

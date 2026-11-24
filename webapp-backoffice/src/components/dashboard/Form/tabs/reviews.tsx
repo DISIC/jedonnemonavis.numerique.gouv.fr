@@ -10,17 +10,26 @@ import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHea
 import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
+import { Toast } from '@/src/components/ui/Toast';
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { getExportSummaryLabels, parseExportParams } from '@/src/utils/export';
-import { getNbPages } from '@/src/utils/tools';
+import {
+	DELETED_REVIEWS_EXPORT_NOTICE,
+	getExportSummaryLabels,
+	getFilterableBlocks,
+	parseExportParams
+} from '@/src/utils/export';
+import { useExportDownload } from '@/src/hooks/useExportDownload';
+import { getNbPages, mapArchivedReviewToReview } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 import { LinearProgress } from '@mui/material';
 import { Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
@@ -33,7 +42,6 @@ import ExportHistory from '../../Reviews/ExportHistory';
 import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
-import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 interface Props {
 	form: FormWithElements;
@@ -59,6 +67,7 @@ const ReviewsTab = (props: Props) => {
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
+	const { downloadExport, isDownloading } = useExportDownload();
 	const { isMobile } = useIsMobile();
 	const progressStyleTreshold = useMemo(() => (isMobile ? 4 : 2), [isMobile]);
 
@@ -80,6 +89,15 @@ const ReviewsTab = (props: Props) => {
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
 
+	const focusRowButton = (reviewId: number) => {
+		rowRefsMap.current
+			.get(reviewId)
+			?.querySelector<HTMLButtonElement>('[data-review-action]')
+			?.focus();
+	};
+
+	const isGlobalAdmin = session?.user?.role.includes('admin') ?? false;
+
 	useEffect(() => {
 		if (!selectedReview?.id) return;
 		rowRefsMap.current
@@ -89,6 +107,9 @@ const ReviewsTab = (props: Props) => {
 
 	const { mutate: createReviewViewLog } =
 		trpc.reviewViewLog.create.useMutation();
+
+	const utils = trpc.useUtils();
+	const [deleteToastOpen, setDeleteToastOpen] = useState(false);
 
 	const filter_modal = useMemo(
 		() =>
@@ -100,6 +121,13 @@ const ReviewsTab = (props: Props) => {
 	);
 
 	const { filters, updateFilters, scopeToForm } = useFilters();
+
+	const showDeleted =
+		(filters.productReviews.filters.onlyDeleted ?? false) && isGlobalAdmin;
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [showDeleted]);
 
 	useEffect(() => {
 		scopeToForm(form.id);
@@ -163,14 +191,43 @@ const ReviewsTab = (props: Props) => {
 		},
 		{
 			keepPreviousData: true,
-			enabled: nbReviews > 0 && !isLoading
+			enabled: nbReviews > 0 && !isLoading && !showDeleted
 		}
 	);
 
-	const reviews = reviewResults?.data ?? [];
-	const reviewsCountFiltered = reviewResults?.metadata?.countFiltered ?? 0;
+	const {
+		data: archivedResults,
+		isFetching: isFetchingArchived,
+		isLoading: isLoadingArchived
+	} = trpc.archivedReview.getList.useQuery(
+		{
+			product_id: form.product_id,
+			form_id: form.id,
+			numberPerPage: showDeleted ? numberPerPage : 0,
+			page: showDeleted ? currentPage : 1
+		},
+		{
+			keepPreviousData: true,
+			enabled: !isLoading && isGlobalAdmin
+		}
+	);
+
+	const archivedReviews = useMemo(
+		() => (archivedResults?.data ?? []).map(mapArchivedReviewToReview),
+		[archivedResults]
+	);
+
+	const reviews = showDeleted ? archivedReviews : reviewResults?.data ?? [];
+	const reviewsCountFiltered = showDeleted
+		? archivedResults?.metadata?.count ?? 0
+		: reviewResults?.metadata?.countFiltered ?? 0;
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
-	const isTableFetching = isFetchingReviews && !isLoadingReviews;
+	const reviewsCountDeleted = archivedResults?.metadata?.count ?? 0;
+	const canBrowseDeleted = isGlobalAdmin && reviewsCountDeleted > 0;
+
+	const isFetchingList = showDeleted ? isFetchingArchived : isFetchingReviews;
+	const isLoadingList = showDeleted ? isLoadingArchived : isLoadingReviews;
+	const isTableFetching = isFetchingList && !isLoadingList;
 
 	// Classification referential → resolve a facet code to its label (for the chips on each row).
 	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
@@ -236,6 +293,10 @@ const ReviewsTab = (props: Props) => {
 	const currentExport =
 		userExportInProgress || exports?.data.find(e => e.id === currentExportId);
 
+	const currentExportNotice = currentExport?.only_deleted_reviews
+		? DELETED_REVIEWS_EXPORT_NOTICE
+		: undefined;
+
 	const currentExportAlert = useMemo((): {
 		severity: AlertProps.Severity;
 		title: NonNullable<ReactNode>;
@@ -250,9 +311,14 @@ const ReviewsTab = (props: Props) => {
 		}
 
 		const parsedParams = parseExportParams(currentExport.params);
-		const finalFilters = currentExport.params
-			? getExportSummaryLabels(parsedParams, buttons)
-			: undefined;
+		const finalFilters =
+			currentExport.params && !currentExport.only_deleted_reviews
+				? getExportSummaryLabels(
+						parsedParams,
+						buttons,
+						getFilterableBlocks(form)
+				  )
+				: undefined;
 
 		switch (currentExport.status) {
 			case 'idle':
@@ -329,7 +395,7 @@ const ReviewsTab = (props: Props) => {
 		if (firstReviewId === undefined) return;
 		shouldFocusFirstRowRef.current = false;
 		requestAnimationFrame(() => {
-			rowRefsMap.current.get(firstReviewId)?.focus();
+			focusRowButton(firstReviewId);
 		});
 	}, [isTableFetching, reviews]);
 
@@ -418,10 +484,12 @@ const ReviewsTab = (props: Props) => {
 		source: '' | '_prev' | '_next' = ''
 	) => {
 		setSelectedReview(review);
-		createReviewViewLog({
-			review_id: review.id as number,
-			review_created_at: review.created_at as Date
-		});
+		if (!showDeleted) {
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+		}
 		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 		window._mtm?.push({
 			event: 'matomo_event',
@@ -457,9 +525,29 @@ const ReviewsTab = (props: Props) => {
 		setSelectedReview(null);
 		if (lastViewedId !== undefined) {
 			requestAnimationFrame(() => {
-				rowRefsMap.current.get(lastViewedId)?.focus();
+				focusRowButton(lastViewedId);
 			});
 		}
+	};
+
+	const handleReviewDeleted = () => {
+		setSelectedReview(null);
+		setDeleteToastOpen(true);
+		push(['trackEvent', 'Product - Avis', 'Delete-Review-Success']);
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'reviews',
+			action_type: 'delete',
+			action: 'review_delete',
+			ui_source: 'review_drawer'
+		});
+		utils.review.invalidate();
+		utils.answer.invalidate();
+		utils.archivedReview.invalidate();
 	};
 
 	const displayEmptyState = () => {
@@ -548,6 +636,8 @@ const ReviewsTab = (props: Props) => {
 					filters={filters.productReviews.filters}
 					submitFilters={handleSubmitfilters}
 					form_id={form.id}
+					isGlobalAdmin={isGlobalAdmin}
+					deletedCount={reviewsCountDeleted}
 				/>
 			) : (
 				<ReviewFiltersModal
@@ -555,12 +645,14 @@ const ReviewsTab = (props: Props) => {
 					filters={filters.productReviews.filters}
 					submitFilters={handleSubmitfilters}
 					form={form}
+					isGlobalAdmin={isGlobalAdmin}
+					deletedCount={reviewsCountDeleted}
 				/>
 			)}
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && (
+				{(nbReviews > 0 || showDeleted) && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							form={form}
@@ -570,6 +662,7 @@ const ReviewsTab = (props: Props) => {
 							search={search}
 							button_id={buttonId}
 							filters={filters.productReviews.filters}
+							onlyDeleted={showDeleted}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
 							onExportCreated={exportId => {
@@ -582,8 +675,10 @@ const ReviewsTab = (props: Props) => {
 							buttons={buttons}
 						/>
 						<ExportHistory
-							exports={(exports?.data || []) as any}
+							exports={exports?.data || []}
 							buttons={buttons}
+							form={form}
+							isDisabled={isLoading || isLoadingExports}
 						/>
 					</div>
 				)}
@@ -597,29 +692,36 @@ const ReviewsTab = (props: Props) => {
 					description={
 						<div
 							className={fr.cx(
-								currentExport.link
+								currentExport.isDownloadable
 									? 'fr-mt-2v'
 									: currentExport.status === 'processing'
 									? 'fr-mt-4v'
 									: undefined
 							)}
 						>
-							{currentExport.link && (
-								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
+							{currentExport.isDownloadable && (
+								<p
+									className={fr.cx(
+										(currentExportAlert.filters || currentExportNotice) &&
+											'fr-mb-4v'
+									)}
+								>
 									Téléchargez l'export :{' '}
-									<Link
-										href={currentExport.link}
+									<button
+										type="button"
+										onClick={() => downloadExport(currentExport.id)}
+										disabled={isDownloading}
 										className={fr.cx('fr-link')}
-										rel="noopener noreferrer"
 									>
 										Export du {currentExport.created_at.toLocaleDateString()}{' '}
 										<i
 											className={fr.cx('fr-icon-download-line', 'fr-icon--sm')}
 											aria-hidden="true"
 										/>
-									</Link>
+									</button>
 								</p>
 							)}
+							{currentExportNotice && <p>{currentExportNotice}</p>}
 							{currentExportAlert.filters && (
 								<>
 									<strong>Filtres sélectionnés:</strong>
@@ -665,14 +767,18 @@ const ReviewsTab = (props: Props) => {
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
-			) : nbReviews === 0 || buttons.length === 0 ? (
+			) : nbReviews === 0 && !canBrowseDeleted ? (
 				displayEmptyState()
 			) : (
 				<>
 					<GenericFilters
 						filterKey="productReviews"
 						renderTags={() => (
-							<ReviewFilterTags buttons={buttons} form={form} />
+							<ReviewFilterTags
+								buttons={buttons}
+								form={form}
+								isGlobalAdmin={isGlobalAdmin}
+							/>
 						)}
 						filterModal={filter_modal}
 						buttons={buttons}
@@ -712,7 +818,16 @@ const ReviewsTab = (props: Props) => {
 						}}
 					/>
 
-					{isLoadingReviews ? (
+					{showDeleted && (
+						<Notice
+							severity="info"
+							title="Réponses supprimées."
+							description="Ces réponses ont été supprimées et ne sont pas comptées dans les statistiques."
+							className="fr-mt-4v"
+						/>
+					)}
+
+					{isLoadingList ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
@@ -888,6 +1003,24 @@ const ReviewsTab = (props: Props) => {
 				onNext={handleNextReview}
 				hasPrevious={selectedReviewIndex > 0}
 				hasNext={selectedReviewIndex < reviews.length - 1}
+				ownRight={ownRight}
+				onDeleted={handleReviewDeleted}
+				isDeletionLocked={form.isTop250}
+				isArchived={showDeleted}
+				archivedAt={
+					showDeleted && selectedReview
+						? archivedResults?.data.find(
+								a => a.original_review_id === selectedReview.id
+						  )?.archived_at
+						: undefined
+				}
+			/>
+			<Toast
+				isOpen={deleteToastOpen}
+				setIsOpen={setDeleteToastOpen}
+				autoHideDuration={4000}
+				severity="success"
+				message="La réponse a bien été supprimée."
 			/>
 		</>
 	);

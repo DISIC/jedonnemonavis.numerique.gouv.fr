@@ -3,18 +3,18 @@ import {
 	initialFilterState,
 	useFilters
 } from '@/src/contexts/FiltersContext';
-import { tss } from 'tss-react/dsfr';
-import { fr } from '@codegouvfr/react-dsfr';
-import { useEffect, useMemo } from 'react';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { getDatesByShortCut } from '@/src/utils/tools';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { CustomModalProps } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getDatesByShortCut } from '@/src/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { Button as PrismaButton } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import { useEffect, useMemo } from 'react';
+import { tss } from 'tss-react/dsfr';
 import DateRangePickerButton from './DateRangePickerButton';
 import IntegrationLinksDropdown from './IntegrationLinksDropdown';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { push } from '@socialgouv/matomo-next';
 
 const dateShortcuts = [
 	{
@@ -78,6 +78,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 			let count = 0;
 			if (reviewFilters.needOtherDifficulties) count++;
 			if (reviewFilters.needOtherHelp) count++;
+			if (reviewFilters.onlyDeleted) count++;
 			if (reviewFilters.fields) {
 				count += reviewFilters.fields.reduce(
 					(acc, f) => acc + f.values.length,
@@ -119,7 +120,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 		if (filterModal && filterKey === 'productReviews') {
 			const rf = filters.productReviews.filters;
-			if (!rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
+			if (
+				!rf.needVerbatim ||
+				rf.needOtherDifficulties ||
+				rf.needOtherHelp ||
+				rf.onlyDeleted
+			)
 				return true;
 			if (rf.fields?.some(f => f.values.length > 0)) return true;
 			if (rf.classes?.length > 0) return true;
@@ -208,7 +214,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 									small
 									options={[
 										{
-											label: 'Avis avec commentaire',
+											label: 'Réponses avec commentaire uniquement',
 											nativeInputProps: {
 												name: 'needVerbatim',
 												checked: filters.productReviews.filters.needVerbatim,

@@ -1,5 +1,7 @@
 import type { Context } from '@/src/server/trpc';
 import { Prisma, TypeAction } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import { checkRightToProceed } from '@/src/server/routers/product';
 import { z } from 'zod';
 import { ALL_ACTIONS } from './constants';
 
@@ -21,6 +23,20 @@ export const getEventListQuery = async ({
 }) => {
 	const { product_id, page, limit, filterAction, startDate, endDate } = input;
 	const skip = (page - 1) * limit;
+
+	if (typeof product_id === 'number') {
+		await checkRightToProceed({
+			prisma: ctx.prisma,
+			session: ctx.session!,
+			product_id,
+			authorizeCarrierUser: true
+		});
+	} else if (!ctx.session?.user.role.includes('admin')) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Vous ne pouvez pas consulter le journal global'
+		});
+	}
 
 	const whereCondition: Prisma.UserEventWhereInput = {
 		OR: [
@@ -65,7 +81,9 @@ export const getEventListQuery = async ({
 			skip,
 			take: limit,
 			include: {
-				user: true
+				user: {
+					select: { id: true, firstName: true, lastName: true, email: true }
+				}
 			}
 		}),
 		ctx.prisma.userEvent.count({ where: whereCondition })

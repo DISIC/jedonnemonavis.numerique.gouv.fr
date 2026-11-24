@@ -7,9 +7,9 @@ import {
 import { AnswerIntention } from '@prisma/client';
 import { z } from 'zod';
 import { Buckets, BucketsInside, ElkAnswer } from '../../../types/custom';
+import { assertAggregatableFieldCode } from './field-codes';
 import {
-	checkAndGetForm,
-	checkAndGetProduct,
+	checkAndGetFormForProduct,
 	getDefaultValues,
 	queryCountByFieldCode
 } from './utils';
@@ -32,8 +32,12 @@ export const getByChildFieldCodeIntervalQuery = async ({
 }) => {
 	const { product_id, form_id, start_date, end_date } = input;
 
-	await checkAndGetProduct({ ctx, product_id });
-	const form = await checkAndGetForm({ ctx, form_id });
+	const form = await checkAndGetFormForProduct({ ctx, product_id, form_id });
+	await assertAggregatableFieldCode({
+		prisma: ctx.prisma,
+		form,
+		field_code: input.field_code
+	});
 
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
@@ -49,7 +53,7 @@ export const getByChildFieldCodeIntervalQuery = async ({
 			term: {
 				terms: {
 					script:
-						'doc["answer_item_id"].value + "#" + doc["answer_text.keyword"].value',
+						'(doc["answer_item_id"].size() != 0 ? doc["answer_item_id"].value : "") + "#" + (doc["answer_text.keyword"].size() != 0 ? doc["answer_text.keyword"].value : "")',
 					size: 1000
 				}
 			}
@@ -87,7 +91,7 @@ export const getByChildFieldCodeIntervalQuery = async ({
 					term: {
 						terms: {
 							script:
-								'doc["parent_answer_item_id"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
+								'(doc["parent_answer_item_id"].size() != 0 ? doc["parent_answer_item_id"].value : "") + "#" + (doc["intention.keyword"].size() != 0 ? doc["intention.keyword"].value : "") + "#" + (doc["field_label.keyword"].size() != 0 ? doc["field_label.keyword"].value : "")',
 							size: 1000,
 							missing: 1
 						}

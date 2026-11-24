@@ -3,7 +3,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { generateInviteToken } from '../helpers';
+import { checkEntityRight } from '../entity/utils';
 
 export const createAdminEntityRightInputSchema = z.object({
 	user_email: z.string().email(),
@@ -20,6 +20,12 @@ export const createAdminEntityRightMutation = async ({
 }) => {
 	const contextUser = ctx.session!.user;
 	const { user_email, entity_id } = input;
+
+	await checkEntityRight({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		entity_id
+	});
 
 	const adminEntityRightAlreadyExists =
 		await ctx.prisma.adminEntityRight.findFirst({
@@ -49,15 +55,15 @@ export const createAdminEntityRightMutation = async ({
 			user_email_invite: !userExists ? user_email.toLowerCase() : null,
 			entity_id
 		},
-		include: { user: true, entity: true }
+		include: {
+			user: { select: { firstName: true, lastName: true, email: true } },
+			entity: true
+		}
 	});
 
 	if (newAdminEntityRight.user === null) {
-		const token = await generateInviteToken(ctx.prisma, user_email);
 		const emailHtml = await renderUserInviteEmail({
 			inviterName: contextUser.name || "Quelqu'un",
-			recipientEmail: user_email.toLowerCase(),
-			inviteToken: token,
 			entityName: newAdminEntityRight.entity.name,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});
@@ -66,12 +72,7 @@ export const createAdminEntityRightMutation = async ({
 			'Invitation à rejoindre « Je donne mon avis »',
 			user_email.toLowerCase(),
 			emailHtml,
-			`Cliquez sur ce lien pour créer votre compte : ${
-				process.env.NODEMAILER_BASEURL
-			}/register?${new URLSearchParams({
-				email: user_email.toLowerCase(),
-				inviteToken: token
-			})}`
+			`Connectez-vous avec ProConnect pour y accéder : ${process.env.NODEMAILER_BASEURL}/login`
 		);
 	} else {
 		const emailHtml = await renderInviteEmail({

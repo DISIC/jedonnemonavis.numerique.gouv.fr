@@ -1,8 +1,8 @@
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
-import { Editor } from 'slate';
-import { useSlate } from 'slate-react';
+import { Editor, Transforms } from 'slate';
+import { ReactEditor, useSlate } from 'slate-react';
 import { tss } from 'tss-react';
 
 const isMarkActive = (editor: Editor, format: string) => {
@@ -10,7 +10,7 @@ const isMarkActive = (editor: Editor, format: string) => {
 	return marks ? marks[format] === true : false;
 };
 
-const toggleMark = (editor: Editor, format: string) => {
+export const toggleMark = (editor: Editor, format: string) => {
 	const isActive = isMarkActive(editor, format);
 	if (isActive) {
 		Editor.removeMark(editor, format);
@@ -31,20 +31,27 @@ const MarkButton = ({
 	const editor = useSlate();
 
 	const { classes, cx } = useStyles();
+	const isActive = isMarkActive(editor, format);
 
 	return (
 		<Button
 			className={cx(classes.button)}
-			priority={isMarkActive(editor, format) ? 'primary' : 'secondary'}
+			priority={isActive ? 'primary' : 'secondary'}
 			title={title}
+			type="button"
 			nativeButtonProps={{
-				onMouseDown: event => {
-					event.preventDefault();
+				'aria-pressed': isActive,
+				onMouseDown: event => event.preventDefault(),
+				onClick: () => {
+					if (!editor.selection) {
+						Transforms.select(editor, Editor.end(editor, []));
+					}
 					toggleMark(editor, format);
+					ReactEditor.focus(editor as ReactEditor);
 				}
 			}}
 		>
-			<span className={fr.cx(icon)} />
+			<span className={fr.cx(icon)} aria-hidden="true" />
 		</Button>
 	);
 };

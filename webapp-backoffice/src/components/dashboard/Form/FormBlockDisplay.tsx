@@ -13,7 +13,8 @@ import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
-import TextInput from './blocks/TextInput';
+import TextInput, { getQuestionId } from './blocks/TextInput';
+import ContactConsent from './blocks/ContactConsent';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -34,18 +35,17 @@ const FormBlockDisplay = (props: Props) => {
 
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	const [isBlockHidden, setIsBlockHidden] = useState(
-		configHelper.displays.some(
-			d => d.kind === 'block' && d.parent_id === block.id && d.hidden
-		)
-	);
+	const getBlockHiddenState = () => {
+		const display = configHelper.displays.find(
+			d => d.kind === 'block' && d.parent_id === block.id
+		);
+		return display ? display.hidden : block.isHiddenByDefault;
+	};
+
+	const [isBlockHidden, setIsBlockHidden] = useState(getBlockHiddenState());
 
 	useEffect(() => {
-		setIsBlockHidden(
-			configHelper.displays.some(
-				d => d.kind === 'block' && d.parent_id === block.id && d.hidden
-			)
-		);
+		setIsBlockHidden(getBlockHiddenState());
 	}, [block, configHelper]);
 
 	useEffect(() => {
@@ -54,10 +54,10 @@ const FormBlockDisplay = (props: Props) => {
 				...configHelper.displays.filter(
 					d => !(d.parent_id === block.id && d.kind === 'block')
 				),
-				...(isBlockHidden
+				...(isBlockHidden !== block.isHiddenByDefault
 					? [
 							{
-								hidden: true,
+								hidden: isBlockHidden,
 								parent_id: block.id,
 								kind: 'block' as FormConfigKind
 							}
@@ -116,6 +116,8 @@ const FormBlockDisplay = (props: Props) => {
 						onConfigChange={onConfigChange}
 					/>
 				);
+			case 'consent':
+				return <ContactConsent block={block} />;
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
@@ -152,7 +154,9 @@ const FormBlockDisplay = (props: Props) => {
 					}
 				>
 					<div className={cx(classes.headerInfo)}>
-						<h3>{block.label}</h3>
+						<h3 id={getQuestionId(block)} className={fr.cx('fr-h5')}>
+							{block.label}
+						</h3>
 						{isBlockHidden && (
 							<Badge
 								className={cx(classes.hiddenBadge, fr.cx('fr-ml-2v'))}
@@ -208,6 +212,11 @@ const FormBlockDisplay = (props: Props) => {
 							<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
 							Cette question est masquée sur le formulaire
 						</p>
+						{block.type_bloc === 'consent' && (
+							<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
+								L’étape Email est également masquée.
+							</p>
+						)}
 					</div>
 				</>
 			)}
@@ -249,8 +258,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		color: fr.colors.decisions.text.default.grey.default
 	},
 	header: {
+		gap: fr.spacing('4v'),
 		'& > div:nth-child(2)': {
 			textAlign: 'right'
+		},
+		[fr.breakpoints.up('md')]: {
+			flexWrap: 'nowrap' as const,
+			'& > div': {
+				flexShrink: 1
+			}
 		}
 	},
 	headerInfo: {
@@ -263,7 +279,15 @@ const useStyles = tss.withName({ FormBlockDisplay }).create({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		gap: fr.spacing('2v'),
-		flexWrap: 'wrap' as const
+		flexWrap: 'wrap' as const,
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column' as const,
+			alignItems: 'stretch',
+			'.fr-btn': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

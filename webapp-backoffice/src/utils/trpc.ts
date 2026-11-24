@@ -1,4 +1,5 @@
 import { httpBatchLink, httpLink, splitLink } from '@trpc/client';
+import type { inferRouterOutputs } from '@trpc/server';
 import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/routers/root';
 import SuperJSON from 'superjson';
@@ -34,3 +35,5 @@ export const trpc = createTRPCNext<AppRouter>({
 	 **/
 	ssr: false
 });
+
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

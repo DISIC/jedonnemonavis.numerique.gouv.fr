@@ -52,6 +52,7 @@ export type Opinion = {
 	contact_satisfaction: string[];
 	contact_tried_verbatim?: string;
 	verbatim?: string;
+	contact_email?: string;
 };
 
 export type Product = {
@@ -102,6 +103,14 @@ export type FormField =
 	| {
 			kind: 'input-textarea';
 			name: keyof Pick<Opinion, 'verbatim' | 'contact_tried_verbatim'>;
+			label: string;
+			hint?: string;
+			conditions?: Condition[];
+			needed?: number[];
+	  }
+	| {
+			kind: 'input-email';
+			name: keyof Pick<Opinion, 'contact_email'>;
 			label: string;
 			hint?: string;
 			conditions?: Condition[];
@@ -159,8 +168,8 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
 	product_name: string;
 	product_id: number;
 	form_id: number;
-	button_name: string;
-	button_id: number;
+	button_name: string | null;
+	button_id: number | null;
 	parent_field_code?: string;
 	parent_answer_item_id?: number;
 	created_at: Date;

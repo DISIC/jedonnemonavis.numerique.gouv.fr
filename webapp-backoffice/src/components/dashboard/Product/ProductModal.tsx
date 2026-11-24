@@ -5,12 +5,14 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Autocomplete from '@mui/material/Autocomplete';
+import { useAutocompleteCreateButton } from '@/src/components/ui/AutocompleteCreatePaper';
 import { Entity, Product } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef } from 'react';
 import {
 	Controller,
+	SubmitErrorHandler,
 	SubmitHandler,
 	useFieldArray,
 	useForm
@@ -33,6 +35,11 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 	urls: { value: string }[];
 };
 
+const FIELDS_FOCUS_ORDER: { name: keyof FormValues; selector: string }[] = [
+	{ name: 'title', selector: '#product-form input[name="title"]' },
+	{ name: 'entity_id', selector: '#entity-select-autocomplete' }
+];
+
 const ProductModal = (props: Props) => {
 	const {
 		modal,
@@ -45,6 +52,10 @@ const ProductModal = (props: Props) => {
 		newCreatedEntity
 	} = props;
 	const { cx, classes } = useStyles();
+	const { autocompleteProps: createEntityProps } = useAutocompleteCreateButton({
+		onCreate: allowCreateEntity ? onNewEntity : undefined,
+		createLabel: 'Créer une nouvelle organisation'
+	});
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const router = useRouter();
@@ -123,14 +134,15 @@ const ProductModal = (props: Props) => {
 			await updateProduct.mutateAsync({
 				id: product.id,
 				product: {
-					...tmpProduct,
-					forms: undefined,
+					title: tmpProduct.title,
+					entity_id: tmpProduct.entity_id,
 					urls: filteredUrls
 				}
 			});
 		} else {
 			const savedProductResponse = await saveProductTmp.mutateAsync({
-				...tmpProduct,
+				title: tmpProduct.title,
+				entity_id: tmpProduct.entity_id,
 				urls: filteredUrls
 			});
 			productId = savedProductResponse.data.id;
@@ -146,6 +158,17 @@ const ProductModal = (props: Props) => {
 
 		onSubmit();
 		modal.close();
+	};
+
+	const onLocalInvalid: SubmitErrorHandler<FormValues> = formErrors => {
+		const firstFieldInError = FIELDS_FOCUS_ORDER.find(
+			field => formErrors[field.name]
+		);
+		if (!firstFieldInError) return;
+
+		setTimeout(() => {
+			document.querySelector<HTMLElement>(firstFieldInError.selector)?.focus();
+		}, 0);
 	};
 
 	useIsModalOpen(modal, {
@@ -212,8 +235,8 @@ const ProductModal = (props: Props) => {
 			concealingBackdrop={false}
 			title={
 				product && product.id
-					? 'Modifier les informations du service'
-					: 'Ajouter un nouveau service'
+					? 'Modifier les informations du service numérique'
+					: 'Ajouter un nouveau service numérique'
 			}
 			size="large"
 			buttons={[
@@ -222,8 +245,11 @@ const ProductModal = (props: Props) => {
 				},
 				{
 					doClosesModal: false,
-					onClick: handleSubmit(onLocalSubmit),
-					children: product && product.id ? 'Sauvegarder' : 'Ajouter ce service'
+					onClick: handleSubmit(onLocalSubmit, onLocalInvalid),
+					children:
+						product && product.id
+							? 'Sauvegarder'
+							: 'Ajouter ce service numérique'
 				}
 			]}
 		>
@@ -247,7 +273,7 @@ const ProductModal = (props: Props) => {
 								<Input
 									label={
 										<p className={fr.cx('fr-mb-0')}>
-											Nom du service{' '}
+											Nom du service numérique{' '}
 											<span className={cx(classes.asterisk)}>*</span>
 										</p>
 									}
@@ -290,15 +316,10 @@ const ProductModal = (props: Props) => {
 										noOptionsText="Aucune organisation trouvée"
 										sx={{ width: '100%' }}
 										options={entityOptions}
-										filterOptions={createFilterOptionsWithArgument(
-											allowCreateEntity
-										)}
+										{...createEntityProps}
+										filterOptions={createFilterOptionsWithArgument(false)}
 										onChange={(_, optionSelected) => {
-											if (optionSelected?.value === -1) {
-												onNewEntity();
-											} else {
-												setSelectedEntityValue(optionSelected?.value);
-											}
+											setSelectedEntityValue(optionSelected?.value);
 										}}
 										isOptionEqualToValue={option => option.value === value}
 										defaultValue={entityOptions.find(
@@ -338,27 +359,8 @@ const ProductModal = (props: Props) => {
 											</div>
 										)}
 										renderOption={(props, option) => (
-											<li
-												{...props}
-												className={fr.cx(
-													option.value === -1 ? 'fr-p-0' : 'fr-p-3v'
-												)}
-											>
-												{option.value === -1 ? (
-													<div
-														className={cx(
-															classes.buttonSelect,
-															fr.cx('fr-p-3v')
-														)}
-													>
-														<span className={fr.cx('fr-mr-2v')}>
-															{option.label}
-														</span>
-														<i className={fr.cx('fr-icon-add-circle-line')} />
-													</div>
-												) : (
-													option.label
-												)}
+											<li {...props} className={fr.cx('fr-p-3v')}>
+												{option.label}
 											</li>
 										)}
 									/>
@@ -398,19 +400,6 @@ const useStyles = tss.withName({ ProductModal }).create(() => ({
 		},
 		border: 'none',
 		padding: 0
-	},
-	buttonSelect: {
-		color: 'white',
-		backgroundColor:
-			fr.colors.decisions.background.actionHigh.blueFrance.default,
-		display: 'flex',
-		justifyContent: 'center',
-		cursor: 'pointer',
-		i: {
-			['&::before']: {
-				'--icon-size': '1.1rem'
-			}
-		}
 	}
 }));
 export default ProductModal;

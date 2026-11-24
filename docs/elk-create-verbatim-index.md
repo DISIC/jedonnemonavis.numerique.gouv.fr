@@ -498,7 +498,7 @@ The initial setup (steps 1–9) is a one-shot process. After that, new documents
 
 The monorepo is deployed on both webapp-backoffice and webapp-form instances. The script guards against duplicate execution:
 
-- **`APP_ID`** — only runs on `app_bbb88831-8c1c-4c96-97df-bfaa51cee877` (webapp-backoffice), skips on webapp-form
+- **`ES_SYNC_ENABLED`** — only runs on Clever Cloud apps where it is set to `true` (the webapp-backoffice app of each environment: production and staging), skips everywhere else
 - **`INSTANCE_NUMBER`** — only runs on instance `0`, skips on scaled instances
 
 Both guards exit cleanly (`exit 0`) so Clever Cloud doesn't report cron failures.
@@ -523,7 +523,7 @@ The cron is defined in `clevercloud/cron.json` (runs nightly at 2am UTC):
 ]
 ```
 
-This file is picked up automatically by Clever Cloud on deploy. Since both apps share the monorepo, the `cron.json` will be present on both, but the `APP_ID` guard in the script ensures it only actually runs on webapp-backoffice.
+This file is picked up automatically by Clever Cloud on deploy. Since both apps share the monorepo, the `cron.json` will be present on both, but the `ES_SYNC_ENABLED` guard in the script ensures it only actually runs on the webapp-backoffice apps that set `ES_SYNC_ENABLED=true`.
 
 ### Upgrading an existing (batch) transform to continuous
 
