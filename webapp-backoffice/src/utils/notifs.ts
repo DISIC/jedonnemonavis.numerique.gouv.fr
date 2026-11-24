@@ -23,33 +23,33 @@ export const getProductsWithReviewCountsByScope = async (
 	}[] = [];
 
 	for (const { scope, startDate, endDate } of scopes) {
-		// Group reviews by form_id via the button relation
-		const reviewsWithFormData = await prisma.review.findMany({
+		const reviewCountsByForm = await prisma.review.groupBy({
+			by: ['form_id'],
 			where: {
 				created_at: {
 					gte: startDate,
 					lte: endDate
 				}
 			},
+			_count: { _all: true }
+		});
+
+		const reviewCountByFormId = new Map(
+			reviewCountsByForm.map(r => [r.form_id, r._count._all])
+		);
+
+		const forms = await prisma.form.findMany({
+			where: { id: { in: [...reviewCountByFormId.keys()] } },
 			select: {
 				id: true,
-				button: {
+				title: true,
+				product: {
 					select: {
-						form: {
+						id: true,
+						title: true,
+						entity: {
 							select: {
-								id: true,
-								title: true,
-								product: {
-									select: {
-										id: true,
-										title: true,
-										entity: {
-											select: {
-												name: true
-											}
-										}
-									}
-								}
+								name: true
 							}
 						}
 					}
@@ -57,38 +57,14 @@ export const getProductsWithReviewCountsByScope = async (
 			}
 		});
 
-		// Group by form_id and count reviews
-		const formReviewCounts = new Map<
-			number,
-			{
-				formId: number;
-				formTitle: string;
-				productId: number;
-				productTitle: string;
-				entityName: string;
-				reviewCount: number;
-			}
-		>();
-
-		reviewsWithFormData.forEach(review => {
-			const form = review.button.form;
-			const formId = form.id;
-
-			if (formReviewCounts.has(formId)) {
-				formReviewCounts.get(formId)!.reviewCount += 1;
-			} else {
-				formReviewCounts.set(formId, {
-					formId: formId,
-					formTitle: form.title || `Évaluation de la satisfaction usager`,
-					productId: form.product.id,
-					productTitle: form.product.title,
-					entityName: form.product.entity.name,
-					reviewCount: 1
-				});
-			}
-		});
-
-		const formattedForms = Array.from(formReviewCounts.values());
+		const formattedForms = forms.map(form => ({
+			formId: form.id,
+			formTitle: form.title || `Évaluation de la satisfaction usager`,
+			productId: form.product.id,
+			productTitle: form.product.title,
+			entityName: form.product.entity.name,
+			reviewCount: reviewCountByFormId.get(form.id) ?? 0
+		}));
 
 		results.push({
 			scope,

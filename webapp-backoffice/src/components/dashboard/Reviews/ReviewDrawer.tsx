@@ -11,11 +11,7 @@ import {
 	displayIntention,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
-import {
-	formatFullFrenchDateTime,
-	getSeverity,
-	retrieveButtonName
-} from '@/src/utils/tools';
+import { formatFullFrenchDateTime, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -322,9 +318,31 @@ const ReviewDrawerContent = ({
 		titleRef.current?.focus();
 	}, [review.id]);
 
-	const buttonName = review.button_id
-		? retrieveButtonName(review.button_id)
-		: undefined;
+	const { data: button } = trpc.button.getById.useQuery(
+		{ id: review.button_id ?? 0 },
+		{ enabled: !!review.button_id }
+	);
+	const buttonName = review.button_id ? (
+		button?.data?.title
+	) : (
+		<>
+			<Badge severity="error" small noIcon>
+				{review.requested_button_id
+					? 'Lien invalide'
+					: "Aucun lien d'intégration"}
+			</Badge>
+			{review.requested_button_id && (
+				<span
+					className={cx(
+						fr.cx('fr-ml-1w', 'fr-hint-text'),
+						classes.invalidLinkInfo
+					)}
+				>
+					identifiant : {review.requested_button_id}
+				</span>
+			)}
+		</>
+	);
 
 	const allBlocks = formTemplate.form_template_steps.flatMap(
 		step => step.form_template_blocks
@@ -680,6 +698,9 @@ const useStyles = tss.create({
 		clip: 'rect(0,0,0,0)',
 		whiteSpace: 'nowrap',
 		border: 0
+	},
+	invalidLinkInfo: {
+		display: 'inline-block'
 	}
 });
 
