@@ -310,7 +310,7 @@ export const buildLinkIssues = (
 			issues: []
 		};
 		productLinkIssues.issues.push({
-			form: { id: form.id, title: form.title ?? form.form_template.title },
+			form: { id: form.id, title: form.title || form.form_template.title },
 			linkLabel
 		});
 		linkIssuesByProductId.set(form.product.id, productLinkIssues);
@@ -323,11 +323,14 @@ export const getLinkIssuesMailText = ({
 	product,
 	issues
 }: Omit<JdmaLinkIssueEmailProps, 'baseUrl'>) => {
+	const hasSeveralIssues = issues.length > 1;
 	const issuesText = issues
 		.map(({ form, linkLabel }) => `«${linkLabel}» (formulaire «${form.title}»)`)
 		.join(', ');
 
-	return `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur des liens d'intégration fermés ou invalides du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ces liens sur votre site.`;
+	return hasSeveralIssues
+		? `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur des liens d'intégration fermés ou invalides du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ces liens sur votre site.`
+		: `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur un lien d'intégration fermé ou invalide du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ce lien sur votre site.`;
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {

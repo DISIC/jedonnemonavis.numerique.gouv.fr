@@ -53,8 +53,8 @@ export const JdmaLinkIssueEmail = ({
 			</Text>
 
 			<ul style={list}>
-				{issues.map(({ form, linkLabel }) => (
-					<li key={`${form.id}-${linkLabel}`} style={listItem}>
+				{issues.map(({ form, linkLabel }, index) => (
+					<li key={`${form.id}-${index}`} style={listItem}>
 						Formulaire « {form.title} » :{' '}
 						<Link
 							href={`${productUrl}/${form.id.toString()}?tab=links`}
