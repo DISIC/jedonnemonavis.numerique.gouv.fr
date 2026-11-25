@@ -407,7 +407,7 @@ const DateRangePickerButton = ({
 									classes.dateFieldGroup
 								)}
 							>
-								<label id="date-debut-label" className={fr.cx('fr-label')}>
+								<label htmlFor="date-debut" className={fr.cx('fr-label')}>
 									Date de début
 								</label>
 								<DateField
@@ -420,8 +420,8 @@ const DateRangePickerButton = ({
 									slotProps={{
 										textField: {
 											InputProps: { className: fr.cx('fr-input') },
+											id: 'date-debut',
 											inputProps: {
-												'aria-labelledby': 'date-debut-label',
 												'aria-describedby': errors.startDate
 													? 'date-debut-error'
 													: undefined
@@ -448,7 +448,7 @@ const DateRangePickerButton = ({
 									classes.dateFieldGroup
 								)}
 							>
-								<label id="date-fin-label" className={fr.cx('fr-label')}>
+								<label htmlFor="date-fin" className={fr.cx('fr-label')}>
 									Date de fin
 								</label>
 								<DateField
@@ -462,8 +462,8 @@ const DateRangePickerButton = ({
 										textField: {
 											variant: 'outlined',
 											InputProps: { className: fr.cx('fr-input') },
+											id: 'date-fin',
 											inputProps: {
-												'aria-labelledby': 'date-fin-label',
 												'aria-describedby': errors.endDate
 													? 'date-fin-error'
 													: undefined
