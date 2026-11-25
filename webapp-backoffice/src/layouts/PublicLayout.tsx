@@ -508,6 +508,12 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				<Footer
 					className={cx(classes.footer)}
 					accessibility="non compliant"
+					domains={[
+						'info.gouv.fr',
+						'service-public.gouv.fr',
+						'legifrance.gouv.fr',
+						'data.gouv.fr'
+					]}
 					accessibilityLinkProps={{
 						href: '/public/accessibility'
 					}}

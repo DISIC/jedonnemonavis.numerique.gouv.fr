@@ -195,6 +195,12 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			<Footer
 				id="footer"
 				accessibility="non compliant"
+				domains={[
+					'info.gouv.fr',
+					'service-public.gouv.fr',
+					'legifrance.gouv.fr',
+					'data.gouv.fr'
+				]}
 				accessibilityLinkProps={{
 					href: '/accessibility'
 				}}
