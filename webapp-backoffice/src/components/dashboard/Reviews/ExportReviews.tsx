@@ -9,7 +9,6 @@ interface Props {
 	form: FormWithElements;
 	startDate: string;
 	endDate: string;
-	mustHaveVerbatims: boolean;
 	search: string;
 	button_id: number | undefined;
 	filters: ReviewFiltersType;
@@ -31,7 +30,6 @@ const ExportReviews = (props: Props) => {
 		form,
 		startDate,
 		endDate,
-		mustHaveVerbatims,
 		search,
 		button_id,
 		filters,
@@ -55,7 +53,6 @@ const ExportReviews = (props: Props) => {
 				params={JSON.stringify({
 					startDate,
 					endDate,
-					mustHaveVerbatims,
 					search,
 					button_id,
 					filters
