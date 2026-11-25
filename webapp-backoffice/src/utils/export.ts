@@ -74,7 +74,6 @@ export const renderFilterFieldLabel = (
 export type ExportParams = Partial<{
 	startDate: string;
 	endDate: string;
-	mustHaveVerbatims: boolean;
 	search: string;
 	button_id: number | string | null;
 	filters: ReviewFiltersType;

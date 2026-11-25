@@ -36,7 +36,6 @@ const CONCURRENCY_LIMIT = parseInt(
 type FilterParams = {
 	startDate?: string;
 	endDate?: string;
-	mustHaveVerbatims?: boolean;
 	search?: string;
 	button_id?: number;
 	filters?: ReviewFiltersType;

@@ -651,7 +651,6 @@ const ReviewsTab = (props: Props) => {
 							form={form}
 							startDate={filters.sharedFilters.currentStartDate}
 							endDate={filters.sharedFilters.currentEndDate}
-							mustHaveVerbatims={true}
 							search={search}
 							button_id={buttonId}
 							filters={filters.productReviews.filters}
