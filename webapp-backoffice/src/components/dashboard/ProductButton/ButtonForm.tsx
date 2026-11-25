@@ -153,10 +153,7 @@ const ButtonForm = ({
 							},
 							illustration: (
 								<ImageWithFallback
-									alt={
-										bsOption.alt_text ||
-										buttonStylesMapping[bsOption.style].altText
-									}
+									alt={buttonStylesMapping[bsOption.style].altText}
 									src={bsOption.image_url}
 									fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton.slug}-${bsOption.style}-light.svg`}
 									width={200}

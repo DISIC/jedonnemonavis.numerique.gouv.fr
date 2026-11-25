@@ -9,6 +9,7 @@ import prisma from '@/src/utils/db';
 import {
 	getFormPreviewUrl,
 	getHasConfigChanged,
+	getFormConfigurationTitle,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
@@ -97,6 +98,7 @@ const ProductFormPage = (props: Props) => {
 		status: 'published'
 	});
 	const [shouldModalOpen, setShouldModalOpen] = useState(false);
+	const [configStepTitle, setConfigStepTitle] = useState<string>();
 
 	useEffect(() => {
 		if (isLoadingSettings) return;
@@ -220,14 +222,16 @@ const ProductFormPage = (props: Props) => {
 		}
 	});
 
+	const headTitle = `${getFormConfigurationTitle(
+		form.title || form.form_template.title,
+		configStepTitle
+	)} | Je donne mon avis`;
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | Configuration du formulaire | Je donne mon avis`}</title>
-				<meta
-					name="description"
-					content={`${form.product.title} | Configuration du formulaire | Je donne mon avis`}
-				/>
+				<title>{headTitle}</title>
+				<meta name="description" content={headTitle} />
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmPublishModal}
@@ -346,6 +350,7 @@ const ProductFormPage = (props: Props) => {
 						onPublish={() => {
 							onConfirmPublishModal.open();
 						}}
+						onStepChange={step => setConfigStepTitle(step.title)}
 						hasConfigChanged={hasConfigChanged}
 					/>
 				</div>

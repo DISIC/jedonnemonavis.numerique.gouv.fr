@@ -845,6 +845,17 @@ export const getContactStepState = (
 	return isConsentHidden ? 'hidden' : 'conditional';
 };
 
+export const getFormConfigurationTitle = (
+	formTitle: string,
+	stepTitle?: string
+) =>
+	[
+		`Configuration du formulaire ${formTitle}`,
+		stepTitle && `étape ${stepTitle}`
+	]
+		.filter(Boolean)
+		.join(' | ');
+
 export const getHasConfigChanged = (
 	firstConfig: FormConfigHelper,
 	secondConfig: FormConfigHelper

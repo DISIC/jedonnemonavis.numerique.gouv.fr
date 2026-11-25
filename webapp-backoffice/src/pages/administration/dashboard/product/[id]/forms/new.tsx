@@ -10,6 +10,7 @@ import {
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import {
+	getFormConfigurationTitle,
 	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
@@ -54,6 +55,7 @@ const NewForm = (props: Props) => {
 
 	const [formStep, setFormStep] = useState<FormCreationStep>('CREATE');
 	const [formTitle, setFormTitle] = useState<string>('');
+	const [configStepTitle, setConfigStepTitle] = useState<string>();
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
 	const [createConfig, setCreateConfig] = useState<CreateFormConfigInput>({
@@ -463,6 +465,7 @@ const NewForm = (props: Props) => {
 								<FormConfigurator
 									form={createdForm}
 									onChange={onChangeConfig}
+									onStepChange={step => setConfigStepTitle(step.title)}
 									hasConfigChanged={hasConfigChanged}
 									isExternalPublish={true}
 								/>
@@ -495,11 +498,15 @@ const NewForm = (props: Props) => {
 		}
 	})();
 
-	const headTitle =
+	const baseHeadTitle =
 		(formStep === 'CREATE' ? committedTitle ?? defaultTitle : formTitle) ||
 		formTitle ||
 		selectedFormTemplate?.title ||
 		currentStepValues.title;
+	const headTitle =
+		formStep === 'EDIT'
+			? getFormConfigurationTitle(baseHeadTitle, configStepTitle)
+			: baseHeadTitle;
 
 	return (
 		<OnboardingLayout

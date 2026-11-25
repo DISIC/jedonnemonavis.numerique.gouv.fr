@@ -55,6 +55,7 @@ const RootScales = (props: Props) => {
 						>
 							<fieldset className={cx(classes.fieldset)}>
 								<legend className={cx(classes.labelWrapper)}>
+									<span className={fr.cx('fr-sr-only')}>{block.label} </span>
 									<span className={cx(classes.label)}>{childBlock.label}</span>
 								</legend>
 								{!disabled && isParentHidden ? (
