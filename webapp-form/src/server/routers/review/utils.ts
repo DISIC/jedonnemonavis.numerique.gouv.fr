@@ -3,7 +3,7 @@ import { Answer, PrismaClient, Review } from '@prisma/client';
 import { Client } from '@elastic/elasticsearch';
 import { ElkAnswer } from '@/src/utils/types';
 import { TRPCError } from '@trpc/server';
-import { isValidButtonId } from '@/src/utils/tools';
+import { isBlankTextAnswer, isValidButtonId } from '@/src/utils/tools';
 import { FormStepNames } from '@/src/pages/[id]';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 import type {
@@ -81,7 +81,45 @@ export async function createOrUpdateAnswers(
 	}
 ) {
 	const { prisma, elkClient } = ctx;
-	const { review, answers, step_name } = input;
+	const { review, step_name } = input;
+
+	const answers = input.answers.filter(answer => !isBlankTextAnswer(answer));
+	const blankFieldCodes = input.answers
+		.filter(isBlankTextAnswer)
+		.map(answer => answer.field_code);
+
+	if (blankFieldCodes.length > 0) {
+		await prisma.answer.deleteMany({
+			where: {
+				review_id: review.id,
+				review_created_at: review.created_at,
+				field_code: { in: blankFieldCodes }
+			}
+		});
+
+		await elkClient.deleteByQuery({
+			index: 'jdma-answers',
+			body: {
+				query: {
+					bool: {
+						filter: [
+							{ term: { review_id: review.id } },
+							{ terms: { field_code: blankFieldCodes } }
+						]
+					}
+				}
+			}
+		});
+
+		if (blankFieldCodes.includes('verbatim')) {
+			await prisma.review.update({
+				where: {
+					id_created_at: { id: review.id, created_at: review.created_at }
+				},
+				data: { has_verbatim: false }
+			});
+		}
+	}
 
 	if (step_name && step_name === 'contact') {
 		await prisma.answer.deleteMany({

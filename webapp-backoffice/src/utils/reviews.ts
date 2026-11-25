@@ -74,6 +74,7 @@ export const formatWhereAndOrder = (
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
+								{ NOT: { answer_text: '' } },
 								!newReviews &&
 									end_date && {
 										created_at: getDateWhereFromUTCRange(
