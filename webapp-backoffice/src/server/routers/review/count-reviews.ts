@@ -10,7 +10,6 @@ export const countReviewsInputSchema = z.object({
 	product_id: z.number().optional(),
 	form_id: z.number(),
 	shouldIncludeAnswers: z.boolean().optional().default(false),
-	mustHaveVerbatims: z.boolean().optional().default(false),
 	sort: z.string().optional(),
 	search: z.string().optional(),
 	start_date: z.string().optional(),
