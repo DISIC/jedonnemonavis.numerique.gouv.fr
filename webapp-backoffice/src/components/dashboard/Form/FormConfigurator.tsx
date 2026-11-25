@@ -2,26 +2,36 @@ import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react';
 import useModifiedSteps from '../../../hooks/dashboard/form/useModifiedSteps';
 import FormStepDisplay from './FormStepDisplay';
-import FormStepper from './FormStepper';
+import FormStepper, { FormStepperHandle } from './FormStepper';
+
+type Step = FormWithElements['form_template']['form_template_steps'][0];
 
 interface Props {
 	form: FormWithElements;
 	hasConfigChanged: boolean;
 	onChange: (configHelper: FormConfigHelper) => void;
 	onPublish?: () => void;
+	onStepChange?: (step: Step) => void;
 	isExternalPublish?: boolean;
 }
 
 const FormConfigurator = (props: Props) => {
-	const { form, hasConfigChanged, isExternalPublish, onChange, onPublish } =
-		props;
+	const {
+		form,
+		hasConfigChanged,
+		isExternalPublish,
+		onChange,
+		onPublish,
+		onStepChange
+	} = props;
 	const formConfig = form.form_configs[0];
 
 	const { classes, cx } = useStyles();
+	const stepperRef = useRef<FormStepperHandle>(null);
 
 	const [currentStep, setCurrentStep] = React.useState(
 		form.form_template.form_template_steps[0]
@@ -55,23 +65,24 @@ const FormConfigurator = (props: Props) => {
 		});
 	};
 
-	const changeStep = (
-		step: FormWithElements['form_template']['form_template_steps'][0]
-	) => {
+	const changeStep = (step: Step) => {
 		setCurrentStep(step);
 	};
 
 	const goToSibilingStep = (to: 'previous' | 'next') => {
 		const currentStepIndex = steps.findIndex(s => s.id === currentStep.id);
+		const targetStep =
+			steps[to === 'previous' ? currentStepIndex - 1 : currentStepIndex + 1];
 
-		if (to === 'previous' && currentStepIndex - 1 >= 0) {
-			changeStep(steps[currentStepIndex - 1]);
-		}
+		if (!targetStep) return;
 
-		if (to === 'next' && currentStepIndex + 1 < steps.length) {
-			changeStep(steps[currentStepIndex + 1]);
-		}
+		changeStep(targetStep);
+		stepperRef.current?.focusStep(targetStep.id);
 	};
+
+	useEffect(() => {
+		onStepChange?.(currentStep);
+	}, [currentStep]);
 
 	useEffect(() => {
 		if (tmpConfigHelper) {
@@ -85,6 +96,7 @@ const FormConfigurator = (props: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-grid-row'))}>
 			<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 				<FormStepper
+					ref={stepperRef}
 					steps={steps}
 					onClick={changeStep}
 					currentStep={currentStep}

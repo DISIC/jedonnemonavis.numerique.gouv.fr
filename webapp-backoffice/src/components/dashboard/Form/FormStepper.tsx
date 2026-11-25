@@ -3,7 +3,13 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { getContactStepState } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { useId, useState } from 'react';
+import {
+	forwardRef,
+	useId,
+	useImperativeHandle,
+	useRef,
+	useState
+} from 'react';
 import { tss } from 'tss-react';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
@@ -16,12 +22,26 @@ interface Props {
 	isStepModified: (stepId: number) => boolean;
 }
 
-const FormStepper = (props: Props) => {
+export type FormStepperHandle = {
+	focusStep: (stepId: number) => void;
+};
+
+const FormStepper = forwardRef<FormStepperHandle, Props>((props, ref) => {
 	const { steps, configHelper, onClick, currentStep, isStepModified } = props;
 	const { classes, cx } = useStyles();
 
 	const collapseId = useId();
 	const [isExpanded, setIsExpanded] = useState(false);
+	const toggleRef = useRef<HTMLButtonElement>(null);
+	const stepButtonsRef = useRef(new Map<number, HTMLButtonElement>());
+
+	useImperativeHandle(ref, () => ({
+		focusStep: stepId => {
+			const stepButton = stepButtonsRef.current.get(stepId);
+			stepButton?.focus();
+			if (document.activeElement !== stepButton) toggleRef.current?.focus();
+		}
+	}));
 
 	return (
 		<div className={cx(classes.container)}>
@@ -31,6 +51,7 @@ const FormStepper = (props: Props) => {
 			>
 				<div className={fr.cx('fr-sidemenu__inner')}>
 					<button
+						ref={toggleRef}
 						type="button"
 						aria-expanded={isExpanded}
 						aria-controls={collapseId}
@@ -56,6 +77,10 @@ const FormStepper = (props: Props) => {
 								return (
 									<li key={step.id} className={fr.cx('fr-sidemenu__item')}>
 										<button
+											ref={el => {
+												if (el) stepButtonsRef.current.set(step.id, el);
+												else stepButtonsRef.current.delete(step.id);
+											}}
 											type="button"
 											className={fr.cx('fr-sidemenu__link')}
 											aria-current={isCurrent ? 'step' : undefined}
@@ -98,7 +123,9 @@ const FormStepper = (props: Props) => {
 			</nav>
 		</div>
 	);
-};
+});
+
+FormStepper.displayName = 'FormStepper';
 
 const useStyles = tss.withName({ FormStepper }).create({
 	container: {
@@ -175,15 +202,6 @@ const useStyles = tss.withName({ FormStepper }).create({
 			'.fr-sidemenu__link': {
 				paddingLeft: fr.spacing('4v'),
 				fontWeight: 700
-			},
-			'.fr-sidemenu__link:not([aria-current=step])::before': {
-				content: '""',
-				position: 'absolute',
-				top: 0,
-				bottom: 0,
-				left: 0,
-				width: '4px',
-				backgroundColor: fr.colors.options.blueFrance.main525.default
 			}
 		}
 	},
