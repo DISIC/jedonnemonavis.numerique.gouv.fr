@@ -11,6 +11,7 @@ import {
 } from '@/src/types/prismaTypesExtended';
 import {
 	getFormConfigurationTitle,
+	getOnboardingHeadTitle,
 	getFormPreviewUrl,
 	getHasConfigChanged,
 	getHelperFromFormConfig
@@ -135,7 +136,6 @@ const NewForm = (props: Props) => {
 
 	const titleInfoId = 'form-title-info';
 	const titleErrorId = 'form-title-error';
-	const [committedTitle, setCommittedTitle] = useState<string>();
 
 	const createFormConfig = trpc.formConfig.create.useMutation({
 		onSuccess: () => {
@@ -171,7 +171,6 @@ const NewForm = (props: Props) => {
 		reset({
 			title: defaultTitle || selectedFormTemplate?.title || ''
 		});
-		setCommittedTitle(undefined);
 	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
@@ -389,9 +388,6 @@ const NewForm = (props: Props) => {
 														)}
 														type="text"
 														onChange={onChange}
-														onBlur={e =>
-															setCommittedTitle(e.target.value.trim())
-														}
 														value={value || ''}
 														name={name}
 														required
@@ -498,15 +494,17 @@ const NewForm = (props: Props) => {
 		}
 	})();
 
-	const baseHeadTitle =
-		(formStep === 'CREATE' ? committedTitle ?? defaultTitle : formTitle) ||
-		formTitle ||
-		selectedFormTemplate?.title ||
-		currentStepValues.title;
-	const headTitle =
+	const pageHeadTitle =
 		formStep === 'EDIT'
-			? getFormConfigurationTitle(baseHeadTitle, configStepTitle)
-			: baseHeadTitle;
+			? getFormConfigurationTitle(
+					formTitle || selectedFormTemplate?.title || currentStepValues.title,
+					configStepTitle
+			  )
+			: currentStepValues.title;
+	const headTitle =
+		hasCreatedProduct && !shouldShowStepper
+			? getOnboardingHeadTitle(pageHeadTitle, steps, 'form')
+			: pageHeadTitle;
 
 	return (
 		<OnboardingLayout

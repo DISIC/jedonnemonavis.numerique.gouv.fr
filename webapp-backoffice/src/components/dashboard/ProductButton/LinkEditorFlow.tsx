@@ -10,6 +10,7 @@ import {
 	FormTemplateButtonWithVariants,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
+import { getOnboardingHeadTitle } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import {
@@ -29,7 +30,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 	const router = useRouter();
 	const { form_id, link_id } = router.query;
 	const { cx, classes } = useStyles();
-	const { createdProduct, createdForm } = useOnboarding();
+	const { createdProduct, createdForm, steps } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<FormTemplateButtonStyle>();
@@ -283,6 +284,11 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 		<OnboardingLayout
 			onCancel={currentStepValues.onCancel}
 			title={currentStepValues.title}
+			headTitle={
+				createdProduct
+					? getOnboardingHeadTitle(currentStepValues.title, steps, 'link')
+					: undefined
+			}
 			confirmText={currentStepValues.confirmText}
 			onConfirm={currentStepValues.onConfirm}
 			hideMainHintText={!!createdButton}

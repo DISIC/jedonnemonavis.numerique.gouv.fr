@@ -1,7 +1,10 @@
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
-import { createFilterOptionsWithArgument } from '@/src/utils/tools';
+import {
+	createFilterOptionsWithArgument,
+	getOnboardingHeadTitle
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -157,14 +160,19 @@ const NewProduct = () => {
 		updateCreatedProduct(tmpProduct);
 	};
 
+	const pageTitle = isEditingStep
+		? 'Modifier un service numérique'
+		: shouldShowStepper
+		? 'Étapier parcours de création'
+		: 'Ajouter un service numérique';
+
 	return (
 		<OnboardingLayout
-			title={
-				isEditingStep
-					? 'Modifier un service numérique'
-					: shouldShowStepper
-					? 'Étapier parcours de création'
-					: 'Ajouter un service numérique'
+			title={pageTitle}
+			headTitle={
+				shouldShowStepper
+					? undefined
+					: getOnboardingHeadTitle(pageTitle, steps, 'product')
 			}
 			onConfirm={handleSubmit(onLocalSubmit)}
 			isStepperLayout={shouldShowStepper}

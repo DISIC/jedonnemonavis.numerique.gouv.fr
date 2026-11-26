@@ -2,6 +2,7 @@ import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRight
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
+import { getOnboardingHeadTitle } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -193,6 +194,11 @@ const NewAccess = ({ product }: Props) => {
 				shouldShowStepper
 					? 'Étapier parcours de création'
 					: 'Inviter des utilisateurs'
+			}
+			headTitle={
+				hasCreatedProduct && !shouldShowStepper
+					? getOnboardingHeadTitle('Inviter des utilisateurs', steps, 'access')
+					: undefined
 			}
 			onConfirm={onConfirm}
 			onSkip={
