@@ -1,8 +1,8 @@
 import { TypeExportSchema } from '@/prisma/generated/zod';
 import { exportQueue } from '@/src/lib/queue';
 import type { Context } from '@/src/server/trpc';
-import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 
 export const createExportInputSchema = z.object({
@@ -27,6 +27,16 @@ export const createExportMutation = async ({
 		product_id: input.product_id,
 		authorizeCarrierUser: true
 	});
+
+	// Exports require the BullMQ worker, which needs Redis. Fail fast with a clear
+	// message rather than creating an Export row that would never be processed.
+	if (!exportQueue) {
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message:
+				"Le service d'export est indisponible (file d'attente non configurée)."
+		});
+	}
 
 	if (input.only_deleted_reviews && !ctx.session!.user.role.includes('admin')) {
 		throw new TRPCError({

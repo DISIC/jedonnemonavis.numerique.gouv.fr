@@ -1,4 +1,5 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import { trpc } from '@/src/utils/trpc';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { getFilterableBlocks } from '@/src/utils/export';
 import { displayIntention } from '@/src/utils/stats/intention-helpers';
@@ -81,13 +82,38 @@ const ReviewFiltersModal = (props: Props) => {
 		return fieldFilter?.values.includes(value) || false;
 	};
 
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const facets = catalogueData?.data ?? [];
+	const objetFacets = facets.filter(
+		f =>
+			f.axis === 'objet' &&
+			(f.product_id == null || f.product_id === form.product_id)
+	);
+	const thematiqueFacets = facets.filter(f => f.axis === 'thematique_site');
+	const facetGroups = [
+		{ title: 'Produits / objets', items: objetFacets },
+		{ title: 'Thématiques site', items: thematiqueFacets }
+	].filter(g => g.items.length > 0);
+	const toggleClass = (code: string) => {
+		setTmpFilters(prev => {
+			const current = prev.classes ?? [];
+			return {
+				...prev,
+				classes: current.includes(code)
+					? current.filter(c => c !== code)
+					: [...current, code]
+			};
+		});
+	};
+
 	const handleReset = () => {
 		const emptyFilters: ReviewFiltersType = {
 			needVerbatim: false,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
 			buttonId: [],
-			fields: []
+			fields: [],
+			classes: []
 		};
 		setTmpFilters(emptyFilters);
 		push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
@@ -210,6 +236,33 @@ const ReviewFiltersModal = (props: Props) => {
 					</Fragment>
 				);
 			})}
+
+			{facetGroups.length > 0 && (
+				<>
+					{filterableBlocks.length > 0 && (
+						<hr className={cx(classes.separator)} />
+					)}
+					<div className={cx(classes.section)}>
+						<p className={cx(classes.subtitle)}>Classification IA (facettes)</p>
+						{facetGroups.map(group => (
+							<div key={group.title} className={fr.cx('fr-mb-2w')}>
+								<p className={fr.cx('fr-text--sm', 'fr-mb-1v')}>{group.title}</p>
+								<Checkbox
+									options={group.items.map(c => ({
+										label: c.label,
+										nativeInputProps: {
+											name: `classe-${c.code}`,
+											checked: (tmpFilters.classes ?? []).includes(c.code),
+											onChange: () => toggleClass(c.code)
+										}
+									}))}
+									state="default"
+								/>
+							</div>
+						))}
+					</div>
+				</>
+			)}
 
 			{isGlobalAdmin && (
 				<div className={cx(classes.section)}>

@@ -1,0 +1,3 @@
+Démarche : service de contact / tchat en ligne avec la Police Nationale (échange avec un agent pour poser une question ou signaler un fait).
+Un policier ou gendarme répond en tchat ; les situations urgentes sont redirigées vers le 17 (police-secours).
+Termes fréquents : tchat, policier, gendarme, signalement, plainte, le 17, forces de l'ordre, brigade numérique.

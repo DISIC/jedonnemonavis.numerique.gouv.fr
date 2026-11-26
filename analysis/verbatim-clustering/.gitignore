@@ -1,0 +1,18 @@
+# Privacy: citizen-submitted verbatims are personal data — NEVER commit raw text,
+# embeddings, or any derived per-row artefact.
+data/
+cache/
+out/
+*.csv
+*.tsv
+*.npy
+*.parquet
+
+# Python env
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Keep the example
+!.env.example

@@ -1,5 +1,6 @@
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
+import { trpc } from '@/src/utils/trpc';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	getFilterableBlocks,
@@ -19,6 +20,11 @@ const ReviewFilterTags = (props: Props) => {
 	const { buttons, form, isGlobalAdmin } = props;
 	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
+
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const classLabelByCode = new Map(
+		(catalogueData?.data ?? []).map(c => [c.code, c.label] as const)
+	);
 
 	const filterableBlocks = getFilterableBlocks(form);
 
@@ -172,6 +178,43 @@ const ReviewFilterTags = (props: Props) => {
 				});
 			});
 		}
+
+		const selectedClasses = filters.productReviews.filters.classes ?? [];
+		selectedClasses.forEach((code, idx) => {
+			const label = classLabelByCode.get(code) ?? code;
+			tags.push(
+				<Tag
+					key={`classe-${idx}`}
+					title={`Retirer le filtre catégorie : ${label}`}
+					dismissible
+					small
+					className={cx(classes.tagFilter)}
+					nativeButtonProps={{
+						onClick: () => {
+							const nextFilters: typeof filters = {
+								...filters,
+								productReviews: {
+									...filters.productReviews,
+									filters: {
+										...filters.productReviews.filters,
+										classes: selectedClasses.filter(c => c !== code)
+									}
+								}
+							};
+							updateFilters({
+								...nextFilters,
+								sharedFilters: {
+									...nextFilters.sharedFilters,
+									hasChanged: hasAnyFilterChanged(nextFilters)
+								}
+							});
+						}
+					}}
+				>
+					Catégorie : {label}
+				</Tag>
+			);
+		});
 
 		return tags.length > 0 ? tags : null;
 	};

@@ -83,7 +83,8 @@ export const initialFilterState: Filters = {
 			needOtherDifficulties: false,
 			needOtherHelp: false,
 			buttonId: [],
-			fields: []
+			fields: [],
+			classes: []
 		}
 	},
 	productStats: {

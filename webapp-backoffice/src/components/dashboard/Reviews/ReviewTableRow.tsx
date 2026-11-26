@@ -70,6 +70,7 @@ const ReviewTableRow = ({
 	review,
 	search,
 	form,
+	categoryInfo,
 	isSelected,
 	onSelectReview,
 	rowRef
@@ -77,6 +78,7 @@ const ReviewTableRow = ({
 	review: ReviewPartialWithRelations;
 	search: string;
 	form: FormWithElements;
+	categoryInfo?: Map<string, string>;
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	rowRef?: (el: HTMLTableRowElement | null) => void;
@@ -84,6 +86,27 @@ const ReviewTableRow = ({
 	const { cx, classes } = useStyles();
 
 	const formTemplate = form.form_template;
+
+	// Verbatim classification — FACETS. Show the human-validated set if any, else the prediction.
+	const classification = review.classification;
+	const allFacets = classification?.facets ?? [];
+	const isValidatedClass = allFacets.some(f => f.source === 'validated');
+	const effectiveFacets = allFacets.filter(f =>
+		isValidatedClass ? f.source === 'validated' : f.source === 'predicted'
+	);
+	// De-duplicate codes (objet + thématique share the chip list) and resolve labels.
+	const facetChips = Array.from(
+		new Map(
+			effectiveFacets
+				.map(f => f.code)
+				.filter((c): c is string => !!c)
+				.map(code => [code, categoryInfo?.get(code) ?? code] as const)
+		).entries()
+	);
+	const polarite = (classification?.polarite as string[] | undefined) ?? [];
+	const classSeverity = isValidatedClass
+		? ('success' as const)
+		: ('info' as const);
 
 	const mainBlocks = formTemplate.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -205,6 +228,31 @@ const ReviewTableRow = ({
 							'-'
 						)}
 					</p>
+					{(facetChips.length > 0 || polarite.length > 0) && (
+						<div className={cx(classes.classBadges)}>
+							{polarite.map(p => (
+								<Badge
+									key={`pol-${p}`}
+									noIcon={true}
+									severity={p === 'positif' ? 'success' : 'error'}
+									small
+								>
+									{p}
+								</Badge>
+							))}
+							{facetChips.map(([code, label]) => (
+								<Badge
+									key={code}
+									className={cx(classes.classBadge)}
+									noIcon={true}
+									severity={classSeverity}
+									small
+								>
+									{isValidatedClass ? `✓ ${label}` : label}
+								</Badge>
+							))}
+						</div>
+					)}
 				</td>
 			)}
 
@@ -329,6 +377,15 @@ const useStyles = tss.create({
 		display: 'flex',
 		alignItems: 'center',
 		gap: '0.25rem'
+	},
+	classBadges: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: fr.spacing('1v'),
+		marginTop: fr.spacing('1v')
+	},
+	classBadge: {
+		fontSize: 12
 	}
 });
 

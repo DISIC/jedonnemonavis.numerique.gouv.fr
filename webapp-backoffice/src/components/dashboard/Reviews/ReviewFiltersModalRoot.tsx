@@ -1,4 +1,5 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import { trpc } from '@/src/utils/trpc';
 import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -78,6 +79,27 @@ const ReviewFiltersModalRoot = (props: Props) => {
 		return fieldFilter?.values.includes(value) || false;
 	};
 
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const facets = catalogueData?.data ?? [];
+	const facetGroups = [
+		{ title: 'Produits / objets', items: facets.filter(f => f.axis === 'objet') },
+		{
+			title: 'Thématiques site',
+			items: facets.filter(f => f.axis === 'thematique_site')
+		}
+	].filter(g => g.items.length > 0);
+	const toggleClass = (code: string) => {
+		setTmpFilters(prev => {
+			const current = prev.classes ?? [];
+			return {
+				...prev,
+				classes: current.includes(code)
+					? current.filter(c => c !== code)
+					: [...current, code]
+			};
+		});
+	};
+
 	const satisfactionOptions = (
 		['good', 'medium', 'bad'] as AnswerIntention[]
 	).map(intention => {
@@ -149,6 +171,31 @@ const ReviewFiltersModalRoot = (props: Props) => {
 				/>
 			</div>
 
+			{facetGroups.length > 0 && (
+				<>
+					<hr className={cx(classes.separator)} />
+					<div className={cx(classes.section)}>
+						<p className={cx(classes.subtitle)}>Classification IA (facettes)</p>
+						{facetGroups.map(group => (
+							<div key={group.title} className={fr.cx('fr-mb-2w')}>
+								<p className={fr.cx('fr-text--sm', 'fr-mb-1v')}>{group.title}</p>
+								<Checkbox
+									options={group.items.map(c => ({
+										label: c.label,
+										nativeInputProps: {
+											name: `classe-${c.code}`,
+											checked: (tmpFilters.classes ?? []).includes(c.code),
+											onChange: () => toggleClass(c.code)
+										}
+									}))}
+									state="default"
+								/>
+							</div>
+						))}
+					</div>
+				</>
+			)}
+
 			{isGlobalAdmin && (
 				<div className={cx(classes.section)}>
 					<hr className={cx(classes.separator)} />
@@ -193,7 +240,8 @@ const ReviewFiltersModalRoot = (props: Props) => {
 									needOtherDifficulties: false,
 									needOtherHelp: false,
 									buttonId: [],
-									fields: []
+									fields: [],
+									classes: []
 								});
 								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
 							}}

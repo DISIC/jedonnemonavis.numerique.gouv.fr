@@ -16,6 +16,7 @@ export const getReviewListInputSchema = z.object({
 	mustHaveVerbatimsOptimzed: z.boolean().optional().default(false),
 	sort: z.string().optional(),
 	search: z.string().optional(),
+	classes: z.array(z.string()).optional(),
 	start_date: z.string().optional(),
 	end_date: z.string().optional(),
 	newReviews: z.boolean().optional(),
@@ -129,6 +130,16 @@ export const getReviewListQuery = async ({
 		!!form?.legacy
 	);
 
+	// Filter by classification: match reviews that carry at least one facet (objet or thématique)
+	// whose code is in the selected set (predicted or validated).
+	if (input.classes && input.classes.length > 0) {
+		where.classification = {
+			is: {
+				facets: { some: { code: { in: input.classes } } }
+			}
+		};
+	}
+
 	// Use raw SQL with unaccent() for accent-insensitive search
 	const searchWhereRaw = buildSearchWhereRaw(input.search || '');
 	if (searchWhereRaw) {
@@ -176,6 +187,7 @@ export const getReviewListQuery = async ({
 				take: numberPerPage,
 				skip: (page - 1) * numberPerPage,
 				include: {
+					classification: { include: { facets: true } },
 					answers: shouldIncludeAnswers
 						? {
 								include: {

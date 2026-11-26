@@ -156,6 +156,8 @@ export type ReviewFiltersType = {
 		field_code: string;
 		values: string[];
 	}>;
+	// Classification problématique codes to filter on (effective class: validated else predicted)
+	classes: string[];
 };
 
 const ZBaseHitSchema = z.object({

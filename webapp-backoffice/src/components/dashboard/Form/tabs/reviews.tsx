@@ -183,6 +183,7 @@ const ReviewsTab = (props: Props) => {
 				? undefined
 				: filters.sharedFilters.currentEndDate,
 			sort: sort,
+			classes: filters.productReviews.filters.classes,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
 			needLogging: false,
@@ -227,6 +228,12 @@ const ReviewsTab = (props: Props) => {
 	const isFetchingList = showDeleted ? isFetchingArchived : isFetchingReviews;
 	const isLoadingList = showDeleted ? isLoadingArchived : isLoadingReviews;
 	const isTableFetching = isFetchingList && !isLoadingList;
+
+	// Classification referential → resolve a facet code to its label (for the chips on each row).
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const categoryInfo = new Map<string, string>(
+		(catalogueData?.data ?? []).map(f => [f.code, f.label] as const)
+	);
 
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
@@ -917,6 +924,7 @@ const ReviewsTab = (props: Props) => {
 																review={review}
 																search={validatedSearch}
 																form={form}
+																categoryInfo={categoryInfo}
 																isSelected={selectedReview?.id === review.id}
 																onSelectReview={handleSelectReview}
 																rowRef={el => {
