@@ -1,4 +1,5 @@
 import { Loader } from '@/src/components/ui/Loader';
+import { storeReturnFocus, useReturnFocus } from '@/src/hooks/useReturnFocus';
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	ButtonWithElements,
@@ -16,6 +17,8 @@ import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import { ButtonModalType } from '../../ProductButton/interface';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
+
+const CREATE_LINK_BUTTON_ID = 'create-link-button';
 
 interface Props {
 	form: FormWithElements;
@@ -70,6 +73,8 @@ const LinksTab = ({
 		}
 	}, [router.query]);
 
+	useReturnFocus(!isLoading);
+
 	if (isLoading) {
 		return (
 			<div className={fr.cx('fr-grid-row')}>
@@ -108,7 +113,9 @@ const LinksTab = ({
 						priority="secondary"
 						iconId="fr-icon-add-line"
 						iconPosition="right"
+						nativeButtonProps={{ id: CREATE_LINK_BUTTON_ID }}
 						onClick={() => {
+							storeReturnFocus(CREATE_LINK_BUTTON_ID);
 							router.push(
 								`/administration/dashboard/product/${form.product_id}/forms/${form.id}/link/new`
 							);
@@ -167,14 +174,19 @@ const LinksTab = ({
 							<span>Aucun lien d'intégration trouvé</span>
 						</div>
 					))}
-				{buttonsList.map((button, index) => (
-					<ProductButtonCard
-						key={index}
-						button={button}
-						onButtonClick={handleModalOpening}
-						ownRight={ownRight}
-					/>
-				))}
+				{buttonsList.length > 0 && (
+					<ul className={cx(classes.cardContainer, fr.cx('fr-raw-list'))}>
+						{buttonsList.map(button => (
+							<li key={button.id}>
+								<ProductButtonCard
+									button={button}
+									onButtonClick={handleModalOpening}
+									ownRight={ownRight}
+								/>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<div className={fr.cx('fr-col-12', 'fr-mt-16v')}>
