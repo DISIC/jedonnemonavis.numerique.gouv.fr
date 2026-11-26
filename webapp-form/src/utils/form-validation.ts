@@ -14,8 +14,11 @@ export type FormAnswers = Record<
 
 type FormConfig = FormWithElements['form_configs'][0];
 
-type Block =
-	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+type Step = FormWithElements['form_template']['form_template_steps'][0];
+
+type Block = Step['form_template_blocks'][0];
+
+const CONTACT_EMAIL_FIELD_CODE = 'contact_email';
 
 const DECORATIVE_BLOCK_TYPES = [
 	'paragraph',
@@ -37,6 +40,47 @@ export function getVisibleBlocks(
 	formConfig?: FormConfig
 ): Block[] {
 	return blocks.filter(block => !isBlockHidden(block, formConfig));
+}
+
+export function isStepHidden(step: Step, formConfig?: FormConfig): boolean {
+	return !!formConfig?.form_config_displays?.some(
+		d => d.kind === 'step' && d.parent_id === step.id && d.hidden
+	);
+}
+
+export type ContactConsent = {
+	block: Block;
+	isEnabled: boolean;
+	emailStep?: Step;
+};
+
+export function getContactConsent(
+	steps: Step[],
+	formConfig?: FormConfig
+): ContactConsent | undefined {
+	const block = steps
+		.flatMap(step => step.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	if (!block) return undefined;
+
+	return {
+		block,
+		isEnabled: !isBlockHidden(block, formConfig),
+		emailStep: steps.find(step =>
+			step.form_template_blocks.some(
+				block => block.field_code === CONTACT_EMAIL_FIELD_CODE
+			)
+		)
+	};
+}
+
+export function omitStepAnswers(answers: FormAnswers, step: Step): FormAnswers {
+	const stepKeys = new Set(
+		step.form_template_blocks.map(block => `block_${block.id}`)
+	);
+	return Object.fromEntries(
+		Object.entries(answers).filter(([key]) => !stepKeys.has(key))
+	);
 }
 
 export function hasBlockAnswer(

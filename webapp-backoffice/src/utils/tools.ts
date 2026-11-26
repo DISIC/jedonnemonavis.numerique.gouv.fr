@@ -1,3 +1,4 @@
+import { JdmaLinkIssueEmailProps } from '@/emails/interface';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
@@ -12,9 +13,9 @@ import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]
 import {
 	ArchivedAnswerSnapshot,
 	ButtonWithElements,
-	FormConfigWithChildren
+	FormConfigWithChildren,
+	FormWithElements
 } from '../types/prismaTypesExtended';
-import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -228,11 +229,111 @@ export const getSeverity = (intention: string) => {
 	}
 };
 
-export const retrieveButtonName = (buttonId: number) => {
-	const { data: button } = trpc.button.getById.useQuery({
-		id: buttonId
-	});
-	if (button?.data) return button.data?.title || '';
+export const getInvalidButtonLabel = (requestedButtonId?: number | null) =>
+	requestedButtonId
+		? `Lien invalide (identifiant ${requestedButtonId})`
+		: "Aucun lien d'intégration";
+
+export const getClosedButtonLogWording = (form: {
+	isDeleted: boolean | null;
+	form_template: { slug: string };
+}) =>
+	form.isDeleted || form.form_template.slug === 'root'
+		? {
+				title: "Tentative de dépôt d'avis",
+				description:
+					"Une tentative de dépôt d'avis a été effectuée depuis ce lien fermé. Nous vous invitons à supprimer le code HTML correspondant de la page concernée.",
+				lastLabel: 'Dernière tentative',
+				countLabel: 'Nombre total de tentatives'
+		  }
+		: {
+				title: 'Avis déposés sur un lien fermé',
+				description:
+					'Des avis ont été déposés depuis ce lien fermé. Ils sont bien enregistrés, mais nous vous invitons à supprimer le code HTML correspondant de la page concernée.',
+				lastLabel: 'Dernier avis déposé',
+				countLabel: "Nombre total d'avis déposés"
+		  };
+
+export const MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT = 3;
+export const MAX_INVALID_LINK_ALERTS_PER_PRODUCT = 3;
+
+type LinkIssueForm = {
+	id: number;
+	title: string | null;
+	form_template: { title: string };
+	product: { id: number; title: string };
+};
+
+export const buildLinkIssues = (
+	invalidLinkCounts: {
+		form_id: number;
+		requested_button_id: number | null;
+		_count: { _all: number };
+	}[],
+	invalidLinkForms: LinkIssueForm[],
+	closedLinks: { title: string; form: LinkIssueForm }[]
+): Omit<JdmaLinkIssueEmailProps, 'baseUrl'>[] => {
+	const invalidLinkFormsById = new Map(invalidLinkForms.map(f => [f.id, f]));
+	const alertCountByProductId = new Map<number, number>();
+
+	const invalidLinkIssues = invalidLinkCounts
+		.filter(
+			ilc => ilc._count._all >= MIN_VERBATIM_REVIEWS_FOR_INVALID_LINK_ALERT
+		)
+		.sort((a, b) => b._count._all - a._count._all)
+		.flatMap(ilc => {
+			const form = invalidLinkFormsById.get(ilc.form_id);
+			if (!form) return [];
+
+			const alertCount = alertCountByProductId.get(form.product.id) ?? 0;
+			if (alertCount >= MAX_INVALID_LINK_ALERTS_PER_PRODUCT) return [];
+			alertCountByProductId.set(form.product.id, alertCount + 1);
+
+			return [
+				{ form, linkLabel: getInvalidButtonLabel(ilc.requested_button_id) }
+			];
+		});
+
+	const closedLinkIssues = closedLinks.map(closedLink => ({
+		form: closedLink.form,
+		linkLabel: closedLink.title
+	}));
+
+	const linkIssuesByProductId = new Map<
+		number,
+		Omit<JdmaLinkIssueEmailProps, 'baseUrl'>
+	>();
+
+	for (const { form, linkLabel } of [
+		...closedLinkIssues,
+		...invalidLinkIssues
+	]) {
+		const productLinkIssues = linkIssuesByProductId.get(form.product.id) ?? {
+			product: { id: form.product.id, title: form.product.title },
+			issues: []
+		};
+		productLinkIssues.issues.push({
+			form: { id: form.id, title: form.title || form.form_template.title },
+			linkLabel
+		});
+		linkIssuesByProductId.set(form.product.id, productLinkIssues);
+	}
+
+	return [...linkIssuesByProductId.values()];
+};
+
+export const getLinkIssuesMailText = ({
+	product,
+	issues
+}: Omit<JdmaLinkIssueEmailProps, 'baseUrl'>) => {
+	const hasSeveralIssues = issues.length > 1;
+	const issuesText = issues
+		.map(({ form, linkLabel }) => `«${linkLabel}» (formulaire «${form.title}»)`)
+		.join(', ');
+
+	return hasSeveralIssues
+		? `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur des liens d'intégration fermés ou invalides du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ces liens sur votre site.`
+		: `Des utilisateurs ont déposé, ou tenté de déposer, des avis sur un lien d'intégration fermé ou invalide du service numérique «${product.title}» : ${issuesText}. Supprimez ou modifiez le code de ce lien sur votre site.`;
 };
 
 export const transformDateToFrenchReadable = (dateString: string): string => {
@@ -272,6 +373,36 @@ export const normalizeString = (str: string): string => {
 		.replace(/[\u0300-\u036f]/g, '') // strip accents
 		.replace(/[^\w\sÀ-ÿ\u0152\u0153'"]/gi, '') // allow œ/Œ; remove other special characters except letters, numbers, spaces, apostrophes, and quotes
 		.trim();
+};
+
+export const toHtmlIdSlug = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};
+
+export const RIGHT_OPTIONS_BUTTON_ID_PREFIX = 'button-options-access-right-';
+
+export const getRightOptionsIds = (right: {
+	id: number;
+	user: { firstName: string | null; lastName: string | null } | null;
+	user_email: string | null;
+	user_email_invite: string | null;
+}) => {
+	const userFullName = right.user
+		? `${right.user.firstName} ${right.user.lastName}`
+		: right.user_email ?? right.user_email_invite ?? '';
+	const idSuffix = `${toHtmlIdSlug(userFullName)}-${right.id}`;
+
+	return {
+		userFullName,
+		idSuffix,
+		optionsButtonId: `${RIGHT_OPTIONS_BUTTON_ID_PREFIX}${idSuffix}`,
+		optionsMenuId: `option-menu-access-right-${idSuffix}`
+	};
 };
 
 export const alternativeString = (str: string): string => {
@@ -689,6 +820,53 @@ export const getHelperFromFormConfig = (
 	};
 };
 
+type FormStep =
+	FormWithElements['form_template']['form_template_steps'][number];
+
+export const getContactStepState = (
+	step: FormStep,
+	steps: FormStep[],
+	configHelper: FormConfigHelper
+): 'hidden' | 'conditional' | null => {
+	const consentBlock = steps
+		.flatMap(s => s.form_template_blocks)
+		.find(block => block.type_bloc === 'consent');
+	const isContactStep = step.form_template_blocks.some(
+		block => block.field_code === 'contact_email'
+	);
+	if (!consentBlock || !isContactStep) return null;
+
+	const display = configHelper.displays.find(
+		d => d.kind === 'block' && d.parent_id === consentBlock.id
+	);
+	const isConsentHidden = display
+		? display.hidden
+		: consentBlock.isHiddenByDefault;
+	return isConsentHidden ? 'hidden' : 'conditional';
+};
+
+export const getFormConfigurationTitle = (
+	formTitle: string,
+	stepTitle?: string
+) =>
+	[
+		`Configuration du formulaire ${formTitle}`,
+		stepTitle && `étape ${stepTitle}`
+	]
+		.filter(Boolean)
+		.join(' | ');
+
+export const getOnboardingHeadTitle = (
+	title: string,
+	steps: { slug: string }[],
+	stepSlug: string
+) => {
+	const stepIndex = steps.findIndex(step => step.slug === stepSlug);
+	return stepIndex === -1
+		? title
+		: `${title} | Étape ${stepIndex + 1} sur ${steps.length}`;
+};
+
 export const getHasConfigChanged = (
 	firstConfig: FormConfigHelper,
 	secondConfig: FormConfigHelper
@@ -788,19 +966,6 @@ export function computeItemFraction(
 	const raw = (progress - start) / range;
 	return Math.max(0, Math.min(1, raw));
 }
-
-export const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-export const regexAtLeastOneNumber = /\d/;
-export const getMissingPasswordRequirements = (password: string): string[] => {
-	const missing: string[] = [];
-
-	if (password.length < 12) missing.push('12 caractères');
-	if (!regexAtLeastOneSpecialCharacter.test(password))
-		missing.push('1 caractère spécial');
-	if (!regexAtLeastOneNumber.test(password)) missing.push('1 chiffre');
-
-	return missing;
-};
 
 export const isHttpUrl = (url: string): boolean => /^https?:\/\//i.test(url);
 
@@ -914,6 +1079,7 @@ type ArchivedReviewSnapshot = {
 	product_id: number;
 	form_id: number;
 	button_id: number | null;
+	requested_button_id: number | null;
 	user_id: string | null;
 	has_verbatim: boolean;
 	answers: JsonValue;
@@ -932,7 +1098,8 @@ export const mapArchivedReviewToReview = (
 		created_at: createdAt,
 		product_id: archived.product_id,
 		form_id: archived.form_id,
-		button_id: archived.button_id ?? undefined,
+		button_id: archived.button_id,
+		requested_button_id: archived.requested_button_id,
 		user_id: archived.user_id ?? undefined,
 		has_verbatim: archived.has_verbatim,
 		answers: answers.map(a => ({
@@ -961,3 +1128,47 @@ export const closeHeaderMenuModal = (headerId: string) => {
 };
 
 export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];
+
+export type FocusTargetDescriptor = {
+	selector: string;
+	label: string;
+	index: number;
+};
+
+const FOCUS_LABEL_MAX_LENGTH = 200;
+
+const getFocusLabel = (element: Element) =>
+	(element.getAttribute('aria-label') || element.textContent || '')
+		.trim()
+		.slice(0, FOCUS_LABEL_MAX_LENGTH);
+
+const getFocusSelector = (element: HTMLElement) => {
+	if (element.id && !element.id.includes(':'))
+		return `#${CSS.escape(element.id)}`;
+	const tag = element.tagName.toLowerCase();
+	const href = element.getAttribute('href');
+	return href ? `${tag}[href="${CSS.escape(href)}"]` : tag;
+};
+
+const getFocusCandidates = (selector: string, label: string) =>
+	Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(
+		candidate => getFocusLabel(candidate) === label
+	);
+
+export const describeFocusTarget = (
+	element: Element | null
+): FocusTargetDescriptor | null => {
+	if (!(element instanceof HTMLElement) || element === document.body)
+		return null;
+	const selector = getFocusSelector(element);
+	const label = getFocusLabel(element);
+	const index = getFocusCandidates(selector, label).indexOf(element);
+	return index === -1 ? null : { selector, label, index };
+};
+
+export const findFocusTarget = ({
+	selector,
+	label,
+	index
+}: FocusTargetDescriptor): HTMLElement | null =>
+	getFocusCandidates(selector, label)[index] ?? null;

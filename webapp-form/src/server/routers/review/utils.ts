@@ -1,12 +1,14 @@
 import { ReviewWithButtonAndProduct } from '@/prisma/augmented';
-import { Answer, PrismaClient } from '@prisma/client';
+import { Answer, PrismaClient, Review } from '@prisma/client';
 import { Client } from '@elastic/elasticsearch';
 import { ElkAnswer } from '@/src/utils/types';
 import { TRPCError } from '@trpc/server';
+import { isBlankTextAnswer, isValidButtonId } from '@/src/utils/tools';
 import { FormStepNames } from '@/src/pages/[id]';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
 import type {
 	DynamicAnswerInput,
+	DynamicReviewInput,
 	ReviewAnswerInput,
 	ReviewChildAnswerInput,
 	ReviewInput
@@ -79,7 +81,45 @@ export async function createOrUpdateAnswers(
 	}
 ) {
 	const { prisma, elkClient } = ctx;
-	const { review, answers, step_name } = input;
+	const { review, step_name } = input;
+
+	const answers = input.answers.filter(answer => !isBlankTextAnswer(answer));
+	const blankFieldCodes = input.answers
+		.filter(isBlankTextAnswer)
+		.map(answer => answer.field_code);
+
+	if (blankFieldCodes.length > 0) {
+		await prisma.answer.deleteMany({
+			where: {
+				review_id: review.id,
+				review_created_at: review.created_at,
+				field_code: { in: blankFieldCodes }
+			}
+		});
+
+		await elkClient.deleteByQuery({
+			index: 'jdma-answers',
+			body: {
+				query: {
+					bool: {
+						filter: [
+							{ term: { review_id: review.id } },
+							{ terms: { field_code: blankFieldCodes } }
+						]
+					}
+				}
+			}
+		});
+
+		if (blankFieldCodes.includes('verbatim')) {
+			await prisma.review.update({
+				where: {
+					id_created_at: { id: review.id, created_at: review.created_at }
+				},
+				data: { has_verbatim: false }
+			});
+		}
+	}
 
 	if (step_name && step_name === 'contact') {
 		await prisma.answer.deleteMany({
@@ -190,7 +230,7 @@ export async function createOrUpdateAnswers(
 					review_id: review.id,
 					review_user_id: review.user_id,
 					button_id: review.button_id,
-					button_name: review.button.title,
+					button_name: review.button?.title ?? null,
 					product_id: review.product_id,
 					product_name: review.product.title,
 					form_id: review.form_id,
@@ -231,7 +271,7 @@ export async function createOrUpdateAnswers(
 									parent_answer_item_id: newAnswer.answer_item_id,
 									review_id: review.id,
 									button_id: review.button_id,
-									button_name: review.button.title,
+									button_name: review.button?.title ?? null,
 									product_id: review.product_id,
 									form_id: review.form_id,
 									product_name: review.product.title,
@@ -244,6 +284,24 @@ export async function createOrUpdateAnswers(
 				.flat()
 		);
 	});
+}
+
+export async function resolveReviewButton(
+	prisma: PrismaClient,
+	formId: number,
+	requestedButtonId?: number | null
+): Promise<Pick<Review, 'button_id' | 'requested_button_id'>> {
+	if (!isValidButtonId(requestedButtonId))
+		return { button_id: null, requested_button_id: null };
+
+	const button = await prisma.button.findFirst({
+		where: { id: requestedButtonId, form_id: formId },
+		select: { id: true }
+	});
+
+	return button
+		? { button_id: button.id, requested_button_id: null }
+		: { button_id: null, requested_button_id: requestedButtonId };
 }
 
 export async function assertReviewTargetsMatch(
@@ -263,6 +321,33 @@ export async function assertReviewTargetsMatch(
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'Button does not belong to this form and product'
+		});
+}
+
+export async function assertFormAcceptsReviews(
+	prisma: PrismaClient,
+	review: DynamicReviewInput
+) {
+	const form = await prisma.form.findUnique({
+		where: { id: review.form_id },
+		select: {
+			product_id: true,
+			isDeleted: true,
+			product: { select: { status: true } },
+			form_template: { select: { slug: true } }
+		}
+	});
+
+	if (
+		!form ||
+		form.product_id !== review.product_id ||
+		form.isDeleted ||
+		form.product.status === 'archived' ||
+		form.form_template.slug === 'root'
+	)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Form does not accept reviews for this product'
 		});
 }
 

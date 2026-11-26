@@ -44,3 +44,6 @@ certs
 prisma/generated
 
 .react-email
+
+# cypress runtime data
+cypress/fixtures/dynamicTestData.json

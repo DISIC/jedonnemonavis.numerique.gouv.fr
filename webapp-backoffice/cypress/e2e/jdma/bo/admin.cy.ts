@@ -9,17 +9,11 @@ import {
 	tryCloseModal
 } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import {
-	adminEmail,
-	adminPassword,
-	appUrl,
-	invitedEmailBis,
-	userPassword
-} from '../../../utils/variables';
+import { adminEmail, appUrl, invitedEmailBis } from '../../../utils/variables';
 
 describe('jdma-admin', () => {
 	before(() => {
-		login(adminEmail, adminPassword, true);
+		login(adminEmail, true);
 		cy.injectAxe();
 		tryCloseModal();
 		cy.wait(500);
@@ -27,7 +21,7 @@ describe('jdma-admin', () => {
 		logout();
 	});
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail);
 		cy.injectAxe();
 	});
 
@@ -43,7 +37,6 @@ describe('jdma-admin', () => {
 		cy.auditA11y();
 		fillSignupForm({
 			email: `test@gmail.com`,
-			password: userPassword,
 			firstName: `Prénom`,
 			lastName: `Nom`
 		});
@@ -119,7 +112,7 @@ describe('jdma-admin', () => {
 					.contains(invitedEmailBis)
 					.should('be.visible');
 			});
-		checkMail(false, 'Invitation à rejoindre « Je donne mon avis »');
+		checkMail('Invitation à rejoindre « Je donne mon avis »', '/login');
 		cy.visit(`${appUrl}`);
 	});
 
@@ -133,17 +126,12 @@ describe('jdma-admin', () => {
 			});
 	});
 
-	it('register guest admin', () => {
+	it('guest admin first ProConnect login gets the invited rights', () => {
 		logout();
-		checkMail(true, 'Invitation à rejoindre « Je donne mon avis »');
-		fillSignupForm({ password: userPassword });
-		cy.get('button').contains('Valider').click();
-		cy.wait(500);
-	});
-
-	it('login guest admin', () => {
-		logout();
-		login(invitedEmailBis, userPassword);
+		login(invitedEmailBis, false, true, {
+			firstName: 'John',
+			lastName: 'Doe'
+		});
 		cy.get(selectors.productTitle).contains(
 			selectors.dashboard.nameTestService
 		);
@@ -161,10 +149,9 @@ describe('jdma-admin', () => {
 
 	// it('delete service with guest admin', () => {
 	// 	logout();
-	// 	login(invitedEmailBis, userPassword);
+	// 	login(invitedEmailBis);
 	// 	deleteService(selectors.dashboard.nameTestService);
 	// 	checkMail(
-	// 		false,
 	// 		`Suppression du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
 	// 	);
 	// 	checkReviewForm(false);
@@ -174,12 +161,11 @@ describe('jdma-admin', () => {
 
 	// it('restore service with guest admin', () => {
 	// 	logout();
-	// 	login(invitedEmailBis, userPassword);
+	// 	login(invitedEmailBis);
 	// 	restaureService();
 	// 	cy.get('input[name="archived-products"]').should('not.exist');
 	// 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 	// 	checkMail(
-	// 		false,
 	// 		`Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
 	// 	);
 	// 	checkReviewForm(true);

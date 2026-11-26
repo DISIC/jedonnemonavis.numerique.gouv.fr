@@ -36,7 +36,6 @@ export const formatWhereAndOrder = (
 	const {
 		product_id,
 		form_id,
-		mustHaveVerbatims,
 		mustHaveVerbatimsOptimzed,
 		sort,
 		start_date,
@@ -68,13 +67,14 @@ export const formatWhereAndOrder = (
 		...(mustHaveVerbatimsOptimzed && {
 			has_verbatim: true
 		}),
-		...((mustHaveVerbatims || filters?.needVerbatim) && {
+		...(filters?.needVerbatim && {
 			OR: [
 				{
 					answers: {
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
+								{ NOT: { answer_text: '' } },
 								!newReviews &&
 									end_date && {
 										created_at: getDateWhereFromUTCRange(

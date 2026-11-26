@@ -2,6 +2,7 @@ import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRight
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
+import { getOnboardingHeadTitle } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -194,6 +195,11 @@ const NewAccess = ({ product }: Props) => {
 					? 'Étapier parcours de création'
 					: 'Inviter des utilisateurs'
 			}
+			headTitle={
+				hasCreatedProduct && !shouldShowStepper
+					? getOnboardingHeadTitle('Inviter des utilisateurs', steps, 'access')
+					: undefined
+			}
 			onConfirm={onConfirm}
 			onSkip={
 				hasCreatedProduct && !hasCreatedUserAccesses ? onSkipAction : undefined
@@ -318,7 +324,7 @@ const NewAccess = ({ product }: Props) => {
 					stateRelatedMessage={
 						userToInvite.errorStatus == 409
 							? "L'utilisateur avec cet email a déja accès à ce service numérique ou à l'oganisation à laquelle appartient ce service numérique."
-							: 'Veuillez saisir une adresse email valide.'
+							: 'Veuillez saisir une adresse email valide. Format attendu : nom@domaine.fr'
 					}
 					hintText="Format attendu : nom@domaine.fr"
 					nativeInputProps={{

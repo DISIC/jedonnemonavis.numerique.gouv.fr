@@ -11,10 +11,11 @@
 #
 # Clever Cloud:
 #   - Uses #!/bin/bash -l to load env vars (ES_ADDON_URI, etc.)
-#   - Guards on APP_ID + INSTANCE_NUMBER to avoid duplicate runs
+#   - Guards on ES_SYNC_ENABLED + INSTANCE_NUMBER to avoid duplicate runs
 #     (monorepo: both webapp-backoffice and webapp-form have this code)
 #
 # Environment variables (Clever Cloud defaults, overridable):
+#   ES_SYNC_ENABLED    Must be "true" on Clever Cloud apps that run the sync
 #   ES_ADDON_URI       Elasticsearch URL        (default: https://localhost:9200)
 #   ES_ADDON_USER      Elasticsearch user       (default: elastic)
 #   ES_ADDON_PASSWORD  Elasticsearch password   (required, no default)
@@ -23,13 +24,12 @@
 set -euo pipefail
 
 # ── Clever Cloud deduplication guards ───────────────────────────────────────
-# Only run on webapp-backoffice instance 0 to prevent duplicate execution
-# across scaled instances and across apps sharing the monorepo.
+# Only run on the webapp-backoffice apps (one per environment) flagged with
+# ES_SYNC_ENABLED=true, on instance 0, to prevent duplicate execution across
+# scaled instances and across apps sharing the monorepo.
 
-TARGET_APP_ID="app_bbb88831-8c1c-4c96-97df-bfaa51cee877"
-
-if [ -n "${APP_ID:-}" ] && [ "${APP_ID}" != "${TARGET_APP_ID}" ]; then
-  echo "Skipping: APP_ID ${APP_ID} is not the target app (${TARGET_APP_ID})"
+if [ -n "${APP_ID:-}" ] && [ "${ES_SYNC_ENABLED:-}" != "true" ]; then
+  echo "Skipping: ES_SYNC_ENABLED is not true on ${APP_ID}"
   exit 0
 fi
 

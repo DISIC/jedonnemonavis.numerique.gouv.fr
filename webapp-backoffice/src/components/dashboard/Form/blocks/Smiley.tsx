@@ -24,6 +24,7 @@ const Smiley = (props: Props) => {
 			)}
 			<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 				<legend className={fr.cx('fr-fieldset__legend')}>
+					<span className={fr.cx('fr-sr-only')}>{block.label}</span>
 					{block.content && (
 						<span className={fr.cx('fr-hint-text', 'fr-mt-2v')}>
 							{block.content}
@@ -52,12 +53,7 @@ const Smiley = (props: Props) => {
 									}
 								}}
 							>
-								<Image
-									src={smiley.img}
-									alt={`Image: ${smiley.label}`}
-									width={56}
-									height={56}
-								/>
+								<Image src={smiley.img} alt="" width={56} height={56} />
 								{smiley.label}
 							</label>
 						</li>

@@ -1,8 +1,8 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
 import { tss } from 'tss-react';
+import { getInstructionsId, getQuestionId } from './TextInput';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -17,17 +17,26 @@ const Textarea = (props: Props) => {
 		<>
 			{block.upLabel && (
 				<p
+					id={getInstructionsId(block)}
 					dangerouslySetInnerHTML={{
 						__html: sanitizeRichHtml(block.upLabel)
 					}}
 				></p>
 			)}
-			<Input
-				className={cx(classes.blockTextarea, fr.cx('fr-mb-2v'))}
-				label={''}
-				textArea
-				nativeTextAreaProps={{ 'aria-label': 'Champs de texte de test' }}
-			/>
+			<div
+				className={cx(
+					classes.blockTextarea,
+					fr.cx('fr-input-group', 'fr-mb-2v')
+				)}
+			>
+				<textarea
+					className={fr.cx('fr-input')}
+					aria-labelledby={getQuestionId(block)}
+					aria-describedby={
+						block.upLabel ? getInstructionsId(block) : undefined
+					}
+				/>
+			</div>
 			{block.downLabel && (
 				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
 					<span className={fr.cx('fr-icon-info-fill', 'fr-mr-1v')} />{' '}

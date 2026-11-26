@@ -9,19 +9,19 @@ import prisma from '@/src/utils/db';
 import {
 	getFormPreviewUrl,
 	getHasConfigChanged,
+	getFormConfigurationTitle,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
-import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
 import { $Enums } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
+import { isAuthTokenValid } from '@/src/utils/proconnect';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -96,6 +96,7 @@ const ProductFormPage = (props: Props) => {
 		status: 'published'
 	});
 	const [shouldModalOpen, setShouldModalOpen] = useState(false);
+	const [configStepTitle, setConfigStepTitle] = useState<string>();
 
 	useEffect(() => {
 		if (isLoadingSettings) return;
@@ -219,14 +220,16 @@ const ProductFormPage = (props: Props) => {
 		}
 	});
 
+	const headTitle = `${getFormConfigurationTitle(
+		form.title || form.form_template.title,
+		configStepTitle
+	)} | Je donne mon avis`;
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | Configuration du formulaire | Je donne mon avis`}</title>
-				<meta
-					name="description"
-					content={`${form.product.title} | Configuration du formulaire | Je donne mon avis`}
-				/>
+				<title>{headTitle}</title>
+				<meta name="description" content={headTitle} />
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmPublishModal}
@@ -269,31 +272,18 @@ const ProductFormPage = (props: Props) => {
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-8')}>
-					<div className={cx(classes.titleContainer)}>
-						<h1 className={fr.cx('fr-mb-0')}>
-							{form.title || form.form_template.title}
-						</h1>
-						{form.form_template.description && (
-							<Tooltip
-								className={classes.tooltip}
-								kind="hover"
-								title={
-									<>
-										<b>Pourquoi ce modèle ?</b>
-										<br />
-										<span
-											dangerouslySetInnerHTML={{
-												__html: sanitizeRichHtml(form.form_template.description)
-											}}
-										/>
-									</>
-								}
-							/>
-						)}
-					</div>
+				<div className={fr.cx('fr-col-12', 'fr-col-md')}>
+					<h1 className={fr.cx('fr-mb-0')}>
+						{form.title || form.form_template.title}
+					</h1>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div
+					className={cx(
+						classes.headerButtons,
+						classes.titleActions,
+						fr.cx('fr-col-12')
+					)}
+				>
 					<Button
 						priority="secondary"
 						iconId="fr-icon-edit-line"
@@ -307,10 +297,10 @@ const ProductFormPage = (props: Props) => {
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
 					<hr className={fr.cx('fr-hr')} />
 				</div>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h2 className={fr.cx('fr-mb-0')}>Personnaliser le formulaire</h2>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-12'))}>
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
@@ -340,6 +330,7 @@ const ProductFormPage = (props: Props) => {
 						onPublish={() => {
 							onConfirmPublishModal.open();
 						}}
+						onStepChange={step => setConfigStepTitle(step.title)}
 						hasConfigChanged={hasConfigChanged}
 					/>
 				</div>
@@ -354,9 +345,16 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	},
 	headerButtons: {
 		display: 'flex',
+		flexWrap: 'wrap',
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
+		'&&': {
+			paddingBottom: fr.spacing('6v')
+		},
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start'
+		},
 		button: {
 			a: {
 				display: 'flex',
@@ -365,16 +363,25 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		}
 	},
 	configuratorContainer: {
-		minHeight: '75vh'
+		minHeight: '75vh',
+		[fr.breakpoints.down('md')]: {
+			'&&': {
+				padding: 0,
+				marginInline: `-${fr.spacing('2v')}`,
+				flexBasis: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				width: `calc(100% + 2 * ${fr.spacing('2v')})`,
+				maxWidth: 'none'
+			}
+		}
 	},
-	tooltip: {
-		...fr.typography[18].style
-	},
-	titleContainer: {
-		display: 'flex',
-		alignItems: 'center',
-		'.fr-icon-question-line': {
-			marginLeft: fr.spacing('2v')
+	titleActions: {
+		[fr.breakpoints.up('md')]: {
+			'&&': {
+				flex: '0 0 auto',
+				width: 'auto',
+				maxWidth: 'none',
+				paddingBottom: fr.spacing('3v')
+			}
 		}
 	}
 });
@@ -459,10 +466,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		secret: process.env.JWT_SECRET
 	});
 
-	if (
-		!currentUserToken ||
-		(currentUserToken.exp as number) > new Date().getTime()
-	) {
+	if (!isAuthTokenValid(currentUserToken)) {
 		prisma.$disconnect();
 		return {
 			redirect: {

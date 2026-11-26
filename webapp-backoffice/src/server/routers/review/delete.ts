@@ -70,6 +70,7 @@ export const deleteReviewMutation = async ({
 				product_id: review.product_id,
 				form_id: review.form_id,
 				button_id: review.button_id,
+				requested_button_id: review.requested_button_id,
 				user_id: review.user_id,
 				has_verbatim: review.has_verbatim,
 				answers: answersSnapshot as Prisma.InputJsonValue,

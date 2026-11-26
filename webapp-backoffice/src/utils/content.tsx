@@ -572,10 +572,13 @@ export const buttonStylesMapping: Record<
 	{
 		label: React.ReactNode;
 		hintText?: React.ReactNode;
+		altText: string;
 	}
 > = {
 	solid: {
 		label: 'Plein',
+		altText:
+			'Aperçu du bouton plein : fond bleu, texte blanc, angles arrondis.',
 		hintText: (
 			<p className={'fr-text--xs fr-mb-0'}>
 				Le bouton par défaut, à placer sur un{' '}
@@ -585,6 +588,8 @@ export const buttonStylesMapping: Record<
 	},
 	outline: {
 		label: 'Contour',
+		altText:
+			'Aperçu du bouton contour : fond blanc, bordure et texte bleus, angles arrondis.',
 		hintText: (
 			<p className={'fr-text--xs fr-mb-0'}>
 				À placer sur un <span className="fr-text--bold">fond coloré</span>.
@@ -593,6 +598,8 @@ export const buttonStylesMapping: Record<
 	},
 	ghost: {
 		label: 'Contour',
+		altText:
+			'Aperçu du bouton contour : fond blanc, bordure grise, texte bleu, angles arrondis.',
 		hintText: (
 			<p className={'fr-text--xs fr-mb-0'}>
 				Bouton avec un contour léger, à placer sur un{' '}

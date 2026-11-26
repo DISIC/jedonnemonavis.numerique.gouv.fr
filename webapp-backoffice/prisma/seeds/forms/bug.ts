@@ -97,14 +97,29 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							isRequired: true
 						},
 						{
-							label: 'Adresse mail',
-							content:
-								'Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message.',
+							label:
+								"J'accepte d'être recontacté par l'administration dans le cadre de l'amélioration du service",
+							type_bloc: 'consent',
+							position: 1,
+							isHideable: true
+						}
+					]
+				}
+			},
+			{
+				title: 'Email',
+				description:
+					'Cette étape permet à l’usager de laisser son adresse email s’il accepte d’être recontacté.',
+				position: 2,
+				isHideable: false,
+				form_template_blocks: {
+					create: [
+						{
+							label: 'Adresse email',
 							type_bloc: 'input_email',
 							field_code: 'contact_email',
-							position: 1,
-							isHideable: true,
-							isRequired: false
+							position: 0,
+							isRequired: true
 						}
 					]
 				}

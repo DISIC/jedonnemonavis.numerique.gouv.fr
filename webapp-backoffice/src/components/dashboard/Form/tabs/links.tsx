@@ -167,14 +167,19 @@ const LinksTab = ({
 							<span>Aucun lien d'intégration trouvé</span>
 						</div>
 					))}
-				{buttonsList.map((button, index) => (
-					<ProductButtonCard
-						key={index}
-						button={button}
-						onButtonClick={handleModalOpening}
-						ownRight={ownRight}
-					/>
-				))}
+				{buttonsList.length > 0 && (
+					<ul className={cx(classes.cardContainer, fr.cx('fr-raw-list'))}>
+						{buttonsList.map(button => (
+							<li key={button.id}>
+								<ProductButtonCard
+									button={button}
+									onButtonClick={handleModalOpening}
+									ownRight={ownRight}
+								/>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<div className={fr.cx('fr-col-12', 'fr-mt-16v')}>

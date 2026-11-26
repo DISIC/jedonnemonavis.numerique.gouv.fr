@@ -1,13 +1,21 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
 import { tss } from 'tss-react';
 
+type Block =
+	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+
 interface Props {
-	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+	block: Block;
 	form: FormWithElements;
 }
+
+export const getQuestionId = (block: Pick<Block, 'id'>) =>
+	`question-${block.id}`;
+
+export const getInstructionsId = (block: Pick<Block, 'id'>) =>
+	`consigne-${block.id}`;
 
 const TextInput = (props: Props) => {
 	const { block, form } = props;
@@ -22,12 +30,26 @@ const TextInput = (props: Props) => {
 					}}
 				></p>
 			)}
-			<Input
-				className={cx(classes.blockInput, fr.cx('fr-mb-2v'))}
-				label={''}
-				hintText={block.content}
-				nativeInputProps={{ 'aria-label': 'Champs de texte' }}
-			/>
+			{block.content && (
+				<p
+					id={getInstructionsId(block)}
+					className={fr.cx('fr-hint-text', 'fr-mb-2v')}
+				>
+					{block.content}
+				</p>
+			)}
+			<div
+				className={cx(classes.blockInput, fr.cx('fr-input-group', 'fr-mb-2v'))}
+			>
+				<input
+					type={block.type_bloc === 'input_email' ? 'email' : 'text'}
+					className={fr.cx('fr-input')}
+					aria-labelledby={getQuestionId(block)}
+					aria-describedby={
+						block.content ? getInstructionsId(block) : undefined
+					}
+				/>
+			</div>
 			{block.downLabel && (
 				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
 					<span className={fr.cx('fr-icon-info-fill', 'fr-mr-1v')} />{' '}

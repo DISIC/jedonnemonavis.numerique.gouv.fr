@@ -46,7 +46,8 @@ export const CheckboxBlock = ({
 			classes={{ legend: classes.legend }}
 			legend={
 				<>
-					{displayLabel} {!block.isRequired && '(optionnel)'}
+					{displayLabel}{' '}
+					{block.isRequired && <span className={classes.asterisk}>*</span>}
 				</>
 			}
 			hintText={block.content || undefined}
@@ -96,5 +97,8 @@ const useStyles = tss.withName({ CheckboxBlock }).create(() => ({
 			fontWeight: 500,
 			marginBottom: fr.spacing('5v')
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default
 	}
 }));

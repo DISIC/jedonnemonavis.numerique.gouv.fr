@@ -528,7 +528,10 @@ const ProductCard = ({
 												<div className={cx(classes.formStatsWrapper)}>
 													<div className={classes.formStatsContent}>
 														<span
-															className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+															className={cx(
+																fr.cx('fr-mr-2v'),
+																classes.smallText
+															)}
 														>
 															Réponses déposées
 														</span>
@@ -719,7 +722,7 @@ const useStyles = tss.withName({ ProductCard }).create({
 		marginBottom: '1.5rem',
 		transition: 'all 0.2s ease-in-out',
 		':nth-of-type(2), :last-child': {
-			marginBottom: '0.5rem'
+			marginBottom: fr.spacing('3v')
 		},
 		'&:hover h3': {
 			textDecoration: 'underline'

@@ -68,7 +68,8 @@ const reviewSchema = z.object({
 	id: z.number().int(),
 	created_at: z.string(),
 	form_id: z.number().int(),
-	button_id: z.number().int(),
+	button_id: z.number().int().nullable(),
+	requested_button_id: z.number().int().nullable(),
 	has_verbatim: z.boolean(),
 	answers: z.array(answerSchema).optional()
 });
@@ -89,6 +90,7 @@ const baseSelect: Prisma.ReviewSelect = {
 	created_at: true,
 	form_id: true,
 	button_id: true,
+	requested_button_id: true,
 	has_verbatim: true
 };
 
@@ -116,7 +118,8 @@ type ReviewRow = {
 	id: number;
 	created_at: Date;
 	form_id: number;
-	button_id: number;
+	button_id: number | null;
+	requested_button_id: number | null;
 	has_verbatim: boolean;
 	answers?: Array<{
 		field_code: string;
@@ -237,6 +240,7 @@ export const reviewsListQuery = async ({
 			created_at: r.created_at.toISOString(),
 			form_id: r.form_id,
 			button_id: r.button_id,
+			requested_button_id: r.requested_button_id,
 			has_verbatim: r.has_verbatim
 		};
 		if (!r.answers) return base;
