@@ -239,14 +239,14 @@ const ChartWrapper = ({
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
 					<thead>
 						<tr>
-							<th scope="col">{tableHeaderLabel}</th>
+							<th scope={singleRow ? 'row' : 'col'}>{tableHeaderLabel}</th>
 							{headers.map((h, index) => (
 								<th scope="col" key={`${h}_${index}_${title}`}>
 									{h}
 								</th>
 							))}
 							{displayTotal && (
-								<th>
+								<th scope="col">
 									{displayTotal === 'classic'
 										? 'Total des réponses'
 										: 'Pourcentage des réponses'}

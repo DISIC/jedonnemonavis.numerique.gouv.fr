@@ -22,7 +22,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 		<Html lang="fr">
 			<Head />
 			{preview && <Preview>{preview}</Preview>}
-			<Body style={main}>
+			<Body lang="fr" style={main}>
 				<Container style={container}>
 					{/* Header with JDMA Banner */}
 					<Section style={header}>
