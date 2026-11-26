@@ -1,12 +1,9 @@
-import { storeReturnFocus, useReturnFocus } from '@/src/hooks/useReturnFocus';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
-
-const EMPTY_STATE_CREATE_LINK_BUTTON_ID = 'empty-state-create-link-button';
 
 interface Props {
 	isSmall?: boolean;
@@ -16,8 +13,6 @@ const NoButtonsPanel = (props: Props) => {
 	const { isSmall } = props;
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-
-	useReturnFocus(true);
 
 	return (
 		<div
@@ -58,11 +53,9 @@ const NoButtonsPanel = (props: Props) => {
 				type="button"
 				size="large"
 				nativeButtonProps={{
-					id: EMPTY_STATE_CREATE_LINK_BUTTON_ID,
 					onClick: event => {
 						event.preventDefault();
 						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
-						storeReturnFocus(EMPTY_STATE_CREATE_LINK_BUTTON_ID);
 						router.push(`${router.asPath.split('?')[0]}/link/new`);
 					}
 				}}

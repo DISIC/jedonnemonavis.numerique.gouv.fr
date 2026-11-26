@@ -856,6 +856,17 @@ export const getFormConfigurationTitle = (
 		.filter(Boolean)
 		.join(' | ');
 
+export const getOnboardingHeadTitle = (
+	title: string,
+	steps: { slug: string }[],
+	stepSlug: string
+) => {
+	const stepIndex = steps.findIndex(step => step.slug === stepSlug);
+	return stepIndex === -1
+		? title
+		: `${title} | Étape ${stepIndex + 1} sur ${steps.length}`;
+};
+
 export const getHasConfigChanged = (
 	firstConfig: FormConfigHelper,
 	secondConfig: FormConfigHelper
@@ -1117,3 +1128,47 @@ export const closeHeaderMenuModal = (headerId: string) => {
 };
 
 export const stripQueryAndHash = (path: string) => path.split(/[?#]/)[0];
+
+export type FocusTargetDescriptor = {
+	selector: string;
+	label: string;
+	index: number;
+};
+
+const FOCUS_LABEL_MAX_LENGTH = 200;
+
+const getFocusLabel = (element: Element) =>
+	(element.getAttribute('aria-label') || element.textContent || '')
+		.trim()
+		.slice(0, FOCUS_LABEL_MAX_LENGTH);
+
+const getFocusSelector = (element: HTMLElement) => {
+	if (element.id && !element.id.includes(':'))
+		return `#${CSS.escape(element.id)}`;
+	const tag = element.tagName.toLowerCase();
+	const href = element.getAttribute('href');
+	return href ? `${tag}[href="${CSS.escape(href)}"]` : tag;
+};
+
+const getFocusCandidates = (selector: string, label: string) =>
+	Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(
+		candidate => getFocusLabel(candidate) === label
+	);
+
+export const describeFocusTarget = (
+	element: Element | null
+): FocusTargetDescriptor | null => {
+	if (!(element instanceof HTMLElement) || element === document.body)
+		return null;
+	const selector = getFocusSelector(element);
+	const label = getFocusLabel(element);
+	const index = getFocusCandidates(selector, label).indexOf(element);
+	return index === -1 ? null : { selector, label, index };
+};
+
+export const findFocusTarget = ({
+	selector,
+	label,
+	index
+}: FocusTargetDescriptor): HTMLElement | null =>
+	getFocusCandidates(selector, label)[index] ?? null;

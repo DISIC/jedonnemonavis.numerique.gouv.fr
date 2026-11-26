@@ -1,5 +1,4 @@
 import { Loader } from '@/src/components/ui/Loader';
-import { storeReturnFocus, useReturnFocus } from '@/src/hooks/useReturnFocus';
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	ButtonWithElements,
@@ -17,8 +16,6 @@ import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import { ButtonModalType } from '../../ProductButton/interface';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
-
-const CREATE_LINK_BUTTON_ID = 'create-link-button';
 
 interface Props {
 	form: FormWithElements;
@@ -73,8 +70,6 @@ const LinksTab = ({
 		}
 	}, [router.query]);
 
-	useReturnFocus(!isLoading);
-
 	if (isLoading) {
 		return (
 			<div className={fr.cx('fr-grid-row')}>
@@ -113,9 +108,7 @@ const LinksTab = ({
 						priority="secondary"
 						iconId="fr-icon-add-line"
 						iconPosition="right"
-						nativeButtonProps={{ id: CREATE_LINK_BUTTON_ID }}
 						onClick={() => {
-							storeReturnFocus(CREATE_LINK_BUTTON_ID);
 							router.push(
 								`/administration/dashboard/product/${form.product_id}/forms/${form.id}/link/new`
 							);
