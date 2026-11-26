@@ -379,7 +379,8 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 			'&&': {
 				flex: '0 0 auto',
 				width: 'auto',
-				maxWidth: 'none'
+				maxWidth: 'none',
+				paddingBottom: fr.spacing('3v')
 			}
 		}
 	}
