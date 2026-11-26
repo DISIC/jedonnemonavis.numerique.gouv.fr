@@ -12,14 +12,12 @@ import {
 	getFormConfigurationTitle,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
-import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import InfoTooltip from '@/src/components/ui/InfoTooltip';
 import { $Enums } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
@@ -274,34 +272,16 @@ const ProductFormPage = (props: Props) => {
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-					<div className={cx(classes.titleContainer)}>
-						<h1 className={fr.cx('fr-mb-0')}>
-							{form.title || form.form_template.title}
-						</h1>
-						{form.form_template.description && (
-							<InfoTooltip
-								className={classes.tooltip}
-								buttonLabel="Pourquoi ce modèle ?"
-								title={
-									<>
-										<b>Pourquoi ce modèle ?</b>
-										<br />
-										<span
-											dangerouslySetInnerHTML={{
-												__html: sanitizeRichHtml(form.form_template.description)
-											}}
-										/>
-									</>
-								}
-							/>
-						)}
-					</div>
+				<div className={fr.cx('fr-col-12', 'fr-col-md')}>
+					<h1 className={fr.cx('fr-mb-0')}>
+						{form.title || form.form_template.title}
+					</h1>
 				</div>
 				<div
 					className={cx(
 						classes.headerButtons,
-						fr.cx('fr-col-12', 'fr-col-md-4')
+						classes.titleActions,
+						fr.cx('fr-col-12')
 					)}
 				>
 					<Button
@@ -394,14 +374,13 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 			}
 		}
 	},
-	tooltip: {
-		...fr.typography[18].style
-	},
-	titleContainer: {
-		display: 'flex',
-		alignItems: 'center',
-		'.ri-information-line': {
-			marginLeft: fr.spacing('2v')
+	titleActions: {
+		[fr.breakpoints.up('md')]: {
+			'&&': {
+				flex: '0 0 auto',
+				width: 'auto',
+				maxWidth: 'none'
+			}
 		}
 	}
 });

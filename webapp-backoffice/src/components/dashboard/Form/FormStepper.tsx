@@ -64,7 +64,7 @@ const FormStepper = forwardRef<FormStepperHandle, Props>((props, ref) => {
 						id={collapseId}
 						className={cx(classes.list, isExpanded && classes.listExpanded)}
 					>
-						<ul className={fr.cx('fr-sidemenu__list')}>
+						<ol className={fr.cx('fr-sidemenu__list', 'fr-raw-list')}>
 							{steps.map(step => {
 								const isHidden =
 									configHelper.displays.some(
@@ -117,7 +117,7 @@ const FormStepper = forwardRef<FormStepperHandle, Props>((props, ref) => {
 									</li>
 								);
 							})}
-						</ul>
+						</ol>
 					</div>
 				</div>
 			</nav>
